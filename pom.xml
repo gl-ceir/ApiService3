@@ -45,11 +45,10 @@
             <scope>runtime</scope>
         </dependency>
 		
- 
-<!--        <dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-        </dependency>-->
+        </dependency> 
         
         <dependency>
             <groupId>io.springfox</groupId>
@@ -67,12 +66,12 @@
             <artifactId>commons-pool2</artifactId>
         </dependency>
  
- 
+        <!-- 
         <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>oracle8</artifactId>
             <version>19.3</version>
-        </dependency>
+        </dependency>-->
  
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -98,6 +97,27 @@
             <version>1.1.1</version>
             <type>jar</type>
         </dependency>
+        
+        <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.20</version>
+        <scope>provided</scope>
+    </dependency>
+        
+        <!--        <dependency>
+            <groupId>com.github.ulisesbocchio</groupId>
+            <artifactId>jasypt-spring-boot-starter</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        -->
+         
+         <dependency>
+            <groupId>com.github.ulisesbocchio</groupId>
+            <artifactId>jasypt-spring-boot</artifactId>    <!--  IF NOT WORKING MIGHT BE   -spring-boot-starter?-->
+            <version>2.0.0</version>
+        </dependency>
+        
     </dependencies>
 
     <dependencyManagement>
@@ -114,9 +134,14 @@
     </dependencyManagement>
 
     <build>
-         <finalName>apiservice3</finalName>
+        <finalName>apiservice3</finalName>
        
         <plugins>
+<!--            <plugin>
+                <groupId>com.github.ulisesbocchio</groupId>
+                <artifactId>jasypt-maven-plugin</artifactId>
+                <version>3.0.3</version>
+            </plugin>-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

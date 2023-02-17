@@ -16,12 +16,15 @@ import com.gl.ceir.config.model.DeviceSnapShot;
 import com.gl.ceir.config.model.DuplicateImeiMsisdn;
 import com.gl.ceir.config.model.ImeiMsisdnIdentity;
 import com.gl.ceir.config.model.constants.ImeiStatus; 
+import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ FileStorageProperties.class })
 @EnableJpaAuditing
 @EnableAutoConfiguration
 @EnableCaching
+@EnableEncryptableProperties
+
 public class ConfigApplication {
 
 	public static void main(String[] args) {

@@ -5,13 +5,13 @@
 package com.gl.ceir.config.service.impl;
 
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.LanguageLabelDb;
 import com.gl.ceir.config.repository.LanguageLabelDbRepository;
-import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.gl.ceir.config.model.EnglishLabel;
+import com.gl.ceir.config.model.LanguageResponse;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
  *
@@ -25,15 +25,18 @@ public class LanguageServiceImpl {
     @Autowired
     LanguageLabelDbRepository languageLabelDbRepository;
 
-    public List<EnglishLabel> getLanguageLabels(String featureName, String language) {
+    public LanguageResponse getLanguageLabels(String featureName, String language) {
+        String responseValue;
         try {
-            return languageLabelDbRepository.getEnglishNameAndLabelFromFeatureName(featureName);
-
+            if (language.contains("kh")) {
+                responseValue = languageLabelDbRepository.getKhmerNameAndLabelFromFeatureName(featureName);
+            } else {
+                responseValue = languageLabelDbRepository.getEnglishNameAndLabelFromFeatureName(featureName);
+            }
+            return new LanguageResponse(language, (JSONObject)  new JSONParser().parse(responseValue));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new ResourceServicesException(this.getClass().getName(), e.getMessage());
         }
-
     }
-
 }

@@ -212,7 +212,11 @@ public class CheckImeiServiceImpl {
         }
     }
 
-    public void saveDeviceDetails(String imei, String osType, String jsonDetails) {
-        appDeviceDetailsRepository.save(new AppDeviceDetailsDb(imei, osType, jsonDetails));
+    public void saveDeviceDetails(AppDeviceDetailsDb appDeviceDetailsDb) {
+        try {
+            appDeviceDetailsRepository.saveDetails(appDeviceDetailsDb.getOsType(),appDeviceDetailsDb.getDeviceId(),appDeviceDetailsDb.getDeviceDetails().toJSONString());
+        } catch (Exception e) {
+            throw new ResourceServicesException(this.getClass().getName(), e.getMessage());
+        }
     }
 }

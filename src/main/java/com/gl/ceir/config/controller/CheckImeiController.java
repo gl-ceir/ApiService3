@@ -1,5 +1,6 @@
 package com.gl.ceir.config.controller;
 
+import com.gl.ceir.config.model.AppDeviceDetailsDb;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -27,8 +28,8 @@ public class CheckImeiController {  //sachin
     @Autowired
     CheckImeiServiceImpl checkImeiServiceImpl;
 
-   // @Autowired
-  //  LanguageServiceImpl languageServiceImpl;
+    @Autowired
+    LanguageServiceImpl languageServiceImpl;
 
     @PostMapping(path = "cc/CheckImeI")
     public MappingJacksonValue CheckImeiValues(@RequestBody CheckImeiValuesEntity checkImeiValuesEntity) {
@@ -63,15 +64,11 @@ public class CheckImeiController {  //sachin
         return new MappingJacksonValue(checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest));
     }
 
-    
-    
     @ApiOperation(value = "Mobile Details", response = String.class)
     @PostMapping("MobileDeviceDetails/save")
-    public MappingJacksonValue getMobileDeviceDetails(@RequestParam String language,
-            @RequestParam String imei, @RequestParam String osType, @RequestBody String jsonDetails) {
-        checkImeiServiceImpl.saveDeviceDetails(imei, osType, jsonDetails);
-       // return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.name(), language));
-return null;
+    public MappingJacksonValue getMobileDeviceDetails(@RequestBody AppDeviceDetailsDb appDeviceDetailsDb) {         
+        checkImeiServiceImpl.saveDeviceDetails(appDeviceDetailsDb);
+        return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.name(), "english"));
     }
 
 }

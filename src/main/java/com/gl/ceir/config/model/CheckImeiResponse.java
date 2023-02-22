@@ -8,7 +8,7 @@ import lombok.Setter;
 /// response might has some annotation for default
 @Getter
 @Setter
-public class CheckImeiResponse {
+public class CheckImeiResponse  {
 
     private String statusCode;
     private String statusMessage;

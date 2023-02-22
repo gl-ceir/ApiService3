@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.json.simple.JSONObject;
 
 @Entity
 @Getter
@@ -26,18 +27,16 @@ public class AppDeviceDetailsDb implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Date createdOn;
-    private String imei;
+    private String deviceId;
     private String osType;
-    private String jsonString;
+    private JSONObject deviceDetails;
 
-    public AppDeviceDetailsDb(String imei, String osType, String jsonString) {
-        this.imei = imei;
+    public AppDeviceDetailsDb(String deviceId, String osType, JSONObject deviceDetails) {
+        this.deviceId = deviceId;
         this.osType = osType;
-        this.jsonString = jsonString;
+        this.deviceDetails = deviceDetails;
     }
-    
-    
-    
+
+   
 
 }

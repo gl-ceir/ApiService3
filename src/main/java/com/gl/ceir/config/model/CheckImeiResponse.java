@@ -1,0 +1,28 @@
+package com.gl.ceir.config.model;
+
+import lombok.Getter;
+import lombok.Setter;
+
+
+
+/// response might has some annotation for default
+@Getter
+@Setter
+public class CheckImeiResponse {
+
+    private String statusCode;
+    private String statusMessage;
+    private String language;
+    private Result result;
+
+    public CheckImeiResponse(String statusCode, String statusMessage, String language, Result result) {
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
+        this.language = language;
+        this.result = result;
+    }
+
+}
+
+
+

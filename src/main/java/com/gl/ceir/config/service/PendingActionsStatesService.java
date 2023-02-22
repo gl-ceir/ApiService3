@@ -6,5 +6,8 @@ import com.gl.ceir.config.model.constants.TransactionState;
 
 public interface PendingActionsStatesService extends RestServices<PendingActionStates> {
 
+
+
+	// new changes to here stage changes
 	public boolean isStateChangeAllowed(TransactionState currentState, TransactionState nextState, Action action);
 }

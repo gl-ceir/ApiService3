@@ -1,62 +1,134 @@
- /*
+/*
   * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
   * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
-  */
- package com.gl.ceir.config;
- import javax.servlet.http.HttpServletRequest;
- import org.json.simple.JSONObject;
- import org.springframework.beans.factory.annotation.Autowired;
- import org.springframework.http.HttpStatus;
- import org.springframework.web.HttpMediaTypeNotSupportedException;
- import org.springframework.web.HttpRequestMethodNotSupportedException;
- import org.springframework.web.bind.annotation.ControllerAdvice;
- import org.springframework.web.bind.annotation.ExceptionHandler;
- import org.springframework.web.bind.annotation.ResponseStatus;
- import org.springframework.web.bind.annotation.RestControllerAdvice;
- import org.springframework.web.context.request.WebRequest;
- import org.springframework.web.servlet.NoHandlerFoundException;
- 
- 
-   @ControllerAdvice
- @RestControllerAdvice
- public class GlobalControllerExceptionHandler {
-     @Autowired
-     HttpServletRequest req;
-     @ExceptionHandler(NoHandlerFoundException.class)
-   
-     
-     @ResponseStatus(HttpStatus.NOT_FOUND)
-     public String handleNoHandlerFound(NoHandlerFoundException e, WebRequest request) {
-         String title = req.getServletPath().contains("v1") ? "invalid url end point " : " version not correct";
-         return customResponseWithCode("404", "not found", title);
-     }
-     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-     public String handleMethodNotAllowed(HttpRequestMethodNotSupportedException e, WebRequest request) {
-         return customResponseWithCode("405", "method not allowed", " method provided is not valid");
-     }
-     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-     public String handleHttpMediaTypeNotSupported(Exception e, WebRequest request) {
-         return customResponseWithCode("406", "not acceptable", "request format is not acceptable ");
-     }
-     @ExceptionHandler(Exception.class)
-     @ResponseStatus(HttpStatus.BAD_REQUEST)
-     public String handleBadRequestException(Exception e, WebRequest request) {
-         return customResponseWithCode("400", "bad request", " request is not valid ");
-     }
-     
-     @ExceptionHandler(IllegalArgumentException.class)
-     @ResponseStatus(HttpStatus.BAD_REQUEST)
-     public String handleIllegalRequestException(Exception e, WebRequest request) {
-         return customResponseWithCode("400", "bad request", " request is not valid ");
-     }
-     String customResponseWithCode(String code, String title, String message) {
-         JSONObject item = new JSONObject();
-         item.put("statusCode", code);
-         item.put("language", "en");
-         item.put("statusMessage", title);
-         item.put("result", message);
-         return item.toJSONString();
-     }
- }
+ */
+package com.gl.ceir.config;
+
+import com.gl.ceir.config.dto.ApiResponse;
+import com.gl.ceir.config.dto.ExceptionResponse;
+import com.gl.ceir.config.exceptions.FileStorageException;
+import com.gl.ceir.config.exceptions.InternalServicesException;
+import com.gl.ceir.config.exceptions.MyFileNotFoundException;
+import com.gl.ceir.config.exceptions.ResourceNotFoundException;
+import com.gl.ceir.config.exceptions.ResourceServicesException;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import javax.servlet.http.HttpServletRequest;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpServerErrorException.InternalServerError;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+//@EnableWebMvc
+@ControllerAdvice
+@RestControllerAdvice
+public class GlobalControllerExceptionHandler {
+
+    @Autowired
+    HttpServletRequest req;
+
+    /* Global Exceptions*/
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionResponse handleNoHandlerFound(NoHandlerFoundException e, WebRequest request) {
+        return new ExceptionResponse(
+                HttpStatus.NOT_FOUND.value(), "not found", "invalid url end point");
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public ExceptionResponse handleMethodNotAllowed(HttpRequestMethodNotSupportedException e, WebRequest request) {
+        return new ExceptionResponse(
+                HttpStatus.METHOD_NOT_ALLOWED.value(), "method not allowed", " method provided is not valid");
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ExceptionResponse handleHttpMediaTypeNotSupported(Exception e, WebRequest request) {
+        return new ExceptionResponse(
+                HttpStatus.NOT_ACCEPTABLE.value(), "not acceptable", "request format is not acceptable ");
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse handleBadRequestException(Exception e, WebRequest request) {
+        return new ExceptionResponse(
+                HttpStatus.BAD_REQUEST.value(), "bad request", " request is not valid ");
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse handleIllegalRequestException(Exception e, WebRequest request) {
+        return new ExceptionResponse(
+                HttpStatus.NOT_FOUND.value(), "bad request", " request is not valid ");
+    }
+
+    @ExceptionHandler(InternalServerError.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ExceptionResponse handleInternalServerException(Exception e, WebRequest request) {
+        return new ExceptionResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(), "server error", "Something Went Wrong");
+    }
+
+    /* Custom Exceptions */
+    
+    @ExceptionHandler(value = ResourceNotFoundException.class)
+    public ResponseEntity<Object> exception(ResourceNotFoundException exception) {
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND.value(), "FAIL", exception.getMessage()),
+                HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = InternalServicesException.class)
+    public ResponseEntity<Object> exception(InternalServicesException exception) {
+        return new ResponseEntity<>(
+                new ExceptionResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR.value(), "server error", "en", exception.getMessage()),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(value = MyFileNotFoundException.class)
+    public ResponseEntity<Object> exception(MyFileNotFoundException exception) {
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND.value(), "FAIL", exception.getMessage()),
+                HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = FileStorageException.class)
+    public ResponseEntity<Object> exception(FileStorageException exception) {
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND.value(), "FAIL", exception.getMessage()),
+                HttpStatus.NOT_FOUND);
+    }
+
+}
+
+//    JSONObject jsonObject = new JSONObject(jsonString) {
+//    /**
+//     * changes the value of JSONObject.map to a LinkedHashMap in order to maintain
+//     * order of keys.
+//     */
+//    @Override
+//    public JSONObject put(String key, Object value) throws JSONException {
+//        try {
+//            Field map = JSONObject.class.getDeclaredField("map");
+//            map.setAccessible(true);
+//            Object mapValue = map.get(this);
+//            if (!(mapValue instanceof LinkedHashMap)) {
+//                map.set(this, new LinkedHashMap<>());
+//            }
+//        } catch (NoSuchFieldException | IllegalAccessException e) {
+//            throw new RuntimeException(e);
+//        }
+//        return super.put(key, value);
+//    }
+//};

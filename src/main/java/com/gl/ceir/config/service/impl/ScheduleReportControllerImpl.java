@@ -98,32 +98,27 @@ public class ScheduleReportControllerImpl implements ScheduleReportService {
         }
     }
 
-    
-    
-    
     public Page<ScheduleReportDb> filterRuleEngineMapping(FilterRequest filterRequest, Integer pageNo, Integer pageSize, String operation) {
         try {
-            
-           String orderColumn = "0".equalsIgnoreCase(filterRequest.getColumnName()) ? "createdOn"
-				: "2".equalsIgnoreCase(filterRequest.getColumnName()) ? "category"
-				   : "3".equalsIgnoreCase(filterRequest.getColumnName()) ? "reportName"
-				     : "4".equalsIgnoreCase(filterRequest.getColumnName()) ? "EmailId"
-					   : "5".equalsIgnoreCase(filterRequest.getColumnName()) ? "Action"
-						 :"6".equalsIgnoreCase(filterRequest.getColumnName()) ? "flag" 
-						     : "7".equalsIgnoreCase(filterRequest.getColumnName()) ? "REPORT_ID":"modifiedOn";
-		
-            
-		Sort.Direction direction;
-		if("modifiedOn".equalsIgnoreCase(orderColumn)) {
-			direction=Sort.Direction.DESC;
-		}
-		else {
-			direction= SortDirection.getSortDirection(filterRequest.getSort());
-		}
-                	
-		Pageable pageable = PageRequest.of(pageNo, pageSize, new Sort(direction, orderColumn));
-                
-             Page<ScheduleReportDb> page = scheduleReportRepository.findAll(buildSpecification(filterRequest).build(), pageable);
+
+            String orderColumn = "0".equalsIgnoreCase(filterRequest.getColumnName()) ? "createdOn"
+                    : "2".equalsIgnoreCase(filterRequest.getColumnName()) ? "category"
+                    : "3".equalsIgnoreCase(filterRequest.getColumnName()) ? "reportName"
+                    : "4".equalsIgnoreCase(filterRequest.getColumnName()) ? "EmailId"
+                    : "5".equalsIgnoreCase(filterRequest.getColumnName()) ? "Action"
+                    : "6".equalsIgnoreCase(filterRequest.getColumnName()) ? "flag"
+                    : "7".equalsIgnoreCase(filterRequest.getColumnName()) ? "REPORT_ID" : "modifiedOn";
+
+            Sort.Direction direction;
+            if ("modifiedOn".equalsIgnoreCase(orderColumn)) {
+                direction = Sort.Direction.DESC;
+            } else {
+                direction = SortDirection.getSortDirection(filterRequest.getSort());
+            }
+
+            //	Pageable pageable = PageRequest.of(pageNo, pageSize,  new SortDirection() );
+            Pageable pageable = null;
+            Page<ScheduleReportDb> page = scheduleReportRepository.findAll(buildSpecification(filterRequest).build(), pageable);
 //			String operationType= "view".equalsIgnoreCase(operation) ? SubFeatures.VIEW_ALL : SubFeatures.EXPORT;
 //			auditTrailRepository.save( new AuditTrail( Long.valueOf(filterRequest.getUserId()),
 //					filterRequest.getUserName(), Long.valueOf(filterRequest.getUserTypeId()),
@@ -137,7 +132,7 @@ public class ScheduleReportControllerImpl implements ScheduleReportService {
             throw new ResourceServicesException(this.getClass().getName(), e.getMessage());
         }
     }
- 
+
     GenericSpecificationBuilder<ScheduleReportDb> buildSpecification(FilterRequest filterRequest) {
         GenericSpecificationBuilder<ScheduleReportDb> cmsb = new GenericSpecificationBuilder<>(propertiesReader.dialect);
         if (Objects.nonNull(filterRequest.getCategory())) {
@@ -146,18 +141,18 @@ public class ScheduleReportControllerImpl implements ScheduleReportService {
         if (Objects.nonNull(filterRequest.getFlag())) {
             cmsb.with(new SearchCriteria("flag", filterRequest.getFlag(), SearchOperation.EQUALITY, Datatype.STRING));
         }
-        
-          if (Objects.nonNull(filterRequest.getCreatedOn())) {
+
+        if (Objects.nonNull(filterRequest.getCreatedOn())) {
             cmsb.with(new SearchCriteria("createdOn", filterRequest.getCreatedOn(), SearchOperation.EQUALITY, Datatype.DATE));
         }
-            if (Objects.nonNull(filterRequest.getModifiedOn())) {
+        if (Objects.nonNull(filterRequest.getModifiedOn())) {
             cmsb.with(new SearchCriteria("modifiedOn", filterRequest.getModifiedOn(), SearchOperation.EQUALITY, Datatype.DATE));
         }
-              if (Objects.nonNull(filterRequest.getReportName())) {
+        if (Objects.nonNull(filterRequest.getReportName())) {
             cmsb.with(new SearchCriteria("reportName", filterRequest.getReportName(), SearchOperation.EQUALITY, Datatype.INT));
         }
-         
-              if (Objects.nonNull(filterRequest.getSearchString()) && !filterRequest.getSearchString().isEmpty()) {
+
+        if (Objects.nonNull(filterRequest.getSearchString()) && !filterRequest.getSearchString().isEmpty()) {
             cmsb.orSearch(new SearchCriteria("flag", filterRequest.getSearchString(), SearchOperation.LIKE, Datatype.STRING));
             cmsb.orSearch(new SearchCriteria("category", filterRequest.getSearchString(), SearchOperation.LIKE, Datatype.STRING));
             cmsb.orSearch(new SearchCriteria("createdOn", filterRequest.getSearchString(), SearchOperation.LIKE, Datatype.DATE));
@@ -167,7 +162,4 @@ public class ScheduleReportControllerImpl implements ScheduleReportService {
         return cmsb;
     }
 
-    
-    
-    
 }

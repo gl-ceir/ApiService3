@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.gl.Rule_engine.RuleEngineApplication;
 import com.gl.ceir.config.configuration.ConnectionConfiguration;
+import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
 import com.gl.ceir.config.model.AppDeviceDetailsDb;
 import com.gl.ceir.config.model.CheckImeiRequest;
@@ -200,7 +201,7 @@ public class CheckImeiServiceImpl {
                         .replace("$brandName", gsmaTacDetails.getBrand_name())
                         .replace("$modelName", gsmaTacDetails.getModelName())
                         .replace("$deviceType", gsmaTacDetails.getDevice_type())
-                        .replace("$nanufacturer", gsmaTacDetails.getDevice_type())
+                        .replace("$manufacturer", gsmaTacDetails.getDevice_type())
                         .replace("$marketingName", gsmaTacDetails.getMarketing_name());
                 isValidImei = true;
             }
@@ -208,7 +209,7 @@ public class CheckImeiServiceImpl {
             return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()), StatusMessage.FOUND.getName(), language.contains("kh") ? "kh" : "en", new Result(isValidImei, message, deviceDetails));
         } catch (Exception e) {
             logger.error("Failed at " + e.getLocalizedMessage());
-            return new CheckImeiResponse(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), StatusMessage.NOT_FOUND.getName(), language.contains("kh") ? "kh" : "en", null);
+                    throw new InternalServicesException(this.getClass().getName(), "Something went wrong");
         }
     }
 
@@ -216,7 +217,7 @@ public class CheckImeiServiceImpl {
         try {
             appDeviceDetailsRepository.saveDetails(appDeviceDetailsDb.getOsType(),appDeviceDetailsDb.getDeviceId(),appDeviceDetailsDb.getDeviceDetails().toJSONString());
         } catch (Exception e) {
-            throw new ResourceServicesException(this.getClass().getName(), e.getMessage());
+                    throw new InternalServicesException(this.getClass().getName(), "Something went wrong");
         }
     }
 }

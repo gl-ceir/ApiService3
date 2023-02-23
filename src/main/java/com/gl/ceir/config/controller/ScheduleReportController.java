@@ -130,7 +130,8 @@ public class ScheduleReportController {
             @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(value = "file", defaultValue = "0") Integer file) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, new Sort(Sort.Direction.DESC, "modifiedOn"));
+          // new Sort(Sort.Direction.DESC, "modifiedOn") ;
+        Pageable pageable = PageRequest.of(pageNo, pageSize,null );
         Page<ScheduleReportDb> page = scheduleReportRepository.findAll(joinWithUserProfile(scheduleReportDb.getId().intValue()), pageable);
         MappingJacksonValue mapping = new MappingJacksonValue(page);
         return mapping; 

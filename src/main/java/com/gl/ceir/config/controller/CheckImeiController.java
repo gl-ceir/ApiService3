@@ -1,5 +1,6 @@
 package com.gl.ceir.config.controller;
 
+import com.gl.ceir.config.exceptions.ResourceServicesException;
 import com.gl.ceir.config.model.AppDeviceDetailsDb;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 import com.gl.ceir.config.model.constants.LanguageFeatureName;
 
 import io.swagger.annotations.ApiOperation;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,15 +64,31 @@ public class CheckImeiController {  //sachin
 
     @ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
     @PostMapping("checkImeiApi")
-    public MappingJacksonValue checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
-        return new MappingJacksonValue(checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest));
+    public ResponseEntity<MappingJacksonValue> checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
+        var result = new MappingJacksonValue(checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest));
+        return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(result);
+
     }
 
     @ApiOperation(value = "Mobile Details", response = String.class)
     @PostMapping("MobileDeviceDetails/save")
-    public MappingJacksonValue getMobileDeviceDetails(@RequestBody AppDeviceDetailsDb appDeviceDetailsDb) {         
+    public MappingJacksonValue getMobileDeviceDetails(@RequestBody AppDeviceDetailsDb appDeviceDetailsDb) {
         checkImeiServiceImpl.saveDeviceDetails(appDeviceDetailsDb);
         return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.name(), "english"));
     }
+} 
 
-}
+
+//    @ApiOperation(value = "check Imei Api v2", response = CheckImeiResponse.class)
+//    @PostMapping("checkImeiApiV1")
+//    public MappingJacksonValue checkImeiDeviceV1(@RequestBody CheckImeiRequest checkImeiRequest) {
+//        var result = checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest);
+//        logger.info("result   " + result);
+//        return new MappingJacksonValue(result);
+// }
+    /*
+            HttpHeaders responseHeaders = new HttpHeaders();
+
+                return new ResponseEntity<String>(result, responseHeaders,  genericModel.getHttpStatus());
+
+     */

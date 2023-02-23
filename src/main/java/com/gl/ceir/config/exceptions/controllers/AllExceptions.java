@@ -39,4 +39,11 @@ public class AllExceptions {
 		return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND.value(), "FAIL", exception.getMessage()),
 				HttpStatus.NOT_FOUND);
 	}
+        
+        
+        
+        
+        
+        
+        
 }

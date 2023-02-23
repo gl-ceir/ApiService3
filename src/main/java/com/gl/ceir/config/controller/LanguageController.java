@@ -4,6 +4,8 @@
  */
 package com.gl.ceir.config.controller;
 
+import com.gl.ceir.config.GlobalControllerExceptionHandler;
+import com.gl.ceir.config.exceptions.ResourceServicesException;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -17,9 +19,10 @@ import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpServerErrorException;
 
 @RestController
-public class LanguageController { 
+public class LanguageController {
 
     private static final Logger logger = Logger.getLogger(LanguageController.class);
 
@@ -34,4 +37,17 @@ public class LanguageController {
         logger.info("Response of View =" + mapping);
         return mapping;
     }
+
+    @ApiOperation(value = "Get ", response = String.class)
+    @RequestMapping(path = "getError", method = RequestMethod.GET)
+    public MappingJacksonValue getErrorResponse(@RequestParam("language") String language) {
+        getResponses();
+        return new MappingJacksonValue(" It is a testing purpose ");
+    }
+
+    void getResponses() {
+         throw new ResourceServicesException(this.getClass().getName(), "Internal error");
+
+    }
+
 }

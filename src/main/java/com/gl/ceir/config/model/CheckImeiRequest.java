@@ -34,10 +34,9 @@ public class CheckImeiRequest implements Serializable {
     private Long msisdn;
     private String operator;
     private String imsi;
-    private String medium;
     private String language;
-    private String interfaces;
-    private String requestProcessStatus;
-    private String imeiProcessStatus;
+    private String channel;
+    private String requestProcessStatus = "DONE";
+    private String imeiProcessStatus = "DONE";
 
 }

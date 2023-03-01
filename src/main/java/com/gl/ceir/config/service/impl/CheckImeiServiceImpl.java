@@ -164,7 +164,7 @@ public class CheckImeiServiceImpl {
     public Object getImeiDetailsDevices(CheckImeiRequest checkImeiRequest) {
         DeviceDetails deviceDetails = null;
         var isValidImei = false;
-        var ruleResponseStatus = checkImeiRequest.getInterfaces() == null || checkImeiRequest.getInterfaces().equalsIgnoreCase("web") || checkImeiRequest.getInterfaces().equalsIgnoreCase("phone") ? "CheckImeiPass" : "CheckImeiPassForUssd";
+        var ruleResponseStatus = checkImeiRequest.getChannel() == null || checkImeiRequest.getChannel().equalsIgnoreCase("web") || checkImeiRequest.getChannel().equalsIgnoreCase("phone") ? "CheckImeiPass" : "CheckImeiPassForUssd";
         var language = checkImeiRequest.getLanguage() == null ? "en" : checkImeiRequest.getLanguage();
         try (BufferedWriter bw = null;) {
             Connection conn = connectionConfiguration.getConnection();

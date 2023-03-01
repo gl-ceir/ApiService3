@@ -13,6 +13,7 @@ import java.sql.SQLException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.apache.log4j.Logger;
 
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.stereotype.Repository;
@@ -22,14 +23,22 @@ public class ConnectionConfiguration {
 
     @PersistenceContext
     private EntityManager em;
+    private static final Logger logger = Logger.getLogger(ConnectionConfiguration.class);
 
     public Connection getConnection() {
-        EntityManagerFactoryInfo info = (EntityManagerFactoryInfo) em.getEntityManagerFactory();
         try {
+            EntityManagerFactoryInfo info = (EntityManagerFactoryInfo) em.getEntityManagerFactory();
             return info.getDataSource().getConnection();
         } catch (SQLException e) {
+            logger.error("Error " + e + " :: " + e.getLocalizedMessage());
+            e.printStackTrace();
             return null;
         }
     }
 
+  
 }
+
+
+
+

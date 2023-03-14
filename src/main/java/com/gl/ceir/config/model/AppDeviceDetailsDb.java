@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.json.simple.JSONObject;
+import javax.persistence.Transient;
 
 @Entity
 @Getter
@@ -27,6 +28,8 @@ public class AppDeviceDetailsDb implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Transient
+    private String languageType;
     private String deviceId;
     private String osType;
     private JSONObject deviceDetails;

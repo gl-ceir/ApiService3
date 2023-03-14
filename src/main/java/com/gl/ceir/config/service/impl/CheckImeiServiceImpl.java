@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import com.gl.Rule_engine.RuleEngineApplication;
 import com.gl.ceir.config.configuration.ConnectionConfiguration;
 import com.gl.ceir.config.exceptions.InternalServicesException;
+import com.gl.ceir.config.exceptions.UnprocessableEntityException;
+
 import com.gl.ceir.config.exceptions.ResourceServicesException;
 import com.gl.ceir.config.model.AppDeviceDetailsDb;
 import com.gl.ceir.config.model.CheckImeiRequest;
@@ -29,6 +31,7 @@ import com.gl.ceir.config.model.DeviceDetails;
 
 import com.gl.ceir.config.model.RuleEngineMapping;
 import com.gl.ceir.config.model.SystemConfigurationDb;
+import com.gl.ceir.config.model.constants.Alerts;
 import com.gl.ceir.config.repository.AuditTrailRepository;
 import com.gl.ceir.config.repository.CheckImeiRepository;
 import com.gl.ceir.config.repository.GsmaTacDetailsRepository;
@@ -36,7 +39,12 @@ import com.gl.ceir.config.repository.SystemConfigurationDbRepository;
 import com.gl.ceir.config.model.constants.StatusMessage;
 import com.gl.ceir.config.repository.AppDeviceDetailsRepository;
 import com.gl.ceir.config.repository.CheckImeiRequestRepository;
+import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
 import java.util.List;
+//import org.json.JSONObject;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.http.HttpStatus;
 
 @Service
@@ -52,6 +60,9 @@ public class CheckImeiServiceImpl {
 
     @PersistenceContext
     EntityManager entityManager;
+
+    @Autowired
+    AlertServiceImpl alertServiceImpl;
 
     @Autowired
     SystemConfigurationDbRepository systemConfigurationDbRepository;
@@ -162,12 +173,11 @@ public class CheckImeiServiceImpl {
     }
 
     public Object getImeiDetailsDevices(CheckImeiRequest checkImeiRequest) {
-        DeviceDetails deviceDetails = null;
+        JSONObject deviceDetails = null;
         var isValidImei = false;
         var ruleResponseStatus = checkImeiRequest.getChannel() == null || checkImeiRequest.getChannel().equalsIgnoreCase("web") || checkImeiRequest.getChannel().equalsIgnoreCase("phone") ? "CheckImeiPass" : "CheckImeiPassForUssd";
         var language = checkImeiRequest.getLanguage() == null ? "en" : checkImeiRequest.getLanguage();
-        try (BufferedWriter bw = null;) {
-            Connection conn = connectionConfiguration.getConnection();
+        try (Connection conn = connectionConfiguration.getConnection()) {
             new Thread(() -> {
                 checkImeiRequestRepository.save(checkImeiRequest);
             }).start();
@@ -176,48 +186,61 @@ public class CheckImeiServiceImpl {
             for (RuleEngineMapping rules : ruleList) {
                 Rule rule = new Rule(rules.getName(), rules.getOutput(), rules.getRuleMessage());
                 String[] my_arr = {rule.rule_name, "1", "NONCDR",
-                    ((rule.rule_name.equals("IMEI_LUHN_CHECK")) ? checkImeiRequest.getImei()
+                    (rule.rule_name.equals("IMEI_LENGTH") ? checkImeiRequest.getImei()
                     : checkImeiRequest.getImei()
-                    .substring(0, 14)),
-                    "4", "5", "6", "7", "8", "IMEI", "", " ", " ", ""};
-                logger.debug("Rule : " + rule.rule_name);
+                    .substring(0, 14)), "", "", "", "", "", "IMEI", "", " ", " ", ""};
                 String expOutput = RuleEngineApplication.startRuleEngine(my_arr, conn, null);
                 if (!rule.output.equalsIgnoreCase(expOutput)) {
                     ruleResponseStatus = rule.rule_name;
                     break;
                 }
             }
-            logger.info("Rule Status :" + ruleResponseStatus);
+            logger.debug("Rule Status :" + ruleResponseStatus);
             SystemConfigurationDb systemConfigurationDb = systemConfigurationDbRepository
                     .getByTagAndTypeAndFeatureName(ruleResponseStatus, language.contains("kh") ? 2 : 1, "CheckImei");
             var message = systemConfigurationDb.getValue().replace("$imei", checkImeiRequest.getImei());
-            logger.info("Message :" + systemConfigurationDb.getValue());
+            logger.debug("Message :" + systemConfigurationDb.getValue());
             if (ruleResponseStatus.contains("CheckImeiPass")) {
+                isValidImei = true;
                 var gsmaTacDetails = gsmaTacDetailsRepository
                         .getByTac(checkImeiRequest.getImei().substring(0, 8));
-                deviceDetails = new DeviceDetails(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModelName(), gsmaTacDetails.getDevice_type(),
-                        gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name());
                 message = message
                         .replace("$brandName", gsmaTacDetails.getBrand_name())
                         .replace("$modelName", gsmaTacDetails.getModelName())
                         .replace("$deviceType", gsmaTacDetails.getDevice_type())
                         .replace("$manufacturer", gsmaTacDetails.getDevice_type())
                         .replace("$marketingName", gsmaTacDetails.getMarketing_name());
-                isValidImei = true;
+                deviceDetails = deviceDetails(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModelName(), gsmaTacDetails.getDevice_type(),
+                        gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name());
             }
-            logger.info("Response :" + message);
-            return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()), StatusMessage.FOUND.getName(), language.contains("kh") ? "kh" : "en", new Result(isValidImei, message, deviceDetails));
+            logger.info("Response :" + deviceDetails);
+            return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()),
+                    StatusMessage.FOUND.getName(), language.contains("kh") ? "kh" : "en",
+                    new Result(isValidImei, message, deviceDetails));
         } catch (Exception e) {
+            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1103.getName(), 0);
             logger.error("Failed at " + e.getLocalizedMessage());
-                    throw new InternalServicesException(this.getClass().getName(), "Something went wrong");
+            throw new InternalServicesException(this.getClass().getName(), "internal server error");
         }
     }
 
     public void saveDeviceDetails(AppDeviceDetailsDb appDeviceDetailsDb) {
         try {
-            appDeviceDetailsRepository.saveDetails(appDeviceDetailsDb.getOsType(),appDeviceDetailsDb.getDeviceId(),appDeviceDetailsDb.getDeviceDetails().toJSONString());
+            appDeviceDetailsRepository.saveDetails(appDeviceDetailsDb.getOsType(), appDeviceDetailsDb.getDeviceId(), appDeviceDetailsDb.getDeviceDetails().toJSONString());
         } catch (Exception e) {
-                    throw new InternalServicesException(this.getClass().getName(), "Something went wrong");
+            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1104.getName(), 0);
+            throw new InternalServicesException(this.getClass().getName(), "Something went wrong");
         }
     }
+
+    private JSONObject deviceDetails(String brand_name, String modelName, String device_type, String manufacturer, String marketing_name) {
+        JSONObject item = new JSONObject();  // check with  response = String.class)
+        item.put("Brand Name", brand_name);
+        item.put("Model Name", modelName);
+        item.put("Manufacturer", manufacturer);
+        item.put("Marketing Name", marketing_name);
+        item.put("Device Type", device_type);
+        return item;
+    }
 }
+

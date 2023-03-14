@@ -4,12 +4,14 @@
  */
 package com.gl.ceir.config.model.constants;
 
-public enum LanguageFeatureName {
-    CHECKIMEI("CheckImei");
+public enum Alerts {
+    ALERT_1103("alert1103"),
+    ALERT_1104("alert1104"),
+    ALERT_1105("alert1105");
 
     private String name;
 
-    LanguageFeatureName(String name) {
+    Alerts(String name) {
         this.name = name;
     }
 

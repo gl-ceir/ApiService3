@@ -2,7 +2,6 @@ package com.gl.ceir.config;
 
 import java.util.ArrayList;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,6 +21,7 @@ import com.gl.ceir.config.model.constants.ImeiStatus;
 @EnableJpaAuditing
 @EnableAutoConfiguration
 @EnableCaching
+//@EnableEncryptableProperties
 public class ConfigApplication {
 
 	public static void main(String[] args) {

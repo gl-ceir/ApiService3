@@ -1,6 +1,8 @@
 package com.gl.ceir.config.controller;
 
+import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
+import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 import com.gl.ceir.config.model.AppDeviceDetailsDb;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,21 +64,30 @@ public class CheckImeiController {  //sachin
         return mapping;
     }
 
-    @ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
-    @PostMapping("services/checkIMEI")
-    public ResponseEntity<MappingJacksonValue> checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
-        var result = new MappingJacksonValue(checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest));
-        return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(result);
-
-    }
-
     @ApiOperation(value = "Mobile Details", response = String.class)
     @PostMapping("MobileDeviceDetails/save")
     public MappingJacksonValue getMobileDeviceDetails(@RequestBody AppDeviceDetailsDb appDeviceDetailsDb) {
         checkImeiServiceImpl.saveDeviceDetails(appDeviceDetailsDb);
-        return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.name(), "english"));
+        return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.name(),appDeviceDetailsDb.getLanguageType()));
     }
-} 
+
+    @ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
+    @PostMapping("services/checkIMEI")
+    public ResponseEntity<MappingJacksonValue> checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
+        if ((checkImeiRequest.getImei() == null || checkImeiRequest.getImei().trim().length() < 1)
+                || (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && checkImeiRequest.getImsi() == null)
+                || (checkImeiRequest.getChannel().equalsIgnoreCase("sms") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getImsi() == null))) {
+            throw new UnprocessableEntityException(this.getClass().getName(), "provide mandatory field ");
+        }
+        return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY)
+                .body(new MappingJacksonValue(checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest)));
+    }
+}
+
+
+
+
+
 
 
 //    @ApiOperation(value = "check Imei Api v2", response = CheckImeiResponse.class)
@@ -86,9 +97,9 @@ public class CheckImeiController {  //sachin
 //        logger.info("result   " + result);
 //        return new MappingJacksonValue(result);
 // }
-    /*
+/*
             HttpHeaders responseHeaders = new HttpHeaders();
 
                 return new ResponseEntity<String>(result, responseHeaders,  genericModel.getHttpStatus());
 
-     */
+ */

@@ -4,12 +4,13 @@
  */
 package com.gl.ceir.config.service.impl;
 
-import com.gl.ceir.config.exceptions.ResourceServicesException;
+import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.repository.LanguageLabelDbRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.gl.ceir.config.model.LanguageResponse;
+import com.gl.ceir.config.model.constants.Alerts;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -25,6 +26,9 @@ public class LanguageServiceImpl {
     @Autowired
     LanguageLabelDbRepository languageLabelDbRepository;
 
+    @Autowired
+    AlertServiceImpl alertServiceImpl;
+
     public LanguageResponse getLanguageLabels(String featureName, String language) {
         String responseValue;
         try {
@@ -33,10 +37,11 @@ public class LanguageServiceImpl {
             } else {
                 responseValue = languageLabelDbRepository.getEnglishNameAndLabelFromFeatureName(featureName);
             }
-            return new LanguageResponse(language, (JSONObject)  new JSONParser().parse(responseValue));
+            return new LanguageResponse(language, (JSONObject) new JSONParser().parse(responseValue));
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            throw new ResourceServicesException(this.getClass().getName(), e.getMessage());
+            logger.error(e.getMessage() +" : "+ e.getLocalizedMessage());
+            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1105.getName(), 0);
+            throw new InternalServicesException(this.getClass().getName(), e.getMessage());
         }
     }
 }

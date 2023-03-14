@@ -11,6 +11,7 @@ import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.exceptions.MyFileNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
+import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -30,8 +31,11 @@ import org.springframework.web.client.HttpServerErrorException.InternalServerErr
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+ 
 
-//@EnableWebMvc
+//@EnableWebMvc   //to be remove FOR SWAGGER
+
+
 @ControllerAdvice
 @RestControllerAdvice
 public class GlobalControllerExceptionHandler {
@@ -83,19 +87,28 @@ public class GlobalControllerExceptionHandler {
     }
 
     /* Custom Exceptions */
-    
-    @ExceptionHandler(value = ResourceNotFoundException.class)
-    public ResponseEntity<Object> exception(ResourceNotFoundException exception) {
-        return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND.value(), "FAIL", exception.getMessage()),
-                HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(value = InternalServicesException.class)
     public ResponseEntity<Object> exception(InternalServicesException exception) {
         return new ResponseEntity<>(
                 new ExceptionResponse(
-                        HttpStatus.INTERNAL_SERVER_ERROR.value(), "server error", "en", exception.getMessage()),
+                        HttpStatus.INTERNAL_SERVER_ERROR.value(), " server error", "en", exception.getMessage()),
                 HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(value = UnprocessableEntityException.class)
+    public ResponseEntity<Object> exception(UnprocessableEntityException exception) {
+        return new ResponseEntity<>(
+                new ExceptionResponse(
+                        HttpStatus.UNPROCESSABLE_ENTITY.value(), "unprocessable entity", "en", exception.getMessage()),
+                HttpStatus.UNPROCESSABLE_ENTITY);
+
+    }
+
+    @ExceptionHandler(value = ResourceNotFoundException.class)
+    public ResponseEntity<Object> exception(ResourceNotFoundException exception) {
+        return new ResponseEntity<>(
+                new ExceptionResponse(HttpStatus.NOT_FOUND.value(), "not found", "en", exception.getMessage()),
+                HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = MyFileNotFoundException.class)

@@ -175,7 +175,9 @@ public class CheckImeiServiceImpl {
     public Object getImeiDetailsDevices(CheckImeiRequest checkImeiRequest) {
         JSONObject deviceDetails = null;
         var isValidImei = false;
-        var ruleResponseStatus = checkImeiRequest.getChannel() == null || checkImeiRequest.getChannel().equalsIgnoreCase("web") || checkImeiRequest.getChannel().equalsIgnoreCase("phone") ? "CheckImeiPass" : "CheckImeiPassForUssd";
+        var ruleResponseStatus = checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
+                ? "CheckImeiPassForUssd" : "CheckImeiPass";
+
         var language = checkImeiRequest.getLanguage() == null ? "en" : checkImeiRequest.getLanguage();
         try (Connection conn = connectionConfiguration.getConnection()) {
             new Thread(() -> {
@@ -243,4 +245,3 @@ public class CheckImeiServiceImpl {
         return item;
     }
 }
-

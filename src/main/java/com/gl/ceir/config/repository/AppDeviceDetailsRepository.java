@@ -12,8 +12,8 @@ import org.springframework.data.repository.query.Param;
 public interface AppDeviceDetailsRepository extends JpaRepository<AppDeviceDetailsDb, Long>, JpaSpecificationExecutor<AppDeviceDetailsDb> {
 
   @Modifying
-    @Query(value = "insert into app_device_details_db (os_type,device_id,device_details)   VALUES (:osType,:deviceId  ,:deviceDetails )", nativeQuery = true)
+    @Query(value = "insert into app_device_details_db (os_type,device_id,device_details,language_type)   VALUES (:osType,:deviceId  ,:deviceDetails , :languageType)", nativeQuery = true)
     @Transactional
-    void saveDetails(@Param("osType") String osType, @Param("deviceId") String deviceId, @Param("deviceDetails") String deviceDetails);
+    void saveDetails(@Param("osType") String osType, @Param("deviceId") String deviceId, @Param("deviceDetails") String deviceDetails  , @Param("languageType") String languageType  );
 
 }

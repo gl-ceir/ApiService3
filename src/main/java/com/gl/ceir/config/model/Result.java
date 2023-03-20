@@ -20,4 +20,10 @@ public class Result {
     private String message;
     private JSONObject deviceDetails;
 
+    @Override
+    public String toString() {
+        return "Result{" + "isValidImei=" + isValidImei + ", message=" + message + ", deviceDetails=" + deviceDetails + '}';
+    }
+
+    
 }

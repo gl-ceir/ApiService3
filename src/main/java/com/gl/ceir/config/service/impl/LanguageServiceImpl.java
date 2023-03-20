@@ -41,7 +41,7 @@ public class LanguageServiceImpl {
         } catch (Exception e) {
             logger.error(e.getMessage() +" : "+ e.getLocalizedMessage());
             alertServiceImpl.raiseAnAlert(Alerts.ALERT_1105.getName(), 0);
-            throw new InternalServicesException(this.getClass().getName(), e.getMessage());
+            throw new InternalServicesException(this.getClass().getName(), e.getLocalizedMessage());
         }
     }
 }

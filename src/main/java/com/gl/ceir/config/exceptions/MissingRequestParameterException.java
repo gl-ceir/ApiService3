@@ -7,13 +7,13 @@ package com.gl.ceir.config.exceptions;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
-public class UnprocessableEntityException extends RuntimeException {
+@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+public class MissingRequestParameterException extends RuntimeException {
 
     private String resourceName;
     private String message;
 
-    public UnprocessableEntityException(String resourceName, String message) {
+    public MissingRequestParameterException(String resourceName, String message) {
         super(String.format("%s not found with %s ", resourceName, message));
         this.resourceName = resourceName;
         this.message = message;

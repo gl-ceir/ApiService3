@@ -36,7 +36,14 @@ public class CheckImeiRequest implements Serializable {
     private String imsi;
     private String language;
     private String channel;
-    private String requestProcessStatus = "DONE";
-    private String imeiProcessStatus = "DONE";
+    private String requestProcessStatus ;
+    private String imeiProcessStatus ;
+
+    @Override
+    public String toString() {
+        return "CheckImeiRequest{" + "imei=" + imei + ", msisdn=" + msisdn + ", operator=" + operator + ", imsi=" + imsi + ", language=" + language + ", channel=" + channel + '}';
+    }
+    
+    
 
 }

@@ -28,18 +28,16 @@ public class AppDeviceDetailsDb implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Transient
     private String languageType;
     private String deviceId;
     private String osType;
     private JSONObject deviceDetails;
 
-    public AppDeviceDetailsDb(String deviceId, String osType, JSONObject deviceDetails) {
+    public AppDeviceDetailsDb(String languageType, String deviceId, String osType, JSONObject deviceDetails) {
+        this.languageType = languageType;
         this.deviceId = deviceId;
         this.osType = osType;
         this.deviceDetails = deviceDetails;
     }
-
-   
 
 }

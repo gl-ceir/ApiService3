@@ -40,6 +40,8 @@ import com.gl.ceir.config.model.constants.StatusMessage;
 import com.gl.ceir.config.repository.AppDeviceDetailsRepository;
 import com.gl.ceir.config.repository.CheckImeiRequestRepository;
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 //import org.json.JSONObject;
@@ -169,20 +171,22 @@ public class CheckImeiServiceImpl {
             logger.info(" Erorr " + e);
         }
         return c1;
-
     }
 
     public Object getImeiDetailsDevices(CheckImeiRequest checkImeiRequest) {
         JSONObject deviceDetails = null;
         var isValidImei = false;
+        var startTime = System.currentTimeMillis();
+        logger.info("Start Time =" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
+        if ((checkImeiRequest.getImei() == null || checkImeiRequest.getImei().trim().length() < 1)
+                || (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getImsi() == null))
+                || (checkImeiRequest.getChannel().equalsIgnoreCase("sms") && checkImeiRequest.getMsisdn() == null)) {
+            throw new UnprocessableEntityException(this.getClass().getName(), "provide mandatory field");
+        }
         var ruleResponseStatus = checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
                 ? "CheckImeiPassForUssd" : "CheckImeiPass";
-
         var language = checkImeiRequest.getLanguage() == null ? "en" : checkImeiRequest.getLanguage();
         try (Connection conn = connectionConfiguration.getConnection()) {
-            new Thread(() -> {
-                checkImeiRequestRepository.save(checkImeiRequest);
-            }).start();
             List<RuleEngineMapping> ruleList = checkImeiRepository.getByFeatureAndUserTypeOrderByRuleOrder("CheckImei",
                     "default");
             for (RuleEngineMapping rules : ruleList) {
@@ -216,19 +220,30 @@ public class CheckImeiServiceImpl {
                         gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name());
             }
             logger.info("Response :" + deviceDetails);
+            checkImeiRequest.setImeiProcessStatus("Success");
+            saveCheckImeiRequest(checkImeiRequest, startTime);
             return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()),
                     StatusMessage.FOUND.getName(), language.contains("kh") ? "kh" : "en",
                     new Result(isValidImei, message, deviceDetails));
         } catch (Exception e) {
             alertServiceImpl.raiseAnAlert(Alerts.ALERT_1103.getName(), 0);
             logger.error("Failed at " + e.getLocalizedMessage());
+            checkImeiRequest.setImeiProcessStatus("Fail");
+            saveCheckImeiRequest(checkImeiRequest, startTime);
             throw new InternalServicesException(this.getClass().getName(), "internal server error");
         }
     }
 
+    private void saveCheckImeiRequest(CheckImeiRequest checkImeiRequest, long startTime) {
+        checkImeiRequest.setRequestProcessStatus(String.valueOf(System.currentTimeMillis() - startTime));
+        new Thread(() -> {
+            checkImeiRequestRepository.save(checkImeiRequest);
+        }).start();
+    }
+
     public void saveDeviceDetails(AppDeviceDetailsDb appDeviceDetailsDb) {
         try {
-            appDeviceDetailsRepository.saveDetails(appDeviceDetailsDb.getOsType(), appDeviceDetailsDb.getDeviceId(), appDeviceDetailsDb.getDeviceDetails().toJSONString());
+            appDeviceDetailsRepository.saveDetails(appDeviceDetailsDb.getOsType(), appDeviceDetailsDb.getDeviceId(), appDeviceDetailsDb.getDeviceDetails().toJSONString(), appDeviceDetailsDb.getLanguageType());
         } catch (Exception e) {
             alertServiceImpl.raiseAnAlert(Alerts.ALERT_1104.getName(), 0);
             throw new InternalServicesException(this.getClass().getName(), "Something went wrong");

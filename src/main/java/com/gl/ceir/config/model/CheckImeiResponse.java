@@ -22,6 +22,13 @@ public class CheckImeiResponse  {
         this.result = result;
     }
 
+    @Override
+    public String toString() {
+        return "CheckImeiResponse{" + "statusCode=" + statusCode + ", statusMessage=" + statusMessage + ", language=" + language + ", result=" + result + '}';
+    }
+    
+    
+
 }
 
 

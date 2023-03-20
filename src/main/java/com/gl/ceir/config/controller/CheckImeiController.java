@@ -1,6 +1,7 @@
 package com.gl.ceir.config.controller;
 
 import com.gl.ceir.config.exceptions.InternalServicesException;
+import com.gl.ceir.config.exceptions.MissingRequestParameterException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 import com.gl.ceir.config.model.AppDeviceDetailsDb;
@@ -21,6 +22,7 @@ import com.gl.ceir.config.model.constants.LanguageFeatureName;
 import io.swagger.annotations.ApiOperation;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 public class CheckImeiController {  //sachin
 
-    private static final Logger logger = Logger.getLogger(GsmaValueController.class);
+    private static final Logger logger = Logger.getLogger(CheckImeiController.class);
 
     @Autowired
     CheckImeiServiceImpl checkImeiServiceImpl;
@@ -69,24 +71,32 @@ public class CheckImeiController {  //sachin
     @ApiOperation(value = "Mobile Details", response = String.class)
     @PostMapping("MobileDeviceDetails/save")
     public MappingJacksonValue getMobileDeviceDetails(@RequestBody AppDeviceDetailsDb appDeviceDetailsDb) {
+        errorValidationChecker(appDeviceDetailsDb);
+        logger.debug("Request = " + appDeviceDetailsDb);
         checkImeiServiceImpl.saveDeviceDetails(appDeviceDetailsDb);
+        logger.debug("Going to fetch response according to  = " + appDeviceDetailsDb.getLanguageType());
         return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.name(), appDeviceDetailsDb.getLanguageType()));
     }
 
     @ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
     @PostMapping("services/checkIMEI")
     public ResponseEntity<MappingJacksonValue> checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
-        logger.info("Start Time =" + LocalDateTime.now() .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
-        if ((checkImeiRequest.getImei() == null || checkImeiRequest.getImei().trim().length() < 1)
-                || (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getImsi() == null))
-                || (checkImeiRequest.getChannel().equalsIgnoreCase("sms") && checkImeiRequest.getMsisdn() == null)) {
-            throw new UnprocessableEntityException(this.getClass().getName(), "provide mandatory field");
-        }
         var value = checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest);
-        logger.info("End Time =" + LocalDateTime.now() .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
+        logger.info("Request = " + checkImeiRequest.toString() + " ; Response =" + value);
         return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY)
                 .body(new MappingJacksonValue(value));
     }
+
+    private void errorValidationChecker(AppDeviceDetailsDb appDeviceDetailsDb) {
+        if (appDeviceDetailsDb.getDeviceId() == null || appDeviceDetailsDb.getLanguageType() == null || appDeviceDetailsDb.getOsType() == null) {
+            throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
+        }
+        if (appDeviceDetailsDb.getDeviceId().isBlank() || appDeviceDetailsDb.getLanguageType().trim().length() < 2 || appDeviceDetailsDb.getOsType().isBlank()) {
+            throw new UnprocessableEntityException(this.getClass().getName(), "provide mandatory field");
+        }
+
+    }
+
 }
 
 //    @ApiOperation(value = "check Imei Api v2", response = CheckImeiResponse.class)

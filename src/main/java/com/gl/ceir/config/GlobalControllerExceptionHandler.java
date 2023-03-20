@@ -8,34 +8,26 @@ import com.gl.ceir.config.dto.ApiResponse;
 import com.gl.ceir.config.dto.ExceptionResponse;
 import com.gl.ceir.config.exceptions.FileStorageException;
 import com.gl.ceir.config.exceptions.InternalServicesException;
+import com.gl.ceir.config.exceptions.MissingRequestParameterException;
 import com.gl.ceir.config.exceptions.MyFileNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
-import com.gl.ceir.config.exceptions.ResourceServicesException;
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpServerErrorException.InternalServerError;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
- 
 
 //@EnableWebMvc   //to be remove FOR SWAGGER
-
-
 @ControllerAdvice
 @RestControllerAdvice
 public class GlobalControllerExceptionHandler {
@@ -86,7 +78,25 @@ public class GlobalControllerExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR.value(), "server error", "Something Went Wrong");
     }
 
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse handleMissingServletRequestParameterException(Exception e, WebRequest request) {
+        return new ExceptionResponse(
+                HttpStatus.BAD_REQUEST.value(), "bad request", "parameter missing");
+    }
+
     /* Custom Exceptions */
+    
+    
+    
+    @ExceptionHandler(value = MissingRequestParameterException.class)
+    public ResponseEntity<Object> exception(MissingServletRequestParameterException exception) {
+        return new ResponseEntity<>(
+                new ExceptionResponse(
+                        HttpStatus.BAD_REQUEST.value(), "bad request", "en", "parameter missing"),
+                HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(value = InternalServicesException.class)
     public ResponseEntity<Object> exception(InternalServicesException exception) {
         return new ResponseEntity<>(

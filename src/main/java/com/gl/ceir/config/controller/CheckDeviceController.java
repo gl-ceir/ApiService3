@@ -26,4 +26,5 @@ public class CheckDeviceController {
         MappingJacksonValue mapping=new MappingJacksonValue(genricResponse);
 		return mapping;
 	}
+
 }

@@ -43,7 +43,21 @@ public class SystemConfigurationDb implements Serializable {
 	private String typeInterp;
 	
 	private String remark;
+
+	private String featureName;
 	
+	public String getFeatureName() {
+		return featureName;
+	}
+	public void setFeatureName(String featureName) {
+		this.featureName = featureName;
+	}
+	public Integer getActive() {
+		return active;
+	}
+	public void setActive(Integer active) {
+		this.active = active;
+	}
 	@NotNull
 	private Integer active;
 	
@@ -117,6 +131,8 @@ public class SystemConfigurationDb implements Serializable {
 		builder.append(tag);
 		builder.append(", value=");
 		builder.append(value);
+		builder.append(", featureName=");
+		builder.append(featureName);
 		builder.append(", description=");
 		builder.append(description);
 		builder.append(", type=");

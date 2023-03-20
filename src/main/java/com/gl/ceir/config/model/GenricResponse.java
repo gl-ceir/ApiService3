@@ -6,6 +6,10 @@ public class GenricResponse {
 	private String message;
 	private String txnId;
 	private Object data;
+        
+        public GenricResponse(int errorCode) {
+		this.errorCode = errorCode;
+	}
 
 	public GenricResponse(int errorCode, String message, String txnId) {
 		this.errorCode = errorCode;

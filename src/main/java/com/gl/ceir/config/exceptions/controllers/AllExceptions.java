@@ -12,7 +12,7 @@ import com.gl.ceir.config.exceptions.MyFileNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
 
-@ControllerAdvice
+// @ControllerAdvice
 public class AllExceptions {
 
 	@ExceptionHandler(value = ResourceNotFoundException.class)
@@ -39,4 +39,11 @@ public class AllExceptions {
 		return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND.value(), "FAIL", exception.getMessage()),
 				HttpStatus.NOT_FOUND);
 	}
+        
+        
+        
+        
+        
+        
+        
 }

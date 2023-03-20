@@ -9,13 +9,14 @@
         <version>2.1.4.RELEASE</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
+    
     <groupId>com.gl.ceir</groupId>
     <artifactId>apiservice3</artifactId>
     <!--<version>I3-1.0.15</version>-->
     <name>apiservice3</name>
 	 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
         <spring-cloud.version>Finchley.SR4</spring-cloud.version>
     </properties>
 
@@ -45,11 +46,15 @@
             <scope>runtime</scope>
         </dependency>
 		
- 
-<!--        <dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180130</version>
+        </dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-        </dependency>-->
+        </dependency> 
         
         <dependency>
             <groupId>io.springfox</groupId>
@@ -67,13 +72,7 @@
             <artifactId>commons-pool2</artifactId>
         </dependency>
  
- 
-        <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>oracle8</artifactId>
-            <version>19.3</version>
-        </dependency>
- 
+  
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
@@ -98,6 +97,27 @@
             <version>1.1.1</version>
             <type>jar</type>
         </dependency>
+        
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.20</version>
+            <scope>provided</scope>
+        </dependency>
+        
+   
+         
+        <dependency>
+            <groupId>com.github.ulisesbocchio</groupId>
+            <artifactId>jasypt-spring-boot</artifactId>    <!--  IF NOT WORKING MIGHT BE   -spring-boot-starter?-->
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>2.0.2</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -114,14 +134,26 @@
     </dependencyManagement>
 
     <build>
-         <finalName>apiservice3</finalName>
+        <finalName>apiservice3</finalName>
        
         <plugins>
+            
+<!--            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>11</source>   same as <java.version> 
+                    <target>11</target>     same as <java.version> 
+                </configuration>
+            </plugin>-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <plugin>
+    
+    
+     <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.1</version>
@@ -137,6 +169,7 @@
                     </execution>
                 </executions>
             </plugin>
+    
         </plugins>
 
     </build>
@@ -163,3 +196,26 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>-->
+     <!--        <dependency>
+            <groupId>com.github.ulisesbocchio</groupId>
+            <artifactId>jasypt-spring-boot-starter</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        -->
+        
+                <!--            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <classifier>import-lib</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>-->

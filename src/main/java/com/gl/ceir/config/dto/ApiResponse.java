@@ -1,6 +1,6 @@
 package com.gl.ceir.config.dto;
 
-public class ApiResponse {
+public class ApiResponse  {
 
 	private int responseCode;
 	private String responseStatus;

@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gl.ceir.config.model.ForeignerImeiDetails;
-import com.gl.ceir.config.model.ForeignerRequest;
-import com.gl.ceir.config.model.GenricResponse;
+import com.gl.ceir.config.model.app.ForeignerImeiDetails;
+import com.gl.ceir.config.model.app.ForeignerRequest;
+import com.gl.ceir.config.model.app.GenricResponse;
 import com.gl.ceir.config.service.impl.ForeignerServiceImpl;
 import com.gl.ceir.config.service.impl.SmsAccountServiceImpl;
 

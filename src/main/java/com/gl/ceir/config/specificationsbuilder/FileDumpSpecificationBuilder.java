@@ -9,9 +9,9 @@ import javax.persistence.criteria.Expression;
 import org.apache.log4j.Logger;
 import org.springframework.data.jpa.domain.Specification;
 
-import com.gl.ceir.config.model.FileDumpMgmt;
-import com.gl.ceir.config.model.FileDumpMgmt;
-import com.gl.ceir.config.model.SearchCriteria;
+import com.gl.ceir.config.model.app.FileDumpMgmt;
+import com.gl.ceir.config.model.app.FileDumpMgmt;
+import com.gl.ceir.config.model.app.SearchCriteria;
 import com.gl.ceir.config.model.constants.Datatype;
 import com.gl.ceir.config.model.constants.SearchOperation;
 import com.gl.ceir.config.util.DbFunctions;

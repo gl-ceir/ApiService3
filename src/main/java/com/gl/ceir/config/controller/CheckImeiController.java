@@ -4,17 +4,16 @@ import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.exceptions.MissingRequestParameterException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
-import com.gl.ceir.config.model.AppDeviceDetailsDb;
+import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.gl.ceir.config.model.CheckImeiValuesEntity;
-
-import com.gl.ceir.config.model.CheckImeiMess;
-import com.gl.ceir.config.model.CheckImeiRequest;
-import com.gl.ceir.config.model.CheckImeiResponse;
+import com.gl.ceir.config.model.app.CheckImeiValuesEntity;
+import com.gl.ceir.config.model.app.CheckImeiMess;
+import com.gl.ceir.config.model.app.CheckImeiRequest;
+import com.gl.ceir.config.model.app.CheckImeiResponse;
 import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
 import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 import com.gl.ceir.config.model.constants.LanguageFeatureName;
@@ -72,9 +71,9 @@ public class CheckImeiController {  //sachin
     @PostMapping("MobileDeviceDetails/save")
     public MappingJacksonValue getMobileDeviceDetails(@RequestBody AppDeviceDetailsDb appDeviceDetailsDb) {
         errorValidationChecker(appDeviceDetailsDb);
-        logger.debug("Request = " + appDeviceDetailsDb);
+        logger.info("Request = " + appDeviceDetailsDb);
         checkImeiServiceImpl.saveDeviceDetails(appDeviceDetailsDb);
-        logger.debug("Going to fetch response according to  = " + appDeviceDetailsDb.getLanguageType());
+        logger.info("Going to fetch response according to  = " + appDeviceDetailsDb.getLanguageType());
         return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.name(), appDeviceDetailsDb.getLanguageType()));
     }
 
@@ -87,14 +86,16 @@ public class CheckImeiController {  //sachin
                 .body(new MappingJacksonValue(value));
     }
 
-    private void errorValidationChecker(AppDeviceDetailsDb appDeviceDetailsDb) {
-        if (appDeviceDetailsDb.getDeviceId() == null || appDeviceDetailsDb.getLanguageType() == null || appDeviceDetailsDb.getOsType() == null) {
+     void errorValidationChecker(AppDeviceDetailsDb appDeviceDetailsDb) {
+        logger.info(appDeviceDetailsDb.toString());
+        logger.info("sdfsdf+" + appDeviceDetailsDb.getLanguageType());
+
+        if ( appDeviceDetailsDb.getDeviceDetails() == null ||  appDeviceDetailsDb.getDeviceId() == null || appDeviceDetailsDb.getLanguageType() == null || appDeviceDetailsDb.getOsType() == null) {
             throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
         }
         if (appDeviceDetailsDb.getDeviceId().isBlank() || appDeviceDetailsDb.getLanguageType().trim().length() < 2 || appDeviceDetailsDb.getOsType().isBlank()) {
             throw new UnprocessableEntityException(this.getClass().getName(), "provide mandatory field");
         }
-
     }
 
 }

@@ -12,21 +12,21 @@ import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.configuration.PropertiesReader;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.FileDumpFilter;
-import com.gl.ceir.config.model.ForeignerRequest;
-import com.gl.ceir.config.model.GenricResponse;
-import com.gl.ceir.config.model.GreylistDb;
-import com.gl.ceir.config.model.GreylistDbHistory;
-import com.gl.ceir.config.model.ImeiInfo;
-import com.gl.ceir.config.model.NationalismImeiDetails;
-import com.gl.ceir.config.model.NationlismDetails;
-import com.gl.ceir.config.model.SearchCriteria;
+import com.gl.ceir.config.model.app.FileDumpFilter;
+import com.gl.ceir.config.model.app.ForeignerRequest;
+import com.gl.ceir.config.model.app.GenricResponse;
+import com.gl.ceir.config.model.app.GreylistDb;
+import com.gl.ceir.config.model.app.GreylistDbHistory;
+import com.gl.ceir.config.model.app.ImeiInfo;
+import com.gl.ceir.config.model.app.NationalismImeiDetails;
+import com.gl.ceir.config.model.app.NationlismDetails;
+import com.gl.ceir.config.model.app.SearchCriteria;
 import com.gl.ceir.config.model.constants.Datatype;
 import com.gl.ceir.config.model.constants.SearchOperation;
-import com.gl.ceir.config.repository.GreyListRepository;
-import com.gl.ceir.config.repository.GreyListTrackRepository;
-import com.gl.ceir.config.repository.NationalismDetailsRepository;
-import com.gl.ceir.config.repository.NationlismImeiDetailsRepository;
+import com.gl.ceir.config.repository.app.GreyListRepository;
+import com.gl.ceir.config.repository.app.GreyListTrackRepository;
+import com.gl.ceir.config.repository.app.NationalismDetailsRepository;
+import com.gl.ceir.config.repository.app.NationlismImeiDetailsRepository;
 import com.gl.ceir.config.specificationsbuilder.SpecificationBuilder;
 
 @Service

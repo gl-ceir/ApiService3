@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.gl.ceir.config.model.ForeignerDetails;
-import com.gl.ceir.config.model.GenricResponse;
-import com.gl.ceir.config.model.ImmegreationFileDetails;
-import com.gl.ceir.config.model.SingleImeiDetails;
+import com.gl.ceir.config.model.app.ForeignerDetails;
+import com.gl.ceir.config.model.app.GenricResponse;
+import com.gl.ceir.config.model.app.ImmegreationFileDetails;
+import com.gl.ceir.config.model.app.SingleImeiDetails;
 import com.gl.ceir.config.service.impl.ForeignerServiceImpl;
 import com.gl.ceir.config.service.impl.ImmegreationServiceImpl;
 

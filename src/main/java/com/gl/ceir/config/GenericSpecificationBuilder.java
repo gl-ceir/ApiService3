@@ -15,8 +15,8 @@ package com.gl.ceir.config;
 
 
  
-import com.gl.ceir.config.model.FilterRequest;
-import com.gl.ceir.config.model.ScheduleReportDb;
+import com.gl.ceir.config.model.app.FilterRequest;
+import com.gl.ceir.config.model.app.ScheduleReportDb;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.jpa.domain.Specification;
 
-import com.gl.ceir.config.model.SearchCriteria;
+import com.gl.ceir.config.model.app.SearchCriteria;
 import com.gl.ceir.config.model.constants.Datatype;
 import com.gl.ceir.config.model.constants.SearchOperation;
 import com.gl.ceir.config.util.DbFunctions;

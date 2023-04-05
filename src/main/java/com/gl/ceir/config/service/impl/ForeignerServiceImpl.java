@@ -11,19 +11,19 @@ import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.exceptions.FileStorageException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.BlacklistDbHistory;
-import com.gl.ceir.config.model.ForeignerDetails;
-import com.gl.ceir.config.model.ForeignerImeiDetails;
-import com.gl.ceir.config.model.ForeignerRequest;
-import com.gl.ceir.config.model.GenricResponse;
-import com.gl.ceir.config.model.ImeiInfo;
-import com.gl.ceir.config.model.SingleImeiDetails;
-import com.gl.ceir.config.model.StackholderPolicyMapping;
-import com.gl.ceir.config.repository.BlackListTrackDetailsRepository;
-import com.gl.ceir.config.repository.ForeignerDetailsRepository;
-import com.gl.ceir.config.repository.ForeignerImeiDetailsRepository;
-import com.gl.ceir.config.repository.ImmegreationImeiDetailsRepository;
-import com.gl.ceir.config.repository.StackholderPolicyMappingRepository;
+import com.gl.ceir.config.model.app.BlacklistDbHistory;
+import com.gl.ceir.config.model.app.ForeignerDetails;
+import com.gl.ceir.config.model.app.ForeignerImeiDetails;
+import com.gl.ceir.config.model.app.ForeignerRequest;
+import com.gl.ceir.config.model.app.GenricResponse;
+import com.gl.ceir.config.model.app.ImeiInfo;
+import com.gl.ceir.config.model.app.SingleImeiDetails;
+import com.gl.ceir.config.model.app.StackholderPolicyMapping;
+import com.gl.ceir.config.repository.app.BlackListTrackDetailsRepository;
+import com.gl.ceir.config.repository.app.ForeignerDetailsRepository;
+import com.gl.ceir.config.repository.app.ForeignerImeiDetailsRepository;
+import com.gl.ceir.config.repository.app.ImmegreationImeiDetailsRepository;
+import com.gl.ceir.config.repository.app.StackholderPolicyMappingRepository;
 import com.gl.ceir.config.util.Utility;
 
 @Service

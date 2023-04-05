@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
-import com.gl.ceir.config.model.DocumentStatus;
-import com.gl.ceir.config.model.Documents;
-import com.gl.ceir.config.repository.DocumentsRepository;
+import com.gl.ceir.config.model.app.DocumentStatus;
+import com.gl.ceir.config.model.app.Documents;
+import com.gl.ceir.config.repository.app.DocumentsRepository;
 import com.gl.ceir.config.service.DocumentsService;
 
 @Service

@@ -76,7 +76,6 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>5.4.12.Final</version>
             <type>jar</type>
         </dependency>
          
@@ -118,6 +117,16 @@
             <version>2.0.2</version>
             <type>jar</type>
         </dependency>
+        
+        
+        
+<!--        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>1.9</version>
+        </dependency>-->
+
+
     </dependencies>
 
     <dependencyManagement>
@@ -138,7 +147,7 @@
        
         <plugins>
             
-<!--            <plugin>
+            <!--            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
@@ -153,7 +162,7 @@
             </plugin>
     
     
-     <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.1</version>
@@ -196,26 +205,26 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>-->
-     <!--        <dependency>
-            <groupId>com.github.ulisesbocchio</groupId>
-            <artifactId>jasypt-spring-boot-starter</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        -->
+<!--        <dependency>
+    <groupId>com.github.ulisesbocchio</groupId>
+    <artifactId>jasypt-spring-boot-starter</artifactId>
+    <version>2.0.0</version>
+</dependency>
+-->
         
-                <!--            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.2</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <classifier>import-lib</classifier>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>-->
+<!--            <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-jar-plugin</artifactId>
+    <version>3.1.2</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>jar</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+                <classifier>import-lib</classifier>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>-->

@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.GsmaValueModel;
-import com.gl.ceir.config.model.UsagesValueModel;
-import com.gl.ceir.config.model.DuplicateValueModel;
-import com.gl.ceir.config.repository.GsmaValueRepository;
-import com.gl.ceir.config.repository.UsagesValueRepository;
-import com.gl.ceir.config.repository.DuplicateValueRepository;
+import com.gl.ceir.config.model.app.GsmaValueModel;
+import com.gl.ceir.config.model.app.UsagesValueModel;
+import com.gl.ceir.config.model.app.DuplicateValueModel;
+import com.gl.ceir.config.repository.app.GsmaValueRepository;
+import com.gl.ceir.config.repository.app.UsagesValueRepository;
+import com.gl.ceir.config.repository.app.DuplicateValueRepository;
 
 @Service
 public class GsmaValueServiceImpl  {

@@ -11,8 +11,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.gl.ceir.config.model.Tac;
-import com.gl.ceir.config.repository.TacRepository;
+import com.gl.ceir.config.model.app.Tac;
+import com.gl.ceir.config.repository.app.TacRepository;
 import com.gl.ceir.config.service.TacFileLoader;
 
 @Service

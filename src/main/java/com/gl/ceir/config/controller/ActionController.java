@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gl.ceir.config.model.Action;
+import com.gl.ceir.config.model.app.Action;
 import com.gl.ceir.config.service.ActionService;
 
 import io.swagger.annotations.ApiOperation;

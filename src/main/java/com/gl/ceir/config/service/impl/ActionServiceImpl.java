@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.Action;
-import com.gl.ceir.config.repository.ActionRepository;
+import com.gl.ceir.config.model.app.Action;
+import com.gl.ceir.config.repository.app.ActionRepository;
 import com.gl.ceir.config.service.ActionService;
 
 @Service

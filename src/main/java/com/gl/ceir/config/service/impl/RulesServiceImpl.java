@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.RuleEngineMapping;
-import com.gl.ceir.config.repository.RulesRepository;
-import java.util.ArrayList;
+import com.gl.ceir.config.repository.app.RulesRepository;
 
 @Service
 public class RulesServiceImpl {

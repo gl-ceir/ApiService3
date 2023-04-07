@@ -15,11 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gl.ceir.config.configuration.FileStorageProperties;
 import com.gl.ceir.config.exceptions.FileStorageException;
-import com.gl.ceir.config.model.GenricResponse;
-import com.gl.ceir.config.model.ImmegreationFileDetails;
-import com.gl.ceir.config.model.StackholderPolicyMapping;
-import com.gl.ceir.config.repository.ImmegreationFileDertailsRepository;
-import com.gl.ceir.config.repository.StackholderPolicyMappingRepository;
+import com.gl.ceir.config.model.app.GenricResponse;
+import com.gl.ceir.config.model.app.ImmegreationFileDetails;
+import com.gl.ceir.config.model.app.StackholderPolicyMapping;
+import com.gl.ceir.config.repository.app.ImmegreationFileDertailsRepository;
+import com.gl.ceir.config.repository.app.StackholderPolicyMappingRepository;
 import com.gl.ceir.config.util.Utility;
 
 @Service

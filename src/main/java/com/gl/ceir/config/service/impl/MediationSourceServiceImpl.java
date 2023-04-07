@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.MediationSource;
-import com.gl.ceir.config.repository.MediationSourceRepository;
+import com.gl.ceir.config.model.app.MediationSource;
+import com.gl.ceir.config.repository.app.MediationSourceRepository;
 import com.gl.ceir.config.service.MediationSourceService;
 
 @Service

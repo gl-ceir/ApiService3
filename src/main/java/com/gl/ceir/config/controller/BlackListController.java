@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
-import com.gl.ceir.config.model.BlackList;
-import com.gl.ceir.config.model.ImeiMsisdnIdentity;
+import com.gl.ceir.config.model.app.BlackList;
+import com.gl.ceir.config.model.app.ImeiMsisdnIdentity;
 import com.gl.ceir.config.service.BlackListService;
 
 import io.swagger.annotations.ApiOperation;

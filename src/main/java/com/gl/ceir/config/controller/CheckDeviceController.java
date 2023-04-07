@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gl.ceir.config.model.CheckDevice;
-import com.gl.ceir.config.model.CheckDeviceReponse;
-import com.gl.ceir.config.model.GenricResponse;
+import com.gl.ceir.config.model.app.CheckDevice;
+import com.gl.ceir.config.model.app.CheckDeviceReponse;
+import com.gl.ceir.config.model.app.GenricResponse;
 import com.gl.ceir.config.service.impl.CheckDeviceImpl;
 
 import io.swagger.annotations.ApiOperation;

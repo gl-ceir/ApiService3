@@ -7,8 +7,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.gl.ceir.config.model.ImsieSeries;
-import com.gl.ceir.config.repository.ImsieSeriesRepository;
+import com.gl.ceir.config.model.app.ImsieSeries;
+import com.gl.ceir.config.repository.app.ImsieSeriesRepository;
 import com.gl.ceir.config.service.ImsieSeriesService;
 
 @Service

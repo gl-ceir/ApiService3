@@ -58,7 +58,7 @@ public class Utility {
 
     }
 
-    public static void main(String[] args) {
+    public static void main123(String[] args) {
         String str = "org.hibernate.dialect.MySQL5InnoDBDialect";
 
         System.out.println(str.toLowerCase().contains("mysql"));

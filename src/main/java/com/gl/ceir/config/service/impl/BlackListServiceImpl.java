@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.BlackList;
-import com.gl.ceir.config.model.ImeiMsisdnIdentity;
-import com.gl.ceir.config.repository.BlackListRepository;
+import com.gl.ceir.config.model.app.BlackList;
+import com.gl.ceir.config.model.app.ImeiMsisdnIdentity;
+import com.gl.ceir.config.repository.app.BlackListRepository;
 import com.gl.ceir.config.service.BlackListService;
 
 @Service

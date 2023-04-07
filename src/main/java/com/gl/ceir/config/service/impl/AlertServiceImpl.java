@@ -4,12 +4,12 @@
  */
 package com.gl.ceir.config.service.impl;
 
-import com.gl.ceir.config.model.AlertDb;
-import com.gl.ceir.config.model.RunningAlertDb;
-import com.gl.ceir.config.repository.AlertDbRepository;
-import com.gl.ceir.config.repository.RunningAlertDbRepository;
+import com.gl.ceir.config.model.app.AlertDb;
+import com.gl.ceir.config.model.app.RunningAlertDb;
+import com.gl.ceir.config.repository.app.AlertDbRepository;
+import com.gl.ceir.config.repository.app.RunningAlertDbRepository;
 
-import com.gl.ceir.config.model.GenricResponse;
+import com.gl.ceir.config.model.app.GenricResponse;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.logging.log4j.LogManager;

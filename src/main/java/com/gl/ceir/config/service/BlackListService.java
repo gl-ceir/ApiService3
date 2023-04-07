@@ -1,7 +1,7 @@
 package com.gl.ceir.config.service;
 
-import com.gl.ceir.config.model.BlackList;
-import com.gl.ceir.config.model.ImeiMsisdnIdentity;
+import com.gl.ceir.config.model.app.BlackList;
+import com.gl.ceir.config.model.app.ImeiMsisdnIdentity;
 
 public interface BlackListService extends RestServices<BlackList> {
 	public BlackList getByMsisdn(Long msisdn);

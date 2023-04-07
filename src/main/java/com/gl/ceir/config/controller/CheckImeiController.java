@@ -4,17 +4,16 @@ import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.exceptions.MissingRequestParameterException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
-import com.gl.ceir.config.model.AppDeviceDetailsDb;
+import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.gl.ceir.config.model.CheckImeiValuesEntity;
-
-import com.gl.ceir.config.model.CheckImeiMess;
-import com.gl.ceir.config.model.CheckImeiRequest;
-import com.gl.ceir.config.model.CheckImeiResponse;
+import com.gl.ceir.config.model.app.CheckImeiValuesEntity;
+import com.gl.ceir.config.model.app.CheckImeiMess;
+import com.gl.ceir.config.model.app.CheckImeiRequest;
+import com.gl.ceir.config.model.app.CheckImeiResponse;
 import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
 import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 import com.gl.ceir.config.model.constants.LanguageFeatureName;
@@ -22,6 +21,7 @@ import com.gl.ceir.config.model.constants.LanguageFeatureName;
 import io.swagger.annotations.ApiOperation;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Optional;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -72,29 +72,55 @@ public class CheckImeiController {  //sachin
     @PostMapping("MobileDeviceDetails/save")
     public MappingJacksonValue getMobileDeviceDetails(@RequestBody AppDeviceDetailsDb appDeviceDetailsDb) {
         errorValidationChecker(appDeviceDetailsDb);
-        logger.debug("Request = " + appDeviceDetailsDb);
+        logger.info("Request = " + appDeviceDetailsDb);
         checkImeiServiceImpl.saveDeviceDetails(appDeviceDetailsDb);
-        logger.debug("Going to fetch response according to  = " + appDeviceDetailsDb.getLanguageType());
+        logger.info("Going to fetch response according to  = " + appDeviceDetailsDb.getLanguageType());
         return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.name(), appDeviceDetailsDb.getLanguageType()));
     }
 
     @ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
     @PostMapping("services/checkIMEI")
     public ResponseEntity<MappingJacksonValue> checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
+        errorValidationChecker(checkImeiRequest);
+        logger.info("Going for values ");
         var value = checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest);
         logger.info("Request = " + checkImeiRequest.toString() + " ; Response =" + value);
         return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY)
                 .body(new MappingJacksonValue(value));
+
     }
 
-    private void errorValidationChecker(AppDeviceDetailsDb appDeviceDetailsDb) {
-        if (appDeviceDetailsDb.getDeviceId() == null || appDeviceDetailsDb.getLanguageType() == null || appDeviceDetailsDb.getOsType() == null) {
+    void errorValidationChecker(CheckImeiRequest checkImeiRequest) {
+        logger.info(checkImeiRequest.toString());
+        // imei not present 
+        if (checkImeiRequest.getImei() == null || checkImeiRequest.getChannel() == null) {
+            logger.info("Null Values " + checkImeiRequest.getImei());
+            throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
+        }
+        //  "imei": "",
+        if (checkImeiRequest.getImei().isBlank()
+                || (checkImeiRequest.getChannel().isBlank())
+                || (!Arrays.asList("web", "ussd", "sms", "phone", "app").contains(checkImeiRequest.getChannel().toLowerCase()))
+                || (checkImeiRequest.getImsi() != null && (checkImeiRequest.getImsi().length() != 15 || !(checkImeiRequest.getImsi().matches("[0-9]+"))))
+                || (checkImeiRequest.getMsisdn() != null && (checkImeiRequest.getMsisdn().trim().length() > 20 || !(checkImeiRequest.getMsisdn().matches("[0-9]+"))))
+                || (checkImeiRequest.getLanguage() != null && checkImeiRequest.getLanguage().trim().length() > 2)
+                || (checkImeiRequest.getOperator() != null && checkImeiRequest.getOperator().trim().length() > 10)
+                || (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getImsi() == null || checkImeiRequest.getMsisdn().isBlank()))
+                || (checkImeiRequest.getChannel().equalsIgnoreCase("sms") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getMsisdn().isBlank()))
+                ) {
+            logger.info("Not allowed " + checkImeiRequest.getChannel());
+            throw new UnprocessableEntityException(this.getClass().getName(), "provide mandatory field");
+        }
+    }
+
+    void errorValidationChecker(AppDeviceDetailsDb appDeviceDetailsDb) {
+        logger.info(appDeviceDetailsDb.toString());
+        if (appDeviceDetailsDb.getDeviceDetails() == null || appDeviceDetailsDb.getDeviceId() == null || appDeviceDetailsDb.getLanguageType() == null || appDeviceDetailsDb.getOsType() == null) {
             throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
         }
         if (appDeviceDetailsDb.getDeviceId().isBlank() || appDeviceDetailsDb.getLanguageType().trim().length() < 2 || appDeviceDetailsDb.getOsType().isBlank()) {
             throw new UnprocessableEntityException(this.getClass().getName(), "provide mandatory field");
         }
-
     }
 
 }
@@ -110,5 +136,38 @@ public class CheckImeiController {  //sachin
             HttpHeaders responseHeaders = new HttpHeaders();
 
                 return new ResponseEntity<String>(result, responseHeaders,  genericModel.getHttpStatus());
+
+   // imei not present 
+        if (checkImeiRequest.getImei() == null || checkImeiRequest.getChannel() == null) {
+            logger.info("NullVals " + checkImeiRequest.getImei());
+            throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
+        }
+
+        //  "imei": "",
+        if (checkImeiRequest.getImei().isBlank() || checkImeiRequest.getChannel().isBlank()) {
+            logger.info("BlankVals " + checkImeiRequest.getImei());
+            throw new UnprocessableEntityException(this.getClass().getName(), "provide standardised value");
+        }
+
+        if (!Arrays.asList("web", "ussd", "sms", "phone", "app").contains(checkImeiRequest.getChannel().toLowerCase())) {
+            logger.info("Not contains " + checkImeiRequest.getChannel());
+            throw new UnprocessableEntityException(this.getClass().getName(), "provide standardised value");
+        }
+
+        if (checkImeiRequest.getImsi() != null && checkImeiRequest.getImsi().length() != 15) {
+            logger.info("imsi not 15 " + checkImeiRequest.getImsi());
+            throw new UnprocessableEntityException(this.getClass().getName(), "provide standardised value");
+        }
+
+        if ((checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getImsi() == null))
+                || (checkImeiRequest.getChannel().equalsIgnoreCase("sms") && checkImeiRequest.getMsisdn() == null)) {
+            throw new UnprocessableEntityException(this.getClass().getName(), "provide mandatory field");
+        }
+        if (checkImeiRequest.getImei().trim().length() < 1) {
+            throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
+        }
+
+
+
 
  */

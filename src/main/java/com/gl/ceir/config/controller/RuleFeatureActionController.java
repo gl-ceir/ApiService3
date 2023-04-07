@@ -5,7 +5,7 @@
  */
 package com.gl.ceir.config.controller;
 
-import com.gl.ceir.config.model.RuleFeatureActionMapping;
+import com.gl.ceir.config.model.app.RuleFeatureActionMapping;
 import com.gl.ceir.config.service.impl.RuleFeaturActionServiceImpl;
 import io.swagger.annotations.ApiOperation;
 import java.util.LinkedList;

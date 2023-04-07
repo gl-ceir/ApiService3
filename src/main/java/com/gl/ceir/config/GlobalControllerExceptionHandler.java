@@ -85,15 +85,17 @@ public class GlobalControllerExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(), "bad request", "parameter missing");
     }
 
+    
+    
     /* Custom Exceptions */
     
     
     
     @ExceptionHandler(value = MissingRequestParameterException.class)
-    public ResponseEntity<Object> exception(MissingServletRequestParameterException exception) {
+    public ResponseEntity<Object> exception(MissingRequestParameterException exception) {
         return new ResponseEntity<>(
                 new ExceptionResponse(
-                        HttpStatus.BAD_REQUEST.value(), "bad request", "en", "parameter missing"),
+                        HttpStatus.BAD_REQUEST.value(), "bad request", "en", exception.getMessage()),
                 HttpStatus.BAD_REQUEST);
     }
 

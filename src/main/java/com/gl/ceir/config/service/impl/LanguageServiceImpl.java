@@ -5,11 +5,11 @@
 package com.gl.ceir.config.service.impl;
 
 import com.gl.ceir.config.exceptions.InternalServicesException;
-import com.gl.ceir.config.repository.LanguageLabelDbRepository;
+import com.gl.ceir.config.repository.app.LanguageLabelDbRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.gl.ceir.config.model.LanguageResponse;
+import com.gl.ceir.config.model.app.LanguageResponse;
 import com.gl.ceir.config.model.constants.Alerts;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

@@ -6,8 +6,8 @@
 package com.gl.ceir.config.service.impl;
 
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.RuleFeatureActionMapping;
-import com.gl.ceir.config.repository.RuleFeaturActionServiceRepo;
+import com.gl.ceir.config.model.app.RuleFeatureActionMapping;
+import com.gl.ceir.config.repository.app.RuleFeaturActionServiceRepo;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

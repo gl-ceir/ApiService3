@@ -2,8 +2,8 @@ package com.gl.ceir.config.service;
 
 import java.util.List;
 
-import com.gl.ceir.config.model.DocumentStatus;
-import com.gl.ceir.config.model.Documents;
+import com.gl.ceir.config.model.app.DocumentStatus;
+import com.gl.ceir.config.model.app.Documents;
 
 public interface DocumentsService {
 	public Documents get(Long id);

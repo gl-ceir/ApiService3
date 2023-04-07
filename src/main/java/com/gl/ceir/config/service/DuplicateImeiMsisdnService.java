@@ -2,9 +2,9 @@ package com.gl.ceir.config.service;
 
 import java.util.List;
 
-import com.gl.ceir.config.model.DuplicateImeiMsisdn;
-import com.gl.ceir.config.model.ImeiMsisdnIdentity;
-import com.gl.ceir.config.model.PendingActions;
+import com.gl.ceir.config.model.app.DuplicateImeiMsisdn;
+import com.gl.ceir.config.model.app.ImeiMsisdnIdentity;
+import com.gl.ceir.config.model.app.PendingActions;
 
 public interface DuplicateImeiMsisdnService extends RestServices<DuplicateImeiMsisdn> {
 	public DuplicateImeiMsisdn get(ImeiMsisdnIdentity imeiMsisdnIdentity);

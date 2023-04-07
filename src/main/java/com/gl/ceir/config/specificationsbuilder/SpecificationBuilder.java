@@ -1,7 +1,7 @@
 package com.gl.ceir.config.specificationsbuilder;
 
-import com.gl.ceir.config.model.ReportDb;
-import com.gl.ceir.config.model.ScheduleReportDb;
+import com.gl.ceir.config.model.app.ReportDb;
+import com.gl.ceir.config.model.app.ScheduleReportDb;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +12,7 @@ import javax.persistence.criteria.Expression;
 import org.apache.log4j.Logger;
 import org.springframework.data.jpa.domain.Specification;
 
-import com.gl.ceir.config.model.SearchCriteria;
+import com.gl.ceir.config.model.app.SearchCriteria;
 import com.gl.ceir.config.model.constants.Datatype;
 import com.gl.ceir.config.model.constants.SearchOperation;
 import com.gl.ceir.config.util.DbFunctions;

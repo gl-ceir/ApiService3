@@ -20,25 +20,25 @@ import org.springframework.stereotype.Service;
 import com.gl.Rule_engine.RuleEngineApplication;
 import com.gl.ceir.config.configuration.ConnectionConfiguration;
 import com.gl.ceir.config.exceptions.InternalServicesException;
+import com.gl.ceir.config.exceptions.MissingRequestParameterException;
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.AppDeviceDetailsDb;
-import com.gl.ceir.config.model.CheckImeiRequest;
-import com.gl.ceir.config.model.Result;
-import com.gl.ceir.config.model.CheckImeiResponse;
-import com.gl.ceir.config.model.DeviceDetails;
-
-import com.gl.ceir.config.model.RuleEngineMapping;
-import com.gl.ceir.config.model.SystemConfigurationDb;
+import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
+import com.gl.ceir.config.model.app.CheckImeiRequest;
+import com.gl.ceir.config.model.app.Result;
+import com.gl.ceir.config.model.app.CheckImeiResponse;
+import com.gl.ceir.config.model.app.DeviceDetails;
+import com.gl.ceir.config.model.app.RuleEngineMapping;
+import com.gl.ceir.config.model.app.SystemConfigurationDb;
 import com.gl.ceir.config.model.constants.Alerts;
-import com.gl.ceir.config.repository.AuditTrailRepository;
-import com.gl.ceir.config.repository.CheckImeiRepository;
-import com.gl.ceir.config.repository.GsmaTacDetailsRepository;
-import com.gl.ceir.config.repository.SystemConfigurationDbRepository;
+import com.gl.ceir.config.repository.app.AuditTrailRepository;
+import com.gl.ceir.config.repository.app.CheckImeiRepository;
+import com.gl.ceir.config.repository.app.GsmaTacDetailsRepository;
+import com.gl.ceir.config.repository.app.SystemConfigurationDbRepository;
 import com.gl.ceir.config.model.constants.StatusMessage;
-import com.gl.ceir.config.repository.AppDeviceDetailsRepository;
-import com.gl.ceir.config.repository.CheckImeiRequestRepository;
+import com.gl.ceir.config.repository.app.AppDeviceDetailsRepository;
+import com.gl.ceir.config.repository.app.CheckImeiRequestRepository;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -178,11 +178,6 @@ public class CheckImeiServiceImpl {
         var isValidImei = false;
         var startTime = System.currentTimeMillis();
         logger.info("Start Time =" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
-        if ((checkImeiRequest.getImei() == null || checkImeiRequest.getImei().trim().length() < 1)
-                || (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getImsi() == null))
-                || (checkImeiRequest.getChannel().equalsIgnoreCase("sms") && checkImeiRequest.getMsisdn() == null)) {
-            throw new UnprocessableEntityException(this.getClass().getName(), "provide mandatory field");
-        }
         var ruleResponseStatus = checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
                 ? "CheckImeiPassForUssd" : "CheckImeiPass";
         var language = checkImeiRequest.getLanguage() == null ? "en" : checkImeiRequest.getLanguage();
@@ -235,10 +230,13 @@ public class CheckImeiServiceImpl {
     }
 
     private void saveCheckImeiRequest(CheckImeiRequest checkImeiRequest, long startTime) {
-        checkImeiRequest.setRequestProcessStatus(String.valueOf(System.currentTimeMillis() - startTime));
-        new Thread(() -> {
+        try {
+            checkImeiRequest.setRequestProcessStatus(String.valueOf(System.currentTimeMillis() - startTime));
             checkImeiRequestRepository.save(checkImeiRequest);
-        }).start();
+        } catch (Exception e) {
+            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1104.getName(), 0);
+            throw new InternalServicesException(this.getClass().getName(), "internal server error");
+        }
     }
 
     public void saveDeviceDetails(AppDeviceDetailsDb appDeviceDetailsDb) {
@@ -246,7 +244,7 @@ public class CheckImeiServiceImpl {
             appDeviceDetailsRepository.saveDetails(appDeviceDetailsDb.getOsType(), appDeviceDetailsDb.getDeviceId(), appDeviceDetailsDb.getDeviceDetails().toJSONString(), appDeviceDetailsDb.getLanguageType());
         } catch (Exception e) {
             alertServiceImpl.raiseAnAlert(Alerts.ALERT_1104.getName(), 0);
-            throw new InternalServicesException(this.getClass().getName(), "Something went wrong");
+            throw new InternalServicesException(this.getClass().getName(), "internal server error");
         }
     }
 

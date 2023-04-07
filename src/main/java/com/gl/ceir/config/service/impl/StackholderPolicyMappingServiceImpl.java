@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.GenricResponse;
-import com.gl.ceir.config.model.StackholderPolicyMapping;
-import com.gl.ceir.config.repository.StackholderPolicyMappingRepository;
+import com.gl.ceir.config.model.app.GenricResponse;
+import com.gl.ceir.config.model.app.StackholderPolicyMapping;
+import com.gl.ceir.config.repository.app.StackholderPolicyMappingRepository;
 
 @Service
 public class StackholderPolicyMappingServiceImpl {

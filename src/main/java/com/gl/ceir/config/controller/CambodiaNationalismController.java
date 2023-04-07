@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gl.ceir.config.model.ForeignerRequest;
-import com.gl.ceir.config.model.GenricResponse;
-import com.gl.ceir.config.model.NationalismImeiDetails;
-import com.gl.ceir.config.model.NationlismDetails;
+import com.gl.ceir.config.model.app.ForeignerRequest;
+import com.gl.ceir.config.model.app.GenricResponse;
+import com.gl.ceir.config.model.app.NationalismImeiDetails;
+import com.gl.ceir.config.model.app.NationlismDetails;
 import com.gl.ceir.config.service.impl.NationalislmServiceImpl;
 
 import io.swagger.annotations.ApiOperation;

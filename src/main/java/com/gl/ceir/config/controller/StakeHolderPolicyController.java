@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gl.ceir.config.model.StackholderPolicyMapping;
+import com.gl.ceir.config.model.app.StackholderPolicyMapping;
 import com.gl.ceir.config.service.impl.StackholderPolicyMappingServiceImpl;
 
 import io.swagger.annotations.ApiOperation;

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.NullMsisdnRegularized;
-import com.gl.ceir.config.repository.NullMsisdnRegularizedRepository;
+import com.gl.ceir.config.model.app.NullMsisdnRegularized;
+import com.gl.ceir.config.repository.app.NullMsisdnRegularizedRepository;
 import com.gl.ceir.config.service.NullMsisdnRegularizedService;
 
 @Service

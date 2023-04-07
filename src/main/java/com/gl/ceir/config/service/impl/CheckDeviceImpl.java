@@ -4,9 +4,9 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.gl.ceir.config.model.CheckDevice;
-import com.gl.ceir.config.model.CheckDeviceReponse;
-import com.gl.ceir.config.model.GenricResponse;
+import com.gl.ceir.config.model.app.CheckDevice;
+import com.gl.ceir.config.model.app.CheckDeviceReponse;
+import com.gl.ceir.config.model.app.GenricResponse;
 @Service
 public class CheckDeviceImpl {
 

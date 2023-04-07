@@ -5,11 +5,11 @@
  */
 package com.gl.ceir.config.controller;
 
-import com.gl.ceir.config.model.CheckImeiMess;
-import com.gl.ceir.config.model.FilterRequest;
-import com.gl.ceir.config.model.ReportDb;
-import com.gl.ceir.config.model.ScheduleReportDb;
-import com.gl.ceir.config.repository.ScheduleReportRepository;
+import com.gl.ceir.config.model.app.CheckImeiMess;
+import com.gl.ceir.config.model.app.FilterRequest;
+import com.gl.ceir.config.model.app.ReportDb;
+import com.gl.ceir.config.model.app.ScheduleReportDb;
+import com.gl.ceir.config.repository.app.ScheduleReportRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;

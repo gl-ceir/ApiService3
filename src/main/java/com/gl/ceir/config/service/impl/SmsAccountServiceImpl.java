@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.MobileOperator;
-import com.gl.ceir.config.model.SmsAccount;
-import com.gl.ceir.config.repository.SmsAccountRepository;
+import com.gl.ceir.config.model.app.MobileOperator;
+import com.gl.ceir.config.model.app.SmsAccount;
+import com.gl.ceir.config.repository.app.SmsAccountRepository;
 import com.gl.ceir.config.service.SmsAccountService;
 
 @Service

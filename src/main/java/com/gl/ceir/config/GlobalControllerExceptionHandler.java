@@ -95,7 +95,7 @@ public class GlobalControllerExceptionHandler {
     public ResponseEntity<Object> exception(MissingRequestParameterException exception) {
         return new ResponseEntity<>(
                 new ExceptionResponse(
-                        HttpStatus.BAD_REQUEST.value(), "bad request", "en", "parameter missing"),
+                        HttpStatus.BAD_REQUEST.value(), "bad request", "en", exception.getMessage()),
                 HttpStatus.BAD_REQUEST);
     }
 

@@ -28,9 +28,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 //
 
 
-@Table(name = "Rule_Feature_Action_Mapping")
+@Table(name = "feature_rule_action")
 @Entity
-public class RuleFeatureActionMapping implements Serializable {
+public class FeatureRuleAction implements Serializable {
 
      private static final long serialVersionUID = 1L;
 
@@ -49,7 +49,7 @@ public class RuleFeatureActionMapping implements Serializable {
 	@JsonFormat(pattern="yyyy-MM-dd HH:mm")
 	private LocalDateTime modifiedOn;
 
-     public RuleFeatureActionMapping(int id, String ruleName, String featureName, String actions, LocalDateTime createdOn, LocalDateTime modifiedOn) {
+     public FeatureRuleAction(int id, String ruleName, String featureName, String actions, LocalDateTime createdOn, LocalDateTime modifiedOn) {
           this.id = id;
           this.ruleName = ruleName;
           this.featureName = featureName;
@@ -59,7 +59,7 @@ public class RuleFeatureActionMapping implements Serializable {
      }
 
      
-     public RuleFeatureActionMapping() {
+     public FeatureRuleAction() {
      }
 
      public int getId() {

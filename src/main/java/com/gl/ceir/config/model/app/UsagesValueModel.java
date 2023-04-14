@@ -5,7 +5,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Table(name = "device_usage_db")
+
+
+@Table(name = "active_unique_imei")
 @Entity
 public class UsagesValueModel implements Serializable {
 

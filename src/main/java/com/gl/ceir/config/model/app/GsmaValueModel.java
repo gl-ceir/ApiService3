@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-@Table(name = "gsma_tac_db")
+@Table(name = "gsma_valid_tac")
 @Entity
 public class GsmaValueModel implements Serializable {
 

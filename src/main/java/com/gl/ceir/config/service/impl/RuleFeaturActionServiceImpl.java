@@ -6,7 +6,7 @@
 package com.gl.ceir.config.service.impl;
 
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.app.RuleFeatureActionMapping;
+import com.gl.ceir.config.model.app.FeatureRuleAction;
 import com.gl.ceir.config.repository.app.RuleFeaturActionServiceRepo;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class RuleFeaturActionServiceImpl {
           }
      }
 
-     public List<RuleFeatureActionMapping> getactionbyRuleFeature(String ruleName, String feature) {
+     public List<FeatureRuleAction> getactionbyRuleFeature(String ruleName, String feature) {
           try {
                logger.info("getactionbyRuleFeature " + ruleName + " :: " + feature);
                return ruleFeaturActionServiceRepo.getByFeatureNameAndRuleName(feature, ruleName);

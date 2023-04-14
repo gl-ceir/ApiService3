@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Table(name = "device_duplicate_db")
+@Table(name = "active_imei_with_different_msisdn")
 @Entity
 public class DuplicateValueModel implements Serializable {
 

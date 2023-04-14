@@ -5,7 +5,7 @@
  */
 package com.gl.ceir.config.repository.app;
  
-import com.gl.ceir.config.model.app.RuleFeatureActionMapping;
+import com.gl.ceir.config.model.app.FeatureRuleAction;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -19,16 +19,16 @@ import org.springframework.data.jpa.repository.Query;
 
 
 
-public  interface RuleFeaturActionServiceRepo extends JpaRepository<RuleFeatureActionMapping, Long>, JpaSpecificationExecutor<RuleFeatureActionMapping>  {
+public  interface RuleFeaturActionServiceRepo extends JpaRepository<FeatureRuleAction, Long>, JpaSpecificationExecutor<FeatureRuleAction>  {
 
  
-     @Query("select distinct featureName from RuleFeatureActionMapping where ruleName = ?1 ")
+     @Query("select distinct featureName from FeatureRuleAction where ruleName = ?1 ")
      public List<String> getByRuleName(String ruleName );
 
-     @Query("select distinct ruleName from RuleFeatureActionMapping where featureName = ?1 ")
+     @Query("select distinct ruleName from FeatureRuleAction where featureName = ?1 ")
      public List<String> getByFeatureName(String featureName);
 
-     public List<RuleFeatureActionMapping> getByFeatureNameAndRuleName(String featureName, String ruleName);
+     public List<FeatureRuleAction> getByFeatureNameAndRuleName(String featureName, String ruleName);
 
 
 

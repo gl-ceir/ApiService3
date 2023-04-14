@@ -1,8 +1,6 @@
 package com.gl.ceir.config.controller;
 
-import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.exceptions.MissingRequestParameterException;
-import com.gl.ceir.config.exceptions.ResourceServicesException;
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
 import org.apache.log4j.Logger;
@@ -19,16 +17,12 @@ import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 import com.gl.ceir.config.model.constants.LanguageFeatureName;
 
 import io.swagger.annotations.ApiOperation;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Optional;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 public class CheckImeiController {  //sachin
@@ -102,10 +96,10 @@ public class CheckImeiController {  //sachin
                 || (checkImeiRequest.getChannel().isBlank())
                 || (!Arrays.asList("web", "ussd", "sms", "phone", "app").contains(checkImeiRequest.getChannel().toLowerCase()))
                 || (checkImeiRequest.getImsi() != null && (checkImeiRequest.getImsi().length() != 15 || !(checkImeiRequest.getImsi().matches("[0-9]+"))))
-                || (checkImeiRequest.getMsisdn() != null && (checkImeiRequest.getMsisdn().trim().length() > 20 || !(checkImeiRequest.getMsisdn().matches("[0-9]+"))))
+                || (checkImeiRequest.getMsisdn() != null && (checkImeiRequest.getMsisdn().trim().length() > 20 || !(checkImeiRequest.getMsisdn().matches("[0-9 ]+"))))
                 || (checkImeiRequest.getLanguage() != null && checkImeiRequest.getLanguage().trim().length() > 2)
                 || (checkImeiRequest.getOperator() != null && checkImeiRequest.getOperator().trim().length() > 10)
-                || (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getImsi() == null || checkImeiRequest.getMsisdn().isBlank()))
+                || (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getImsi() == null || checkImeiRequest.getMsisdn().isBlank()  || checkImeiRequest.getImsi().length() != 15 || !checkImeiRequest.getImsi().matches("[0-9]+") ))
                 || (checkImeiRequest.getChannel().equalsIgnoreCase("sms") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getMsisdn().isBlank()))
                 ) {
             logger.info("Not allowed " + checkImeiRequest.getChannel());

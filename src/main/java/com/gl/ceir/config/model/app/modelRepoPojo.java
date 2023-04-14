@@ -9,9 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.CreationTimestamp;
 
-@Table(name = "model_name")
+@Table(name = "dev_model_name")
 @Entity
 public class modelRepoPojo implements Serializable {
 

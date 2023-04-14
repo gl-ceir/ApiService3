@@ -7,9 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.gl.ceir.config.exceptions.ResourceServicesException;
-import com.gl.ceir.config.model.app.BrandName;
+import com.gl.ceir.config.model.app.DevBrandName;
 import com.gl.ceir.config.repository.app.BrandRepository;
-import org.springframework.data.domain.Sort;
 
 @Service
 public class BrandServiceImpl {
@@ -19,10 +18,10 @@ public class BrandServiceImpl {
 
     private static final Logger logger = Logger.getLogger(BrandServiceImpl.class);
 
-    public List<BrandName> getAllBrands() {
+    public List<DevBrandName> getAllBrands() {
         try {
             logger.info("Going to get All Brand List ");
-            return brandRepository.findAll(Sort.by(Sort.Direction.ASC, "brandName"));
+            return brandRepository.findAll();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new ResourceServicesException(this.getClass().getName(), e.getMessage());

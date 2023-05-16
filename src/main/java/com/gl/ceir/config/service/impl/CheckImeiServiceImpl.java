@@ -7,7 +7,8 @@ import java.sql.SQLException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -17,7 +18,7 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.gl.Rule_engine.RuleEngineApplication;
+import com.gl.Rule_engine_Old.RuleEngineApplication;
 import com.gl.ceir.config.configuration.ConnectionConfiguration;
 import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.exceptions.MissingRequestParameterException;
@@ -52,7 +53,7 @@ import org.springframework.http.HttpStatus;
 @Service
 public class CheckImeiServiceImpl {
 
-    private static final Logger logger = Logger.getLogger(CheckImeiServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(CheckImeiServiceImpl.class);
 
     @Autowired
     CheckImeiRepository checkImeiRepository;
@@ -204,14 +205,14 @@ public class CheckImeiServiceImpl {
             if (ruleResponseStatus.contains("CheckImeiPass")) {
                 isValidImei = true;
                 var gsmaTacDetails = gsmaTacDetailsRepository
-                        .getByTac(checkImeiRequest.getImei().substring(0, 8));
+                        .getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
                 message = message
                         .replace("$brandName", gsmaTacDetails.getBrand_name())
-                        .replace("$modelName", gsmaTacDetails.getModelName())
+                        .replace("$modelName", gsmaTacDetails.getModel_name())
                         .replace("$deviceType", gsmaTacDetails.getDevice_type())
-                        .replace("$manufacturer", gsmaTacDetails.getDevice_type())
+                        .replace("$manufacturer", gsmaTacDetails.getManufacturer())
                         .replace("$marketingName", gsmaTacDetails.getMarketing_name());
-                deviceDetails = deviceDetails(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModelName(), gsmaTacDetails.getDevice_type(),
+                deviceDetails = deviceDetails(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(),
                         gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name());
             }
             logger.info("Response :" + deviceDetails);

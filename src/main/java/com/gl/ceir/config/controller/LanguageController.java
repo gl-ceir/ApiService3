@@ -5,7 +5,8 @@
 package com.gl.ceir.config.controller;
 
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 public class LanguageController {
 
-    private static final Logger logger = Logger.getLogger(LanguageController.class);
+    private static final Logger logger = LogManager.getLogger(LanguageController.class);
 
     @Autowired
     LanguageServiceImpl languageServiceImpl;

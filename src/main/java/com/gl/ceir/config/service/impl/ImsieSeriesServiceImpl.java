@@ -3,7 +3,8 @@ package com.gl.ceir.config.service.impl;
 import java.util.List;
 
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,7 @@ import com.gl.ceir.config.service.ImsieSeriesService;
 @Service
 public class ImsieSeriesServiceImpl implements ImsieSeriesService {
 
-	private static final Logger logger = Logger.getLogger(ImsieSeriesServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(ImsieSeriesServiceImpl.class);
 
 	@Autowired
 	private ImsieSeriesRepository imsieSeriesRepository;

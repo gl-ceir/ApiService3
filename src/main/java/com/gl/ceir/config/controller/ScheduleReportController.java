@@ -10,8 +10,8 @@ import com.gl.ceir.config.model.app.FilterRequest;
 import com.gl.ceir.config.model.app.ReportDb;
 import com.gl.ceir.config.model.app.ScheduleReportDb;
 import com.gl.ceir.config.repository.app.ScheduleReportRepository;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.RestController;
 import com.gl.ceir.config.service.ScheduleReportService;
@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 public class ScheduleReportController {
 
-    private static final Logger logger = Logger.getLogger(ScheduleReportController.class);
+    private static final Logger logger = LogManager.getLogger(ScheduleReportController.class);
 
     @Autowired
     ScheduleReportControllerImpl scheduleReportControllerImpl;

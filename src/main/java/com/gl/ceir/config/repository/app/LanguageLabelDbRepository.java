@@ -12,10 +12,10 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface LanguageLabelDbRepository extends JpaRepository<LanguageLabelDb, Long>, JpaSpecificationExecutor<LanguageLabelDb> {
 
-    @Query(value = "select JSON_OBJECTAGG(label, english_name) as labelDetails from app.label_mul_lingual_text where feature_name = :featureName", nativeQuery = true)
+    @Query(value = "select JSON_OBJECTAGG(label, english_name) as labelDetails from  label_mul_lingual_text where feature_name = :featureName", nativeQuery = true)
     public String getEnglishNameAndLabelFromFeatureName(String featureName);
 
-    @Query(value = "select JSON_OBJECTAGG(label, khmer_name  ) as labelDetails from app.label_mul_lingual_text where feature_name = :featureName", nativeQuery = true)
+    @Query(value = "select JSON_OBJECTAGG(label, khmer_name  ) as labelDetails from  label_mul_lingual_text where feature_name = :featureName", nativeQuery = true)
     public String getKhmerNameAndLabelFromFeatureName(String featureName);
 
 }

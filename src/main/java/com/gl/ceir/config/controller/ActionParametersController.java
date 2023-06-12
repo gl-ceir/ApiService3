@@ -60,8 +60,7 @@ public class ActionParametersController {
 	}
 
 	// @RequestMapping(path = "/ActionParameters/{id}", method = RequestMethod.PUT)
-	public MappingJacksonValue update(@PathVariable(value = "id") Long id,
-			@RequestBody ActionParameters actionParameters) {
+	public MappingJacksonValue update(@RequestBody ActionParameters actionParameters) {
 		ActionParameters updatedActionParameters = actionParametersService.update(actionParameters);
 		MappingJacksonValue mapping = new MappingJacksonValue(updatedActionParameters);
 		return mapping;

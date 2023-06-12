@@ -215,7 +215,7 @@ public class CheckImeiServiceImpl {
                 deviceDetails = deviceDetails(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(),
                         gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name());
             }
-            logger.info("Response :" + deviceDetails);
+            logger.info("Response via  mobileDeviceRepository :" + deviceDetails);
             checkImeiRequest.setImeiProcessStatus("Success");
             saveCheckImeiRequest(checkImeiRequest, startTime);
             return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()),

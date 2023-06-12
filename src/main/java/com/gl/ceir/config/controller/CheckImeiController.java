@@ -133,7 +133,10 @@ public class CheckImeiController {  //sachin
         if (appDeviceDetailsDb.getDeviceDetails() == null || appDeviceDetailsDb.getDeviceId() == null || appDeviceDetailsDb.getLanguageType() == null || appDeviceDetailsDb.getOsType() == null) {
             throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
         }
-        if (appDeviceDetailsDb.getDeviceId().isBlank() || appDeviceDetailsDb.getLanguageType().trim().length() < 2 || appDeviceDetailsDb.getOsType().isBlank()  || appDeviceDetailsDb.getDeviceId().trim().length() >25 ) {
+    if (appDeviceDetailsDb.getDeviceId().isBlank()
+        || appDeviceDetailsDb.getLanguageType().trim().length() < 2
+        || appDeviceDetailsDb.getOsType().isBlank()
+        || appDeviceDetailsDb.getDeviceId().trim().length() > 50) {
             throw new UnprocessableEntityException(this.getClass().getName(), "provide specified field value");
         }
     }
@@ -142,12 +145,12 @@ public class CheckImeiController {  //sachin
         if (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || (checkImeiRequest.getChannel().equalsIgnoreCase("sms"))) {
             var systemConfig = systemConfigListRepository.findByTagAndInterp("OPERATORS", checkImeiRequest.getOperator().toUpperCase());
             if (systemConfig == null) {
-                logger.warn("Operator Not allowed ");
+        logger.info("Operator Not allowed ");
                 throw new UnprocessableEntityException(this.getClass().getName(), "provide correct operator");
             }
             logger.info("Found operator with  value " + systemConfig.getValue());
             if (!Optional.ofNullable(request.getHeader("Authorization")).isPresent() || !request.getHeader("Authorization").startsWith("Basic ")) {
-                logger.warn("Rejected Due to  Authorization  Not Present");
+        logger.info("Rejected Due to  Authorization  Not Present");
                 throw new UnAuthorizationException(this.getClass().getName(), "access denied");
             }
             logger.info("Basic Authorization present " + request.getHeader("Authorization").substring(6));
@@ -156,11 +159,11 @@ public class CheckImeiController {  //sachin
                       logger.info("user:"+decodedString.split(":")[0]  + "pass:"+ decodedString.split(":")[1]);
                 var userValue = userRepository.getByUsernameAndPasswordAndParentId(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
                 if (userValue == null   || !userValue.getUsername().equals(decodedString.split(":")[0])   ||  !userValue.getPassword().equals(decodedString.split(":")[1])   ) {
-                    logger.warn("username password not match");
+          logger.info("username password not match");
                     throw new UnAuthorizationException(this.getClass().getName(), "access denied");
                 }
             } catch (Exception e) {
-                logger.warn("Authentication fail" + e);
+        logger.info("Authentication fail" + e);
                 throw new UnAuthorizationException(this.getClass().getName(), "access denied");
             }
         }

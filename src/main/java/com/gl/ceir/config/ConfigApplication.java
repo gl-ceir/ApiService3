@@ -12,6 +12,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableConfigurationProperties
@@ -22,6 +24,8 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan({"com.gl.ceir.config"})
 
 @EnableEncryptableProperties
+
+
 public class ConfigApplication {
 
     public static void main(String[] args) {

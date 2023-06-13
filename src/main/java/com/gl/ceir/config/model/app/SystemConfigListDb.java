@@ -13,8 +13,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.persistence.Table;
+
 
 @Entity
+@Table(name = "sys_param_list_value")
 public class SystemConfigListDb implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -33,11 +36,12 @@ public class SystemConfigListDb implements Serializable {
 	private Date modifiedOn;
 	
 	@JsonIgnore
-	private String tag;
 	
-	private Integer value;
+        String tag;
 	
-	private String interp;
+	 Integer value;
+	
+	 String interp;
 	
 	@Column(length = 10)
 	private String tagId;

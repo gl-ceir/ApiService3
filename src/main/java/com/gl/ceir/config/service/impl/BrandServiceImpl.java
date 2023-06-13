@@ -2,7 +2,8 @@ package com.gl.ceir.config.service.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ public class BrandServiceImpl {
     @Autowired
     private BrandRepository brandRepository;
 
-    private static final Logger logger = Logger.getLogger(BrandServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(BrandServiceImpl.class);
 
     public List<DevBrandName> getAllBrands() {
         try {

@@ -11,7 +11,8 @@ import com.gl.ceir.config.repository.app.RuleFeaturActionServiceRepo;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -22,7 +23,7 @@ import org.apache.log4j.Logger;
 @Service
 public class RuleFeaturActionServiceImpl {
 
-     private static final Logger logger = Logger.getLogger(RuleFeaturActionServiceImpl.class);
+     private static final Logger logger = LogManager.getLogger(RuleFeaturActionServiceImpl.class);
 
      @Autowired
      RuleFeaturActionServiceRepo ruleFeaturActionServiceRepo;

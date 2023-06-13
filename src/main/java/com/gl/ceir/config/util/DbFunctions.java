@@ -3,11 +3,12 @@ package com.gl.ceir.config.util;
 import java.util.Objects;
 
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DbFunctions {
 
-	private static final Logger logger = Logger.getLogger(DbFunctions.class);
+	private static final Logger logger = LogManager.getLogger(DbFunctions.class);
 
 	private static String dateFunction;
 	private static String dateFormat;

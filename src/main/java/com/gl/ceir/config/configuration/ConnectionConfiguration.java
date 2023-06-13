@@ -13,8 +13,8 @@ import java.sql.SQLException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import org.apache.log4j.Logger;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.stereotype.Repository;
 
@@ -23,7 +23,7 @@ public class ConnectionConfiguration {
 
     @PersistenceContext
     private EntityManager em;
-    private static final Logger logger = Logger.getLogger(ConnectionConfiguration.class);
+    private static final Logger logger = LogManager.getLogger(ConnectionConfiguration.class);
 
     public Connection getConnection() {
         try {

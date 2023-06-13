@@ -6,7 +6,8 @@ import java.util.List;
 import javax.persistence.criteria.Expression;
 
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.gl.ceir.config.model.app.FileDumpMgmt;
@@ -17,7 +18,7 @@ import com.gl.ceir.config.model.constants.SearchOperation;
 import com.gl.ceir.config.util.DbFunctions;
 
 public class FileDumpSpecificationBuilder {
-	private static final Logger logger = Logger.getLogger(FileDumpSpecificationBuilder.class);
+	private static final Logger logger = LogManager.getLogger(FileDumpSpecificationBuilder.class);
 
 	private final List<SearchCriteria> params;
 	private final List<SearchCriteria> searchParams;

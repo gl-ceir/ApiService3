@@ -11,6 +11,7 @@ import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.exceptions.MissingRequestParameterException;
 import com.gl.ceir.config.exceptions.MyFileNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
+import com.gl.ceir.config.exceptions.UnAuthorizationException;
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,12 +86,15 @@ public class GlobalControllerExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(), "bad request", "parameter missing");
     }
 
-    
-    
     /* Custom Exceptions */
-    
-    
-    
+    @ExceptionHandler(value = UnAuthorizationException.class)
+    public ResponseEntity<Object> exception(UnAuthorizationException exception) {
+        return new ResponseEntity<>(
+                new ExceptionResponse(
+                        HttpStatus.UNAUTHORIZED.value(), "unauthorized", "en", exception.getMessage()),
+                HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(value = MissingRequestParameterException.class)
     public ResponseEntity<Object> exception(MissingRequestParameterException exception) {
         return new ResponseEntity<>(

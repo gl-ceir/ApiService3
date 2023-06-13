@@ -98,12 +98,12 @@
             <type>jar</type>
         </dependency>
          
-        <dependency>
-            <groupId>com.gl</groupId>
-            <artifactId>Rule_engine</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.gl</groupId>-->
+<!--            <artifactId>Rule_engine</artifactId>-->
+<!--            <version>0.0.1-SNAPSHOT</version>-->
+<!--            <type>jar</type>-->
+<!--        </dependency>-->
          
       
         

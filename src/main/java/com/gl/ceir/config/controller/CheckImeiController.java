@@ -95,15 +95,13 @@ public class CheckImeiController {  //sachin
 
     @ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
     @PostMapping("services/checkIMEI")
-    public ResponseEntity<MappingJacksonValue> checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
+    public ResponseEntity checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
         errorValidationChecker(checkImeiRequest);
         authorizationChecker(checkImeiRequest);
         logger.info("Going for values ");
         var value = checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest);
         logger.info("Request = " + checkImeiRequest.toString() + " ; Response =" + value);
-        return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY)
-                .body(new MappingJacksonValue(value));
-
+        return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(new MappingJacksonValue(value));
     }
 
     void errorValidationChecker(CheckImeiRequest checkImeiRequest) {

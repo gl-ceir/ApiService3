@@ -21,15 +21,12 @@ import org.springframework.stereotype.Service;
 import com.gl.Rule_engine_Old.RuleEngineApplication;
 import com.gl.ceir.config.configuration.ConnectionConfiguration;
 import com.gl.ceir.config.exceptions.InternalServicesException;
-import com.gl.ceir.config.exceptions.MissingRequestParameterException;
-import com.gl.ceir.config.exceptions.UnprocessableEntityException;
-
 import com.gl.ceir.config.exceptions.ResourceServicesException;
 import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
 import com.gl.ceir.config.model.app.CheckImeiRequest;
 import com.gl.ceir.config.model.app.Result;
 import com.gl.ceir.config.model.app.CheckImeiResponse;
-import com.gl.ceir.config.model.app.DeviceDetails;
+import com.gl.ceir.config.model.app.Notification;
 import com.gl.ceir.config.model.app.RuleEngineMapping;
 import com.gl.ceir.config.model.app.SystemConfigurationDb;
 import com.gl.ceir.config.model.constants.Alerts;
@@ -41,8 +38,16 @@ import com.gl.ceir.config.model.constants.StatusMessage;
 import com.gl.ceir.config.repository.app.AppDeviceDetailsRepository;
 import com.gl.ceir.config.repository.app.CheckImeiRequestRepository;
 import com.gl.ceir.config.repository.app.LanguageLabelDbRepository;
+import com.gl.ceir.config.repository.app.OperatorSeriesRepository;
 import com.google.gson.Gson;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -53,6 +58,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 //import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
+import com.google.gson.Gson;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
 @Service
@@ -89,6 +96,12 @@ public class CheckImeiServiceImpl {
 
     @Autowired
     LanguageLabelDbRepository languageLabelDbRepository;
+
+    @Autowired
+    OperatorSeriesRepository operatorSeriesRepository;
+
+    @Value("${local-ip}")
+    public String localIp;
 
     public String getResult(String user_type, String feature, String imei, Long imei_type) {
         String rulePass = "true";
@@ -231,19 +244,17 @@ public class CheckImeiServiceImpl {
                     break;
                 }
             }
-            logger.debug("Rule Status :" + ruleResponseStatus);
+            logger.info("Rule Status :" + ruleResponseStatus);
             SystemConfigurationDb systemConfigurationDb
                     = systemConfigurationDbRepository.getByTagAndTypeAndFeatureName(
                             ruleResponseStatus, language.contains("kh") ? 2 : 1, "CheckImei");
             var message = systemConfigurationDb.getValue().replace("$imei", checkImeiRequest.getImei());
-            logger.debug("Message :" + systemConfigurationDb.getValue());
+            logger.info("Message :" + systemConfigurationDb.getValue());
+            LinkedHashMap<String, String> linkedMap = null;
             if (ruleResponseStatus.contains("CheckImeiPass")) {
                 isValidImei = true;
-                var gsmaTacDetails
-                        = gsmaTacDetailsRepository.getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
-                message
-                        = message
-                                .replace("$brandName", gsmaTacDetails.getBrand_name())
+                var gsmaTacDetails = gsmaTacDetailsRepository.getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
+                message = message                                .replace("$brandName", gsmaTacDetails.getBrand_name())
                                 .replace("$modelName", gsmaTacDetails.getModel_name())
                                 .replace("$deviceType", gsmaTacDetails.getDevice_type())
                                 .replace("$manufacturer", gsmaTacDetails.getManufacturer())
@@ -256,14 +267,18 @@ public class CheckImeiServiceImpl {
                                 gsmaTacDetails.getManufacturer(),
                                 gsmaTacDetails.getMarketing_name(),
                                 language);
+                linkedMap = new Gson().fromJson(deviceDetails.toString(), LinkedHashMap.class);
             }
             logger.info("Response via  mobileDeviceRepository :" + deviceDetails);
-            LinkedHashMap<String, String> yourlinkedMap = new Gson().fromJson(deviceDetails.toString(), LinkedHashMap.class);
-            var result = new Result(isValidImei, message, yourlinkedMap);
+            var result = new Result(isValidImei, message, deviceDetails == null ? null : linkedMap);
             checkImeiRequest.setRequestProcessStatus("Success");
             checkImeiRequest.setImeiProcessStatus(isValidImei == true ? "Valid" : "Invalid");
             logger.info("Response for semi result :" + result);
             saveCheckImeiRequest(checkImeiRequest, startTime);
+            if (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && systemConfigurationDbRepository.getByTag("send_sms_flag").getValue().equalsIgnoreCase("true")) {
+                logger.info("Going for ussd and send_sms_flag true  ");
+                createPostRequestForNotification(checkImeiRequest, result);
+            }
             return new CheckImeiResponse(
                     String.valueOf(HttpStatus.OK.value()),
                     StatusMessage.FOUND.getName(),
@@ -320,6 +335,59 @@ public class CheckImeiServiceImpl {
         item.put(lang.equals("en") ? "Marketing Name" : languageLabelDbRepository.getKhmerNameFromLabel("marketingName"), marketing_name);
         item.put(lang.equals("en") ? "Device Type" : languageLabelDbRepository.getKhmerNameFromLabel("deviceType"), device_type);
         return item;
+    }
+
+    private void createPostRequestForNotification(CheckImeiRequest checkImeiRequest, Result result) {
+        var notification = new Notification("SMS", result.getMessage(), "CheckImei", 0, 0, checkImeiRequest.getMsisdn(),
+                checkImeiRequest.getOperator(), checkImeiRequest.getLanguage(), checkImeiRequest.getOperator());
+        Gson gson = new Gson();
+        String body = gson.toJson(notification, Notification.class);
+        sendPostForSmsNotification(body);
+    }
+
+    private String sendPostForSmsNotification(String body) {
+        String url = systemConfigurationDbRepository.getByTag("notificationTableUrl")
+                .getValue()
+                .replace("{localIp}", localIp);
+        StringBuffer response = new StringBuffer();
+        logger.info("POST  Start Url-> " + url + " ;Body->" + body);
+        try {
+            URL obj = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Accept", "application/json");
+            con.setRequestMethod("POST");
+            // For POST only - START
+            con.setDoOutput(true);
+            OutputStream os = con.getOutputStream();
+            byte[] input = body.getBytes("utf-8");
+            os.write(input, 0, input.length);
+            os.flush();
+            os.close();
+            // For POST only - END
+            int responseCode = con.getResponseCode();
+            logger.info("POST Response Code :: " + responseCode);
+            if (responseCode == HttpURLConnection.HTTP_OK) { //success
+                BufferedReader in = new BufferedReader(new InputStreamReader(
+                        con.getInputStream()));
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+                // print result
+                logger.info(response.toString());
+            } else {
+                logger.info("POST request not worked");
+                alertServiceImpl.raiseAnAlert(Alerts.ALERT_1107.getName(), 0);
+
+            }
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+
+        return response.toString();
+
     }
 
 }

@@ -15,20 +15,17 @@ import com.gl.ceir.config.model.app.CheckImeiValuesEntity;
 import com.gl.ceir.config.model.app.CheckImeiMess;
 import com.gl.ceir.config.model.app.CheckImeiRequest;
 import com.gl.ceir.config.model.app.CheckImeiResponse;
-import com.gl.ceir.config.model.app.SystemConfigListDb;
 import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
 import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 import com.gl.ceir.config.model.constants.LanguageFeatureName;
 import com.gl.ceir.config.repository.app.SystemConfigListRepository;
+import com.gl.ceir.config.repository.app.SystemConfigurationDbRepository;
 import com.gl.ceir.config.repository.app.UserRepository;
 
 import io.swagger.annotations.ApiOperation;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -55,6 +52,10 @@ public class CheckImeiController {  //sachin
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    SystemConfigurationDbRepository systemConfigurationDbRepository;
+
 
     @PostMapping(path = "cc/CheckImeI")
     public MappingJacksonValue CheckImeiValues(@RequestBody CheckImeiValuesEntity checkImeiValuesEntity) {
@@ -131,10 +132,10 @@ public class CheckImeiController {  //sachin
         if (appDeviceDetailsDb.getDeviceDetails() == null || appDeviceDetailsDb.getDeviceId() == null || appDeviceDetailsDb.getLanguageType() == null || appDeviceDetailsDb.getOsType() == null) {
             throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
         }
-    if (appDeviceDetailsDb.getDeviceId().isBlank()
-        || appDeviceDetailsDb.getLanguageType().trim().length() < 2
-        || appDeviceDetailsDb.getOsType().isBlank()
-        || appDeviceDetailsDb.getDeviceId().trim().length() > 50) {
+        if (appDeviceDetailsDb.getDeviceId().isBlank()
+                || appDeviceDetailsDb.getLanguageType().trim().length() < 2
+                || appDeviceDetailsDb.getOsType().isBlank()
+                || appDeviceDetailsDb.getDeviceId().trim().length() > 50) {
             throw new UnprocessableEntityException(this.getClass().getName(), "provide specified field value");
         }
     }
@@ -143,25 +144,25 @@ public class CheckImeiController {  //sachin
         if (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || (checkImeiRequest.getChannel().equalsIgnoreCase("sms"))) {
             var systemConfig = systemConfigListRepository.findByTagAndInterp("OPERATORS", checkImeiRequest.getOperator().toUpperCase());
             if (systemConfig == null) {
-        logger.info("Operator Not allowed ");
+                logger.info("Operator Not allowed ");
                 throw new UnprocessableEntityException(this.getClass().getName(), "provide correct operator");
             }
             logger.info("Found operator with  value " + systemConfig.getValue());
             if (!Optional.ofNullable(request.getHeader("Authorization")).isPresent() || !request.getHeader("Authorization").startsWith("Basic ")) {
-        logger.info("Rejected Due to  Authorization  Not Present");
+                logger.info("Rejected Due to  Authorization  Not Present");
                 throw new UnAuthorizationException(this.getClass().getName(), "access denied");
             }
             logger.info("Basic Authorization present " + request.getHeader("Authorization").substring(6));
             try {
                 var decodedString = new String(Base64.getDecoder().decode(request.getHeader("Authorization").substring(6)));
-                      logger.info("user:"+decodedString.split(":")[0]  + "pass:"+ decodedString.split(":")[1]);
+                logger.info("user:" + decodedString.split(":")[0] + "pass:" + decodedString.split(":")[1]);
                 var userValue = userRepository.getByUsernameAndPasswordAndParentId(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
-                if (userValue == null   || !userValue.getUsername().equals(decodedString.split(":")[0])   ||  !userValue.getPassword().equals(decodedString.split(":")[1])   ) {
-          logger.info("username password not match");
+                if (userValue == null || !userValue.getUsername().equals(decodedString.split(":")[0]) || !userValue.getPassword().equals(decodedString.split(":")[1])) {
+                    logger.info("username password not match");
                     throw new UnAuthorizationException(this.getClass().getName(), "access denied");
                 }
             } catch (Exception e) {
-        logger.info("Authentication fail" + e);
+                logger.info("Authentication fail" + e);
                 throw new UnAuthorizationException(this.getClass().getName(), "access denied");
             }
         }

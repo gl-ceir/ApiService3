@@ -20,7 +20,6 @@ public class GsmaTacDetails implements Serializable {
     @Id
     private int id;
     private String deviceId;
-
     private String brand_name;
     private String model_name;
     private String device_type;

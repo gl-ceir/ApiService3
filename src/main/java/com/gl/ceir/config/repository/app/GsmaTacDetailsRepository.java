@@ -6,8 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.gl.ceir.config.model.app.GsmaTacDetails;
 
 
-public interface GsmaTacDetailsRepository
-        extends JpaRepository<GsmaTacDetails, Long>, JpaSpecificationExecutor<GsmaTacDetails> {
+public interface GsmaTacDetailsRepository extends JpaRepository<GsmaTacDetails, Long>, JpaSpecificationExecutor<GsmaTacDetails> {
 
     public GsmaTacDetails getBydeviceId(String tac);
 

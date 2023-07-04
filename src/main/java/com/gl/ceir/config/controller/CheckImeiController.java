@@ -15,6 +15,7 @@ import com.gl.ceir.config.model.app.CheckImeiValuesEntity;
 import com.gl.ceir.config.model.app.CheckImeiMess;
 import com.gl.ceir.config.model.app.CheckImeiRequest;
 import com.gl.ceir.config.model.app.CheckImeiResponse;
+import com.gl.ceir.config.model.app.DeviceidBaseUrlDb;
 import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
 import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 import com.gl.ceir.config.model.constants.LanguageFeatureName;
@@ -32,6 +33,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 public class CheckImeiController {  //sachin
@@ -57,30 +61,38 @@ public class CheckImeiController {  //sachin
     SystemConfigurationDbRepository systemConfigurationDbRepository;
 
 
-    @PostMapping(path = "cc/CheckImeI")
-    public MappingJacksonValue CheckImeiValues(@RequestBody CheckImeiValuesEntity checkImeiValuesEntity) {
-        String user_type = checkImeiValuesEntity.getUser_type().trim();
-        String feature = checkImeiValuesEntity.getFeature().trim().replaceAll(" ", "");
-        String imei = checkImeiValuesEntity.getImei();
-        Long imei_type = checkImeiValuesEntity.getImei_type();
-        logger.info("Feature   " + feature + user_type);
-        logger.info("UsrType   " + user_type);
-        logger.info("Imei_type (devIdType)   " + imei_type);
-        logger.info("Imei   " + imei);
-        CheckImeiMess cImsg = new CheckImeiMess();
-        MappingJacksonValue mapping = null;
-        String rulePass = checkImeiServiceImpl.getResult(user_type, feature, imei, imei_type);
-        logger.info("rulePass Value =" + rulePass);
-        if (rulePass.equalsIgnoreCase("true")) {
-            cImsg.setErrorMessage("NA");
-            cImsg.setStatus("Pass");
-            cImsg.setDeviceId(imei.substring(0, 8));
-        } else {
-            cImsg.setErrorMessage(rulePass);
-            cImsg.setStatus("Fail");
-            cImsg.setDeviceId(imei.substring(0, 8));
-        }
-        mapping = new MappingJacksonValue(cImsg);
+//    @PostMapping(path = "cc/CheckImeI")
+//    public MappingJacksonValue CheckImeiValues(@RequestBody CheckImeiValuesEntity checkImeiValuesEntity) {
+//        String user_type = checkImeiValuesEntity.getUser_type().trim();
+//        String feature = checkImeiValuesEntity.getFeature().trim().replaceAll(" ", "");
+//        String imei = checkImeiValuesEntity.getImei();
+//        Long imei_type = checkImeiValuesEntity.getImei_type();
+//        logger.info("Feature   " + feature + user_type);
+//        logger.info("UsrType   " + user_type);
+//        logger.info("Imei_type (devIdType)   " + imei_type);
+//        logger.info("Imei   " + imei);
+//        CheckImeiMess cImsg = new CheckImeiMess();
+//        MappingJacksonValue mapping = null;
+//        String rulePass = checkImeiServiceImpl.getResult(user_type, feature, imei, imei_type);
+//        logger.info("rulePass Value =" + rulePass);
+//        if (rulePass.equalsIgnoreCase("true")) {
+//            cImsg.setErrorMessage("NA");
+//            cImsg.setStatus("Pass");
+//            cImsg.setDeviceId(imei.substring(0, 8));
+//        } else {
+//            cImsg.setErrorMessage(rulePass);
+//            cImsg.setStatus("Fail");
+//            cImsg.setDeviceId(imei.substring(0, 8));
+//        }
+//        mapping = new MappingJacksonValue(cImsg);
+//        return mapping;
+//    }
+
+    @ApiOperation(value = "Pre Init Api to get  Server", response = DeviceidBaseUrlDb.class)
+    @RequestMapping(path = "service/preInit", method = RequestMethod.GET)
+    public MappingJacksonValue getPreInit(@RequestParam("deviceId") String deviceId) {
+        MappingJacksonValue mapping = new MappingJacksonValue(checkImeiServiceImpl.getPreinitApi(deviceId));
+        logger.info("Response of View =" + mapping);
         return mapping;
     }
 
@@ -101,7 +113,7 @@ public class CheckImeiController {  //sachin
         authorizationChecker(checkImeiRequest);
         logger.info("Going for values ");
         var value = checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest);
-        logger.info("Request = " + checkImeiRequest.toString() + " ; Response =" + value);
+        logger.info("Request = " + checkImeiRequest.toString() + " ; Response =" + value.toString());
         return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(new MappingJacksonValue(value));
     }
 

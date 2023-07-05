@@ -120,11 +120,12 @@ public class CheckImeiController {  //sachin
     void errorValidationChecker(CheckImeiRequest checkImeiRequest) {
         logger.info(checkImeiRequest.toString());
         // imei not present 
-        if (checkImeiRequest.getImei() == null || checkImeiRequest.getChannel() == null) {
+        if (checkImeiRequest.getImei() == null || checkImeiRequest.getChannel() == null || checkImeiRequest.getUtm_source() == null) {
             logger.info("Null Values " + checkImeiRequest.getImei());
             throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
         }
         if (checkImeiRequest.getImei().isBlank()
+                || (checkImeiRequest.getUtm_source().isBlank())
                 || (checkImeiRequest.getChannel().isBlank())
                 || (!Arrays.asList("web", "ussd", "sms", "phone", "app").contains(checkImeiRequest.getChannel().toLowerCase()))
                 || (checkImeiRequest.getImsi() != null && (checkImeiRequest.getImsi().length() != 15 || !(checkImeiRequest.getImsi().matches("[0-9]+"))))

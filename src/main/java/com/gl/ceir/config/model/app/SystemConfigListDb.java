@@ -40,7 +40,8 @@ public class SystemConfigListDb implements Serializable {
         String tag;
 	
 	 Integer value;
-	
+
+    @Column(name = "interpretation")
 	 String interp;
 	
 	@Column(length = 10)

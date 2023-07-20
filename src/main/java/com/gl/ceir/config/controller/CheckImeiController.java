@@ -7,6 +7,7 @@ import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -115,6 +116,20 @@ public class CheckImeiController {  //sachin
         return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.name(), appDeviceDetailsDb.getLanguageType()));
     }
 
+    void errorValidationChecker(AppDeviceDetailsDb appDeviceDetailsDb) {
+        logger.info(appDeviceDetailsDb.toString());
+        if (appDeviceDetailsDb.getDeviceDetails() == null || appDeviceDetailsDb.getDeviceId() == null || appDeviceDetailsDb.getLanguageType() == null || appDeviceDetailsDb.getOsType() == null) {
+            throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
+        }
+        if (appDeviceDetailsDb.getDeviceId().isBlank()
+                || appDeviceDetailsDb.getLanguageType().trim().length() < 2
+                || appDeviceDetailsDb.getOsType().isBlank()
+                || appDeviceDetailsDb.getDeviceId().trim().length() > 50) {
+            throw new UnprocessableEntityException(this.getClass().getName(), "provide specified field value");
+        }
+    }
+
+    /*  *******************************  */
     @ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
     @PostMapping("services/checkIMEI")
     public ResponseEntity checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
@@ -136,9 +151,14 @@ public class CheckImeiController {  //sachin
         logger.info("user-agent " + request.getHeader("user-agent"));
         checkImeiRequest.setHeader_browser(request.getHeader("user-agent"));
         checkImeiRequest.setHeader_public_ip(userIp);
+
+        var language = checkImeiRequest.getLanguage() == null ? "en"
+                : checkImeiRequest.getLanguage().equalsIgnoreCase("kh") ? "kh" : "en";
+        checkImeiRequest.setLanguage(language);    // needs refactoring
         errorValidationChecker(checkImeiRequest);
         authorizationChecker(checkImeiRequest);
         logger.info("Going for values ");
+
         var value = checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest);
         logger.info("Request = " + checkImeiRequest.toString() + " ; Response =" + value.toString());
         return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(new MappingJacksonValue(value));
@@ -148,7 +168,7 @@ public class CheckImeiController {  //sachin
         logger.info(checkImeiRequest.toString());
         if (checkImeiRequest.getImei() == null || checkImeiRequest.getChannel() == null) {
             logger.info("Null Values " + checkImeiRequest.getImei());
-            throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
+            throw new MissingRequestParameterException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
         }
         if (checkImeiRequest.getImei().isBlank()
                 || (checkImeiRequest.getChannel().isBlank())
@@ -156,24 +176,11 @@ public class CheckImeiController {  //sachin
                 || (checkImeiRequest.getImsi() != null && (checkImeiRequest.getImsi().length() != 15 || !(checkImeiRequest.getImsi().matches("[0-9]+"))))
                 || (checkImeiRequest.getMsisdn() != null && (checkImeiRequest.getMsisdn().trim().length() > 20 || !(checkImeiRequest.getMsisdn().matches("[0-9 ]+"))))
                 || (checkImeiRequest.getLanguage() != null && checkImeiRequest.getLanguage().trim().length() > 2)
-                || (checkImeiRequest.getOperator() != null && checkImeiRequest.getOperator().trim().length() > 10)
+                || (checkImeiRequest.getOperator() != null && checkImeiRequest.getOperator().trim().length() > 20)
                 || (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getImsi() == null || checkImeiRequest.getOperator() == null || checkImeiRequest.getOperator().isBlank() || checkImeiRequest.getMsisdn().isBlank() || checkImeiRequest.getImsi().length() != 15 || !checkImeiRequest.getImsi().matches("[0-9]+")))
                 || (checkImeiRequest.getChannel().equalsIgnoreCase("sms") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getMsisdn().isBlank() || checkImeiRequest.getOperator() == null || checkImeiRequest.getOperator().isBlank()))) {
             logger.info("Not allowed " + checkImeiRequest.getChannel());
-            throw new UnprocessableEntityException(this.getClass().getName(), "provide mandatory field");
-        }
-    }
-
-    void errorValidationChecker(AppDeviceDetailsDb appDeviceDetailsDb) {
-        logger.info(appDeviceDetailsDb.toString());
-        if (appDeviceDetailsDb.getDeviceDetails() == null || appDeviceDetailsDb.getDeviceId() == null || appDeviceDetailsDb.getLanguageType() == null || appDeviceDetailsDb.getOsType() == null) {
-            throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
-        }
-        if (appDeviceDetailsDb.getDeviceId().isBlank()
-                || appDeviceDetailsDb.getLanguageType().trim().length() < 2
-                || appDeviceDetailsDb.getOsType().isBlank()
-                || appDeviceDetailsDb.getDeviceId().trim().length() > 50) {
-            throw new UnprocessableEntityException(this.getClass().getName(), "provide specified field value");
+            throw new UnprocessableEntityException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
         }
     }
 
@@ -181,15 +188,15 @@ public class CheckImeiController {  //sachin
         if (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || (checkImeiRequest.getChannel().equalsIgnoreCase("sms"))) {
             if (!Optional.ofNullable(request.getHeader("Authorization")).isPresent() || !request.getHeader("Authorization").startsWith("Basic ")) {
                 logger.info("Rejected Due to  Authorization  Not Present");
-                throw new UnAuthorizationException(this.getClass().getName(), "access denied");
+                throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
             }
             logger.info("Basic Authorization present " + request.getHeader("Authorization").substring(6));
             try {
-            var systemConfig = systemConfigListRepository.findByTagAndInterp("OPERATORS", checkImeiRequest.getOperator().toUpperCase());
-            if (systemConfig == null) {
-                logger.info("Operator Not allowed ");
-                throw new UnprocessableEntityException(this.getClass().getName(), "provide correct operator");
-            }
+                var systemConfig = systemConfigListRepository.findByTagAndInterp("OPERATORS", checkImeiRequest.getOperator().toUpperCase());
+                if (systemConfig == null) {
+                    logger.info("Operator Not allowed ");
+                    throw new UnprocessableEntityException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+                }
                 logger.info("Found operator with  value " + systemConfig.getValue());
                 var decodedString = new String(Base64.getDecoder().decode(request.getHeader("Authorization").substring(6)));
                 logger.info("user:" + decodedString.split(":")[0] + "pass:" + decodedString.split(":")[1]);
@@ -198,33 +205,35 @@ public class CheckImeiController {  //sachin
                         .getByUsernameAndPasswordAndParentId(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
                 if (userValue == null || !userValue.getUsername().equals(decodedString.split(":")[0]) || !userValue.getPassword().equals(decodedString.split(":")[1])) {
                     logger.info("username password not match");
-                    throw new UnAuthorizationException(this.getClass().getName(), "access denied");
+                    throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
                 }
-                var checkimeiFeatureType = systemConfigurationDbRepository.getByTag("CHECK_IMEI_FEATURE_ID").getValue();
-                FeatureIpAccessList featureIpAccessList = featureIpAccessListRepository.getByFeatureId(checkimeiFeatureType);
-                logger.info(" data in featureIpAccessList  " + featureIpAccessList);
-                if (featureIpAccessList == null) {
-                    throw new UnAuthorizationException(this.getClass().getName(), "access denied");
-                }
-                if (featureIpAccessList.getTypeOfCheck() == 1) {
-                    if (!featureIpAccessList.getIpAddress().contains(checkImeiRequest.getPublic_ip())) {
-                        logger.info("Type Check 1 But Ip not allowed ");
-                        throw new UnAuthorizationException(this.getClass().getName(), "access denied");
-                    }
-                } else {
-                    logger.info("Type Check 2 with featureid  " + featureIpAccessList.getFeatureIpListId() + " And User id " + userValue.getId());
-                    UserFeatureIpAccessList userFeatureIpAccessList = userFeatureIpAccessListRepository.getByFeatureIpListIdAndUserId(featureIpAccessList.getFeatureIpListId(), userValue.getId());
-                    logger.info("Response from  UserFeatureIpAccessList " + userFeatureIpAccessList);
-                    if (userFeatureIpAccessList == null || !(userFeatureIpAccessList.getIpAddress().contains(checkImeiRequest.getPublic_ip()))) {
-                        logger.info("Type Check 2 But Ip not allowed ");
-                        throw new UnAuthorizationException(this.getClass().getName(), "access denied");
-                    }
 
+                if (systemConfigurationDbRepository.getByTag("CHECK_IMEI_AUTH_WITH_IP").getValue().equalsIgnoreCase("true")) {
+                    var checkimeiFeatureType = systemConfigurationDbRepository.getByTag("CHECK_IMEI_FEATURE_ID").getValue();
+                    FeatureIpAccessList featureIpAccessList = featureIpAccessListRepository.getByFeatureId(checkimeiFeatureType);
+                    logger.info(" data in featureIpAccessList  " + featureIpAccessList);
+                    if (featureIpAccessList == null) {
+                        throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+                    }
+                    if (featureIpAccessList.getTypeOfCheck() == 1) {
+                        if (!featureIpAccessList.getIpAddress().contains(checkImeiRequest.getPublic_ip())) {
+                            logger.info("Type Check 1 But Ip not allowed ");
+                            throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+                        }
+                    } else {
+                        logger.info("Type Check 2 with featureid  " + featureIpAccessList.getFeatureIpListId() + " And User id " + userValue.getId());
+                        UserFeatureIpAccessList userFeatureIpAccessList = userFeatureIpAccessListRepository.getByFeatureIpListIdAndUserId(featureIpAccessList.getFeatureIpListId(), userValue.getId());
+                        logger.info("Response from  UserFeatureIpAccessList " + userFeatureIpAccessList);
+                        if (userFeatureIpAccessList == null || !(userFeatureIpAccessList.getIpAddress().contains(checkImeiRequest.getPublic_ip()))) {
+                            logger.info("Type Check 2 But Ip not allowed ");
+                            throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+                        }
+                    }
                 }
                 logger.info("Authentication Pass ");
             } catch (Exception e) {
                 logger.info("Authentication fail" + e);
-                throw new UnAuthorizationException(this.getClass().getName(), "access denied");
+                throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
             }
         }
     }

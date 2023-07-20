@@ -208,12 +208,7 @@ public class CheckImeiServiceImpl {
         SessionFactory sessionFactory = metadata.getSessionFactoryBuilder().build();
 
         try {
-            c1
-                    = sessionFactory
-                            .getSessionFactoryOptions()
-                            .getServiceRegistry()
-                            .getService(ConnectionProvider.class)
-                            .getConnection();
+            c1 = sessionFactory.getSessionFactoryOptions().getServiceRegistry().getService(ConnectionProvider.class).getConnection();
             logger.info("Connection for Rule " + c1);
             logger.info(c1.getMetaData().getDatabaseProductName());
 
@@ -232,15 +227,15 @@ public class CheckImeiServiceImpl {
         var startTime = System.currentTimeMillis();
         logger.info("Start Time =" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")));
         try {
-            var language = checkImeiRequest.getLanguage() == null ? "en" : checkImeiRequest.getLanguage();
+
             var ruleResponseStatus = getRuleResponse(checkImeiRequest);
             logger.info("Rule Response Status :" + ruleResponseStatus);
-            boolean nationalWhiteListResponse = getnationalWhiteListResponse(checkImeiRequest.getImei().substring(0, 14));
+            boolean nationalWhiteListResponse = getnationalWhiteListResponse(checkImeiRequest.getImei().length() > 14 ? checkImeiRequest.getImei().substring(0, 14) : checkImeiRequest.getImei());
             logger.info("Is imei present in natinoal whitelist  :" + nationalWhiteListResponse);
             if (ruleResponseStatus.contains("CheckImeiPass")) {
                 isValidImei = true;
                 gsmaTacDetails = gsmaTacDetailsRepository.getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
-                deviceDetails = deviceDetails(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), language);
+                deviceDetails = deviceDetails(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
                 mappedDeviceDetails = new Gson().fromJson(deviceDetails.toString(), LinkedHashMap.class);
                 logger.info("Going for Message Tac Details  :" + gsmaTacDetails);
                 if (gsmaTacDetails.getDevice_type().equalsIgnoreCase("Smartphone") || gsmaTacDetails.getDevice_type().contains("phone")) {
@@ -270,7 +265,7 @@ public class CheckImeiServiceImpl {
             var message = systemConfigurationDbRepository.getByTagAndTypeAndFeatureName(
                     checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
                     ? status + "ForUssd" : status,
-                    language.contains("kh") ? 2 : 1, "CheckImei").getValue()
+                    checkImeiRequest.getLanguage().contains("kh") ? 2 : 1, "CheckImei").getValue()
                     .replace("$imei", checkImeiRequest.getImei());
 
 //            if (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")) {
@@ -284,28 +279,30 @@ public class CheckImeiServiceImpl {
             var compStatus = systemConfigurationDbRepository.getByTagAndTypeAndFeatureName(
                     checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
                     ? status + "ComplianceForUssd" : status + "Compliance",
-                    language.contains("kh") ? 2 : 1, "CheckImei");
+                    checkImeiRequest.getLanguage().contains("kh") ? 2 : 1, "CheckImei");
             logger.info("Compliance Status:::::::  :" + compStatus);
 
             var complianceStatus = compStatus == null ? null : compStatus.getValue();
             logger.info("Compliance Status::  :" + complianceStatus);
             logger.info("Response via  mobileDeviceRepository :" + mappedDeviceDetails);
-            var result = new Result(isValidImei, complianceStatus, message, deviceDetails == null ? null : mappedDeviceDetails);
+            var symbol_color = systemConfigurationDbRepository.getByTag(status + "SymbolColor").getValue();
+            var result = new Result(isValidImei, symbol_color, complianceStatus, message, deviceDetails == null ? null : mappedDeviceDetails);
             checkImeiRequest.setRequestProcessStatus("Success");
             checkImeiRequest.setImeiProcessStatus(isValidImei == true ? "Valid" : "Invalid");
             checkImeiRequest.setComplianceStatus(complianceStatus);
+            checkImeiRequest.setSymbol_color(symbol_color);
             saveCheckImeiRequest(checkImeiRequest, startTime);
             if (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && systemConfigurationDbRepository.getByTag("send_sms_flag").getValue().equalsIgnoreCase("true")) {
                 logger.info("Going for ussd and send_sms_flag true  ");
                 createPostRequestForNotification(checkImeiRequest, result);
             }
-            return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()), StatusMessage.FOUND.getName(), language.contains("kh") ? "kh" : "en", result);
+            return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()), StatusMessage.FOUND.getName(), checkImeiRequest.getLanguage(), result);
         } catch (Exception e) {
             alertServiceImpl.raiseAnAlert(Alerts.ALERT_1103.getName(), 0);
             logger.error("Failed at " + e.getLocalizedMessage());
             checkImeiRequest.setRequestProcessStatus("Fail");
             saveCheckImeiRequest(checkImeiRequest, startTime);
-            throw new InternalServicesException(this.getClass().getName(), "internal server error");
+            throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
         }
     }
 
@@ -316,8 +313,13 @@ public class CheckImeiServiceImpl {
             checkImeiRequestRepository.save(checkImeiRequest);
         } catch (Exception e) {
             alertServiceImpl.raiseAnAlert(Alerts.ALERT_1104.getName(), 0);
-            throw new InternalServicesException(this.getClass().getName(), "internal server error");
+            throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
         }
+    }
+
+    public String globalErrorMsgs(String language) {
+        return systemConfigurationDbRepository.getByTagAndTypeAndFeatureName("CheckImeiErrorMessage",
+                language.contains("kh") ? 2 : 1, "CheckImei").getValue();
     }
 
     public void saveDeviceDetails(AppDeviceDetailsDb appDeviceDetailsDb) {
@@ -412,7 +414,7 @@ public class CheckImeiServiceImpl {
             return response;
         } catch (Exception e) {
             logger.error(e.getMessage() + " : " + e.getLocalizedMessage());
-            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1105.getName(), 0);
+            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1106.getName(), 0);
             throw new InternalServicesException(this.getClass().getName(), e.getLocalizedMessage());
         }
     }
@@ -431,8 +433,9 @@ public class CheckImeiServiceImpl {
             for (RuleEngineMapping rules : ruleList) {
                 Rule rule = new Rule(rules.getName(), rules.getOutput(), rules.getRuleMessage());
                 String[] my_arr = {
-                    rule.rule_name, "1", "NONCDR", (rule.rule_name.equals("IMEI_LENGTH")
-                    ? checkImeiRequest.getImei() : checkImeiRequest.getImei().substring(0, 14)), "", "", "", "", "", "IMEI", "", " ", " ", ""};
+                    rule.rule_name, "1", "NONCDR",
+                    checkImeiRequest.getImei(),
+                     "", "", "", "", "", "IMEI", "", " ", " ", ""};
                 String expOutput = RuleEngineApplication.startRuleEngine(my_arr, conn, null);
                 if (!rule.output.equalsIgnoreCase(expOutput)) {
                     ruleResponseStatus = rule.rule_name;
@@ -442,7 +445,7 @@ public class CheckImeiServiceImpl {
             return ruleResponseStatus;
         } catch (SQLException e) {
             logger.error(e.getMessage() + " : " + e.getLocalizedMessage());
-            throw new InternalServicesException(this.getClass().getName(), e.getLocalizedMessage());
+            throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
         }
 
     }

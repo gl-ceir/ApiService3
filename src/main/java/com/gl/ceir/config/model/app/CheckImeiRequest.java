@@ -19,7 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
- @Table(name = "check_imei_req_detail")
+@Table(name = "check_imei_req_detail")
 
 public class CheckImeiRequest implements Serializable {
 
@@ -43,11 +43,15 @@ public class CheckImeiRequest implements Serializable {
     private String checkProcessTime;
     private String complianceStatus;
     private String utm_source;
+    private String browser;
+    private String public_ip;
+    private String header_browser;
+    private String header_public_ip;
+    private String symbol_color;
 
     @Override
     public String toString() {
-        return "CheckImeiRequest{" + "id=" + id + ", createdOn=" + createdOn + ", imei=" + imei + ", msisdn=" + msisdn + ", operator=" + operator + ", imsi=" + imsi + ", language=" + language + ", channel=" + channel + ", requestProcessStatus=" + requestProcessStatus + ", imeiProcessStatus=" + imeiProcessStatus + ", checkProcessTime=" + checkProcessTime + ", complianceStatus=" + complianceStatus + ", utm_source=" + utm_source + '}';
+        return "CheckImeiRequest{" + "id=" + id + ", createdOn=" + createdOn + ", imei=" + imei + ", msisdn=" + msisdn + ", operator=" + operator + ", imsi=" + imsi + ", language=" + language + ", channel=" + channel + ", requestProcessStatus=" + requestProcessStatus + ", imeiProcessStatus=" + imeiProcessStatus + ", checkProcessTime=" + checkProcessTime + ", complianceStatus=" + complianceStatus + ", utm_source=" + utm_source + ", browser=" + browser + ", public_ip=" + public_ip + ", header_browser=" + header_browser + ", header_public_ip=" + header_public_ip + ", symbol_color=" + symbol_color + '}';
     }
-
 
 }

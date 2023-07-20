@@ -4,8 +4,10 @@
  */
 package com.gl.ceir.config;
 
+import com.gl.ceir.config.controller.CheckImeiController;
 import com.gl.ceir.config.dto.ApiResponse;
 import com.gl.ceir.config.dto.ExceptionResponse;
+import com.gl.ceir.config.dto.Result;
 import com.gl.ceir.config.exceptions.FileStorageException;
 import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.exceptions.MissingRequestParameterException;
@@ -13,7 +15,13 @@ import com.gl.ceir.config.exceptions.MyFileNotFoundException;
 import com.gl.ceir.config.exceptions.ResourceNotFoundException;
 import com.gl.ceir.config.exceptions.UnAuthorizationException;
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
+import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
+import java.util.Enumeration;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,65 +41,120 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 @RestControllerAdvice
 public class GlobalControllerExceptionHandler {
 
+    private static final Logger logger = LogManager.getLogger(GlobalControllerExceptionHandler.class);
+
     @Autowired
     HttpServletRequest req;
 
-    /* Global Exceptions*/
+    @Autowired
+    CheckImeiServiceImpl checkImeiServiceImpl;
+
+    /* Global System Exceptions*/
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ExceptionResponse handleNoHandlerFound(NoHandlerFoundException e, WebRequest request) {
-        return new ExceptionResponse(
-                HttpStatus.NOT_FOUND.value(), "not found", "invalid url end point");
+        logger.error("Error msg :" + e.getLocalizedMessage() + " # request " + request.toString());
+        try {
+            logger.error("Error ############ : " + req.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
+        } catch (Exception exp) {
+            logger.error("Error msgs :" + exp.toString());
+
+        }
+        return new ExceptionResponse(HttpStatus.NOT_FOUND.value(), "not found", "en", new Result(checkImeiServiceImpl.globalErrorMsgs("en")));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public ExceptionResponse handleMethodNotAllowed(HttpRequestMethodNotSupportedException e, WebRequest request) {
-        return new ExceptionResponse(
-                HttpStatus.METHOD_NOT_ALLOWED.value(), "method not allowed", " method provided is not valid");
+        logger.error("Error msg :" + e.getLocalizedMessage() + " # request " + request.toString());
+        try {
+            Scanner s = new Scanner(req.getInputStream(), "UTF-8").useDelimiter("\\A");
+            String st = s.hasNext() ? s.next() : "";
+            logger.error("Error ############ : " + req.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
+        } catch (Exception exp) {
+            logger.error("Error msgs :" + exp.toString());
+
+        }
+        return new ExceptionResponse(HttpStatus.METHOD_NOT_ALLOWED.value(), "method not allowed", "en", new Result(checkImeiServiceImpl.globalErrorMsgs("en")));
     }
 
-    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)// other than json
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public ExceptionResponse handleHttpMediaTypeNotSupported(Exception e, WebRequest request) {
-        return new ExceptionResponse(
-                HttpStatus.NOT_ACCEPTABLE.value(), "not acceptable", "request format is not acceptable ");
+        logger.error("Error msg :" + e.getLocalizedMessage() + " # request " + request.toString());
+        try {
+            logger.error("Error ############ : " + req.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
+        } catch (Exception exp) {
+            logger.error("Error msgs :" + exp.toString());
+
+        }
+        return new ExceptionResponse(HttpStatus.NOT_ACCEPTABLE.value(), "not acceptable", "en", new Result(checkImeiServiceImpl.globalErrorMsgs("en")));
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionResponse handleBadRequestException(Exception e, WebRequest request) {
-        return new ExceptionResponse(
-                HttpStatus.BAD_REQUEST.value(), "bad request", " request is not valid ");
+        logger.error("Error msg :" + e.getLocalizedMessage() + " # request " + request.toString());
+        try {
+            logger.error("Error ############ : " + req.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
+        } catch (Exception exp) {
+            logger.error("Error msgs :" + exp.toString());
+
+        }
+        return new ExceptionResponse(HttpStatus.BAD_REQUEST.value(), "bad request", "en ", new Result(checkImeiServiceImpl.globalErrorMsgs("en")));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler(IllegalArgumentException.class)  // spec chars
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionResponse handleIllegalRequestException(Exception e, WebRequest request) {
-        return new ExceptionResponse(
-                HttpStatus.NOT_FOUND.value(), "bad request", " request is not valid ");
+        logger.error("Error msg :" + e.getLocalizedMessage() + " # request " + request.toString());
+        try {
+            logger.error("Error ############ : " + req.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
+        } catch (Exception exp) {
+            logger.error("Error msgs :" + exp.toString());
+
+        }
+        return new ExceptionResponse(HttpStatus.NOT_FOUND.value(), "bad request", " request is not valid ", new Result(checkImeiServiceImpl.globalErrorMsgs("en")));
     }
 
     @ExceptionHandler(InternalServerError.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionResponse handleInternalServerException(Exception e, WebRequest request) {
-        return new ExceptionResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(), "server error", "Something Went Wrong");
+        logger.error("Error msg :" + e.getLocalizedMessage() + " # request " + request.toString());
+        try {
+            logger.error("Error ############ : " + req.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
+        } catch (Exception exp) {
+            logger.error("Error msgs :" + exp.toString());
+
+        }
+        return new ExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "server error", "en", new Result(checkImeiServiceImpl.globalErrorMsgs("en")));
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionResponse handleMissingServletRequestParameterException(Exception e, WebRequest request) {
-        return new ExceptionResponse(
-                HttpStatus.BAD_REQUEST.value(), "bad request", "parameter missing");
+        logger.error("Error msg :" + e.getLocalizedMessage() + " # request " + request.toString());
+        try {
+            logger.error("Error ############ : " + req.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
+        } catch (Exception exp) {
+            logger.error("Error msgs :" + exp.toString());
+        }
+        return new ExceptionResponse(HttpStatus.BAD_REQUEST.value(), "bad request", "en", new Result(checkImeiServiceImpl.globalErrorMsgs("en")));
     }
 
     /* Custom Exceptions */
+ /* Custom Exceptions */
+ /* Custom Exceptions */
+ /* Custom Exceptions */
+ /* Custom Exceptions */
+ /* Custom Exceptions */
+
+ /* Custom Exceptions */
     @ExceptionHandler(value = UnAuthorizationException.class)
     public ResponseEntity<Object> exception(UnAuthorizationException exception) {
         return new ResponseEntity<>(
                 new ExceptionResponse(
-                        HttpStatus.UNAUTHORIZED.value(), "unauthorized", "en", exception.getMessage()),
+                        HttpStatus.UNAUTHORIZED.value(), "unauthorized", exception.getResourceName(), new Result(exception.getMessage())),
                 HttpStatus.UNAUTHORIZED);
     }
 
@@ -99,7 +162,7 @@ public class GlobalControllerExceptionHandler {
     public ResponseEntity<Object> exception(MissingRequestParameterException exception) {
         return new ResponseEntity<>(
                 new ExceptionResponse(
-                        HttpStatus.BAD_REQUEST.value(), "bad request", "en", exception.getMessage()),
+                        HttpStatus.BAD_REQUEST.value(), "bad request", exception.getResourceName(), new Result(exception.getMessage())),
                 HttpStatus.BAD_REQUEST);
     }
 
@@ -107,7 +170,7 @@ public class GlobalControllerExceptionHandler {
     public ResponseEntity<Object> exception(InternalServicesException exception) {
         return new ResponseEntity<>(
                 new ExceptionResponse(
-                        HttpStatus.INTERNAL_SERVER_ERROR.value(), " server error", "en", exception.getMessage()),
+                        HttpStatus.INTERNAL_SERVER_ERROR.value(), " server error", exception.getResourceName(), new Result(exception.getMessage())),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -115,7 +178,7 @@ public class GlobalControllerExceptionHandler {
     public ResponseEntity<Object> exception(UnprocessableEntityException exception) {
         return new ResponseEntity<>(
                 new ExceptionResponse(
-                        HttpStatus.UNPROCESSABLE_ENTITY.value(), "unprocessable entity", "en", exception.getMessage()),
+                        HttpStatus.UNPROCESSABLE_ENTITY.value(), "unprocessable entity", exception.getResourceName(), new Result(exception.getMessage())),
                 HttpStatus.UNPROCESSABLE_ENTITY);
 
     }
@@ -123,10 +186,11 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(value = ResourceNotFoundException.class)
     public ResponseEntity<Object> exception(ResourceNotFoundException exception) {
         return new ResponseEntity<>(
-                new ExceptionResponse(HttpStatus.NOT_FOUND.value(), "not found", "en", exception.getMessage()),
+                new ExceptionResponse(HttpStatus.NOT_FOUND.value(), "not found", exception.getResourceName(), new Result(exception.getMessage())),
                 HttpStatus.NOT_FOUND);
     }
 
+    /* Custom Exceptions .Not used Currently*/
     @ExceptionHandler(value = MyFileNotFoundException.class)
     public ResponseEntity<Object> exception(MyFileNotFoundException exception) {
         return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND.value(), "FAIL", exception.getMessage()),

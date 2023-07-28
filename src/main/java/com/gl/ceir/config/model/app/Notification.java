@@ -6,9 +6,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 
+@DynamicInsert
 public class Notification implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -21,6 +24,74 @@ public class Notification implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdOn;
 
+    @CreationTimestamp
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime modifiedOn;
+
+    // @ColumnDefault(value = "")
+    private String channelType;
+
+    // @ColumnDefault(value = "")
+    private String message;
+
+    // @ColumnDefault(value = "0")
+    private Long userId;
+
+    // @ColumnDefault(value = "0")
+    private Long featureId;
+
+    // @ColumnDefault(value = "")
+    private String featureTxnId;
+
+    // @ColumnDefault(value = "")
+    private String featureName;
+
+    // @ColumnDefault(value = "")
+    private String subFeature;
+
+    // @ColumnDefault(value = "0")
+    private Integer status;
+
+    // @ColumnDefault(value = "")
+    private String subject;
+
+    // @ColumnDefault(value = "0")
+    private Integer retryCount;
+
+    // @ColumnDefault(value = "")
+    private String referTable;
+
+    // @ColumnDefault(value = "")
+    private String roleType;
+
+    // @ColumnDefault(value = "")
+    private String receiverUserType;
+
+    // @ColumnDefault(value = "")
+    private String email;
+
+    // @ColumnDefault(value = "")
+    private String msisdn;
+
+    // @ColumnDefault(value = "")
+    private String operatorName;
+
+    private LocalDateTime notificationSentTime;
+
+    // @ColumnDefault(value = "")
+    private String corelationId;
+
+    // @ColumnDefault(value = "")
+    private String msgLang;
+
+    // @ColumnDefault(value = "")
+    private String deliveryStatus;
+
+    private LocalDateTime deliveryTime;
+
+    // @ColumnDefault(value = "")
+    private String sendSmsInterface;
+
     public Notification(String channelType, String message, String featureName, Integer status, Integer retryCount, String msisdn, String operatorName, String msgLang, String sendSmsInterface) {
         this.channelType = channelType;
         this.message = message;
@@ -32,54 +103,6 @@ public class Notification implements Serializable {
         this.msgLang = msgLang;
         this.sendSmsInterface = sendSmsInterface;
     }
-
-    @CreationTimestamp
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime modifiedOn;
-
-    private String channelType;
-
-    private String message;
-
-    private Long userId;
-
-    private Long featureId;
-
-    private String featureTxnId;
-
-    private String featureName;
-
-    private String subFeature;
-
-    private Integer status;
-
-    private String subject;
-
-    private Integer retryCount;
-
-    private String referTable;
-
-    private String roleType;
-
-    private String receiverUserType;
-
-    private String email;
-
-    private String msisdn;
-
-    private String operatorName;
-
-    private LocalDateTime notificationSentTime;
-
-    private String corelationId;
-
-    private String msgLang;
-
-    private String deliveryStatus;
-
-    private LocalDateTime deliveryTime;
-
-    private String sendSmsInterface;
 
     public Notification() {
     }

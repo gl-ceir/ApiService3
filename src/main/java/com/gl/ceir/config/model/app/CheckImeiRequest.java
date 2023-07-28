@@ -14,6 +14,7 @@ import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @Getter
@@ -21,6 +22,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Table(name = "check_imei_req_detail")
 
+@DynamicInsert
 public class CheckImeiRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -38,20 +40,24 @@ public class CheckImeiRequest implements Serializable {
     private String imsi;
     private String language;
     private String channel;
-    private String requestProcessStatus ;
+    private String requestProcessStatus;
     private String imeiProcessStatus;
     private String checkProcessTime;
     private String complianceStatus;
+    private int complianceValue;
     private String utm_source;
     private String browser;
     private String public_ip;
     private String header_browser;
     private String header_public_ip;
     private String symbol_color;
+    private String device_id;
+    private String os_type;
+    private String fail_process_description;
 
     @Override
     public String toString() {
-        return "CheckImeiRequest{" + "id=" + id + ", createdOn=" + createdOn + ", imei=" + imei + ", msisdn=" + msisdn + ", operator=" + operator + ", imsi=" + imsi + ", language=" + language + ", channel=" + channel + ", requestProcessStatus=" + requestProcessStatus + ", imeiProcessStatus=" + imeiProcessStatus + ", checkProcessTime=" + checkProcessTime + ", complianceStatus=" + complianceStatus + ", utm_source=" + utm_source + ", browser=" + browser + ", public_ip=" + public_ip + ", header_browser=" + header_browser + ", header_public_ip=" + header_public_ip + ", symbol_color=" + symbol_color + '}';
+        return "CheckImeiRequest{" + "id=" + id + ", createdOn=" + createdOn + ", imei=" + imei + ", msisdn=" + msisdn + ", operator=" + operator + ", imsi=" + imsi + ", language=" + language + ", channel=" + channel + ", requestProcessStatus=" + requestProcessStatus + ", imeiProcessStatus=" + imeiProcessStatus + ", checkProcessTime=" + checkProcessTime + ", complianceStatus=" + complianceStatus + ", complianceValue=" + complianceValue + ", utm_source=" + utm_source + ", browser=" + browser + ", public_ip=" + public_ip + ", header_browser=" + header_browser + ", header_public_ip=" + header_public_ip + ", symbol_color=" + symbol_color + ", device_id=" + device_id + ", os_type=" + os_type + ", fail_process_description=" + fail_process_description + '}';
     }
 
 }

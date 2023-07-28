@@ -11,6 +11,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface AppDeviceDetailsRepository extends JpaRepository<AppDeviceDetailsDb, Long>, JpaSpecificationExecutor<AppDeviceDetailsDb> {
 
+    @Query(value = "select  distinct(os_type)  from  mobile_app_dev_info where device_id = :device_id limit 1", nativeQuery = true)
+    public String getByDeviceId(String device_id);
+
     @Modifying
     @Query(value = "insert into mobile_app_dev_info (os_type,device_id,device_details,language_type)   VALUES (:osType,:deviceId  ,:deviceDetails , :languageType)", nativeQuery = true)
     @Transactional

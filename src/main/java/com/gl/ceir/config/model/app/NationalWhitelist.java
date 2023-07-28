@@ -30,14 +30,12 @@ public class NationalWhitelist implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String imei;
 
     @CreationTimestamp
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdOn;
 
-    private String imei;
     private String actualImei;
     private String msisdn;
     private String mobileOperator;
@@ -47,6 +45,5 @@ public class NationalWhitelist implements Serializable {
     private String typeOfEntry;
 
     private LocalDateTime nationalWhiteListCreatedDate;
-    private LocalDateTime nationalWhiteListModifiedDate;
 
 }

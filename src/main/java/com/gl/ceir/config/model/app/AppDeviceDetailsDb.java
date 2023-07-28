@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.transaction.Transactional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,6 +32,8 @@ public class AppDeviceDetailsDb implements Serializable {
     private String languageType;
     private String deviceId;
     private String osType;
+
+    // @Transactional
     private JSONObject deviceDetails;
 
     public AppDeviceDetailsDb(String languageType, String deviceId, String osType, JSONObject deviceDetails) {

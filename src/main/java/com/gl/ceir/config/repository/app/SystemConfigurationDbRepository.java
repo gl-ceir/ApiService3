@@ -12,7 +12,7 @@ public interface SystemConfigurationDbRepository extends JpaRepository<SystemCon
 
 	public SystemConfigurationDb getById(Long id);
 
-	public SystemConfigurationDb getByTagAndTypeAndFeatureName(String tag , int type, String featureName); 
+//	public SystemConfigurationDb getByTagAndTypeAndFeatureName(String tag , int type, String featureName);
 
 
 }

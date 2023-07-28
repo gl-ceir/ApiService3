@@ -25,7 +25,7 @@ public class LanguageController {
     LanguageServiceImpl languageServiceImpl;
 
     @ApiOperation(value = "Get All Labels as Per Language", response = String.class)
-    @RequestMapping(path = "dialectRetreiver", method = RequestMethod.GET)
+    @RequestMapping(path = "services/mobile_api/dialectRetreiver", method = RequestMethod.GET)
     public MappingJacksonValue getLanguageLabels(@RequestParam("language") String language,
             @RequestParam("feature_name") String feature_name) {
         MappingJacksonValue mapping = new MappingJacksonValue(languageServiceImpl.getLanguageLabels(feature_name, language));

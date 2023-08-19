@@ -31,7 +31,6 @@ public class AlertServiceImpl {
     RunningAlertDbRepository runningAlertDbRepository;
 
     public GenricResponse raiseAnAlert(String alertId, int userId) {
-
         try {
             AlertDb alertDb = alertDbRepository.getByAlertId(alertId);
             runningAlertDbRepository.save(new RunningAlertDb(userId, alertId, alertDb.getDescription(), 0));
@@ -42,32 +41,40 @@ public class AlertServiceImpl {
         }
     }
 
-    public GenricResponse raiseAnAlert(String alertId, int user_Id, Map<String, String> bodyPlaceHolderMap) {
-
+    public void raiseAnAlert1(String alertCode, String alertMessage, String alertProcess, int userId) {
         try {
-            String path = System.getenv("APP_HOME") + "alarm/start.sh";
-            String userId = String.valueOf(user_Id);
-            ProcessBuilder pb = new ProcessBuilder(path, alertId, bodyPlaceHolderMap.get("<e>"), bodyPlaceHolderMap.get("<process_name>"), userId);
+            logger.info("Alert  " + alertMessage);
+            String path = System.getenv("APP_HOME") + "alert/start.sh";
+            ProcessBuilder pb = new ProcessBuilder(path, alertCode, alertMessage, alertProcess, String.valueOf(userId));
             Process p = pb.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line = null;
             String response = null;
             while ((line = reader.readLine()) != null) {
-                logger.info("" + line);
                 response += line;
             }
-            logger.info("response " + response);
-            return new GenricResponse(0);
-
+            logger.info("Alert is generated ");
         } catch (Exception ex) {
-            logger.info(ex.getLocalizedMessage() + " ::: " + ex.getMessage());
-            return new GenricResponse(1);
+            logger.error("Not able to execute Alert mgnt jar ", ex.getLocalizedMessage() + " ::: " + ex.getMessage());
         }
     }
 
+//    public static void callAlertMgmt(String alertCode, String alertMessage, String alertProcess, String userId) {
+//        try {
+//            String alertJar = System.getenv("APP_HOME") + "/alert/start.sh";
+//            Process upload = Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "\"" + alertJar + "\"" + "\"" + alertCode + "\"" + "\"" + alertMessage + "\"" + "\"" + alertProcess + "\"" + "\"" + userId + "\""});
+//            upload.waitFor();
+//            if (upload.exitValue() == 0) {
+//                logger.info("Process successfully executed ");
+//            }            //      return new GenricResponse(0);
+
+//        } catch (Exception e) { //      return new GenricResponse(1);
+//            logger.error("Not able to execute Alert mgnt jar ", e);
+//        }
+//    }
+
+
 }
-
-
 
 //        try { 
 //            AlertDb alertDb = alertDbRepository.getByAlertId(alertId);

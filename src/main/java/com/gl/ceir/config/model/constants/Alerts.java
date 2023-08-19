@@ -10,7 +10,9 @@ public enum Alerts {
     ALERT_1105("alert1105"), // language
     ALERT_1106("alert1106"), // pri init api
     ALERT_1107("alert1107"), // sendPostForSms
-    ALERT_1108("alert1108");  // notification impl
+    ALERT_1108("alert1108"), // notification impl
+    ALERT_1110("alert1110");  // simp
+
 
     private String name;
 

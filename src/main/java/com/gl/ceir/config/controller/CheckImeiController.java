@@ -109,32 +109,6 @@ public class CheckImeiController {  //sachin
     @Autowired
     AppDeviceDetailsRepository appDeviceDetailsRepository;
 
-//    @PostMapping(path = "cc/CheckImeI")
-//    public MappingJacksonValue CheckImeiValues(@RequestBody CheckImeiValuesEntity checkImeiValuesEntity) {
-//        String user_type = checkImeiValuesEntity.getUser_type().trim();
-//        String feature = checkImeiValuesEntity.getFeature().trim().replaceAll(" ", "");
-//        String imei = checkImeiValuesEntity.getImei();
-//        Long imei_type = checkImeiValuesEntity.getImei_type();
-//        logger.info("Feature   " + feature + user_type);
-//        logger.info("UsrType   " + user_type);
-//        logger.info("Imei_type (devIdType)   " + imei_type);
-//        logger.info("Imei   " + imei);
-//        CheckImeiMess cImsg = new CheckImeiMess();
-//        MappingJacksonValue mapping = null;
-//        String rulePass = checkImeiServiceImpl.getResult(user_type, feature, imei, imei_type);
-//        logger.info("rulePass Value =" + rulePass);
-//        if (rulePass.equalsIgnoreCase("true")) {
-//            cImsg.setErrorMessage("NA");
-//            cImsg.setStatus("Pass");
-//            cImsg.setDeviceId(imei.substring(0, 8));
-//        } else {
-//            cImsg.setErrorMessage(rulePass);
-//            cImsg.setStatus("Fail");
-//            cImsg.setDeviceId(imei.substring(0, 8));
-//        }
-//        mapping = new MappingJacksonValue(cImsg);
-//        return mapping;
-//    }
     @ApiOperation(value = "Pre Init Api to get  Server", response = DeviceidBaseUrlDb.class)
     @RequestMapping(path = "services/mobile_api/preInit", method = RequestMethod.GET)
     public MappingJacksonValue getPreInit(@RequestParam("deviceId") String deviceId) {
@@ -174,44 +148,29 @@ public class CheckImeiController {  //sachin
                 ? (request.getHeader("X-FORWARDED-FOR") == null ? request.getRemoteAddr()
                 : request.getHeader("X-FORWARDED-FOR"))
                 : request.getHeader("HTTP_CLIENT_IP");
-        try {
-            logger.info("HTTP_CLIENT_IP " + request.getHeader("HTTP_CLIENT_IP"));
-            logger.info("X-FORWARDED-FOR " + request.getHeader("X-FORWARDED-FOR"));
-            logger.info("getRemoteAddr " + request.getRemoteAddr());
-            logger.info("getServletPath " + request.getServletPath());
-            logger.info("getRemoteAddr " + request.getRemoteAddr());
-            logger.info("getAuthType " + request.getAuthType());
-            logger.info("getLocalAddr " + request.getLocalAddr());
-            logger.info("getRemoteHost " + request.getRemoteHost());
-            logger.info("userIp " + userIp);
-            logger.info("ClientIP " + request.getHeader("Client-IP"));
-            logger.info("user-agent " + request.getHeader("user-agent"));
-//            if (checkImeiRequest.getDevice_id() != null) {
-//                checkImeiRequest.setOs_type(appDeviceDetailsRepository.getByDeviceId(checkImeiRequest.getDevice_id()));}
-
-        } catch (Exception e) {
-            logger.warn("Getting Ips for Testing purpose", e);
-        }
-        var startTime = System.currentTimeMillis();
+        var startTime = System.currentTimeMillis();  // this can be stored in setRequestProcessStatus
+//        try {
+//            logger.debug("user-agent " + request.getHeader("user-agent") + ";ClientIP " + request.getHeader("Client-IP") + ";userIp " + userIp + ";getRemoteHost " + request.getRemoteHost() + ";getLocalAddr " + request.getLocalAddr() + ";getAuthType " + request.getAuthType() + ";getRemoteAddr " + request.getRemoteAddr() + ";getServletPath " + request.getServletPath() + ";getRemoteAddr " + request.getRemoteAddr() + ";X-FORWARDED-FOR " + request.getHeader("X-FORWARDED-FOR") + "; HTTP_CLIENT_IP " + request.getHeader("HTTP_CLIENT_IP"));
+//        } catch (Exception e) {
+//            logger.warn("Getting Ips for Testing purpose", e);
+//        }
+      //  logger.info("!!!!!!!! Request = " + checkImeiRequest.toString());
         checkImeiRequest.setHeader_browser(request.getHeader("user-agent"));
         checkImeiRequest.setHeader_public_ip(userIp);
-
-        var language = checkImeiRequest.getLanguage() == null ? "en"
-                : checkImeiRequest.getLanguage().equalsIgnoreCase("kh") ? "kh" : "en";
+        var language = checkImeiRequest.getLanguage() == null ? "en" : checkImeiRequest.getLanguage().equalsIgnoreCase("kh") ? "kh" : "en";
         checkImeiRequest.setLanguage(language);    // needs refactoring
+        logger.debug(checkImeiRequest.toString());
         errorValidationChecker(checkImeiRequest, startTime);
         authorizationChecker(checkImeiRequest, startTime);
-        logger.info("Going for values ");
-
+        logger.debug("Going for values ");
         var value = checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest, startTime);
-        logger.info("Request = " + checkImeiRequest.toString() + " ; Response =" + value.toString());
+        logger.info("   Start Time = " + startTime + "; End Time  = " + System.currentTimeMillis() + "  !!! Request = " + checkImeiRequest.toString() + " ########## Response =" + value.toString());
         return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(new MappingJacksonValue(value));
     }
 
     void errorValidationChecker(CheckImeiRequest checkImeiRequest, long startTime) {
-        logger.info(checkImeiRequest.toString());
         if (checkImeiRequest.getImei() == null || checkImeiRequest.getChannel() == null) {
-            logger.info("Null Values " + checkImeiRequest.getImei());
+            logger.debug("Null Values " + checkImeiRequest.getImei());
             checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, mandatoryParameterMissing);
             throw new MissingRequestParameterException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
         }
@@ -224,7 +183,7 @@ public class CheckImeiController {  //sachin
                 || (checkImeiRequest.getOperator() != null && checkImeiRequest.getOperator().trim().length() > 20)
                 || (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getImsi() == null || checkImeiRequest.getOperator() == null || checkImeiRequest.getOperator().isBlank() || checkImeiRequest.getMsisdn().isBlank() || checkImeiRequest.getImsi().length() != 15 || !checkImeiRequest.getImsi().matches("[0-9]+")))
                 || (checkImeiRequest.getChannel().equalsIgnoreCase("sms") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getMsisdn().isBlank() || checkImeiRequest.getOperator() == null || checkImeiRequest.getOperator().isBlank()))) {
-            logger.info("Not allowed " + checkImeiRequest.getChannel());
+            logger.debug("Not allowed " + checkImeiRequest.getChannel());
             checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, requiredValueNotPresent);
             throw new UnprocessableEntityException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
         }
@@ -281,10 +240,9 @@ public class CheckImeiController {  //sachin
                         }
                     }
                 }
-                logger.info("Authentication Pass ");
+                logger.debug("Authentication Pass ");
             } catch (NullPointerException | UnsupportedOperationException e) {
-
-                logger.info("Authentication fail" + e);
+                logger.warn("Authentication fail" + e);
                 throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
             }
         }
@@ -306,7 +264,6 @@ public class CheckImeiController {  //sachin
 //
 //                    checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, someWentWrongException);
 //                }
-
 //    @ApiOperation(value = "check Imei Api v2", response = CheckImeiResponse.class)
 //    @PostMapping("checkImeiApiV1")
 //    public MappingJacksonValue checkImeiDeviceV1(@RequestBody CheckImeiRequest checkImeiRequest) {
@@ -350,6 +307,32 @@ public class CheckImeiController {  //sachin
         }
 
 
+//    @PostMapping(path = "cc/CheckImeI")
+//    public MappingJacksonValue CheckImeiValues(@RequestBody CheckImeiValuesEntity checkImeiValuesEntity) {
+//        String user_type = checkImeiValuesEntity.getUser_type().trim();
+//        String feature = checkImeiValuesEntity.getFeature().trim().replaceAll(" ", "");
+//        String imei = checkImeiValuesEntity.getImei();
+//        Long imei_type = checkImeiValuesEntity.getImei_type();
+//        logger.info("Feature   " + feature + user_type);
+//        logger.info("UsrType   " + user_type);
+//        logger.info("Imei_type (devIdType)   " + imei_type);
+//        logger.info("Imei   " + imei);
+//        CheckImeiMess cImsg = new CheckImeiMess();
+//        MappingJacksonValue mapping = null;
+//        String rulePass = checkImeiServiceImpl.getResult(user_type, feature, imei, imei_type);
+//        logger.info("rulePass Value =" + rulePass);
+//        if (rulePass.equalsIgnoreCase("true")) {
+//            cImsg.setErrorMessage("NA");
+//            cImsg.setStatus("Pass");
+//            cImsg.setDeviceId(imei.substring(0, 8));
+//        } else {
+//            cImsg.setErrorMessage(rulePass);
+//            cImsg.setStatus("Fail");
+//            cImsg.setDeviceId(imei.substring(0, 8));
+//        }
+//        mapping = new MappingJacksonValue(cImsg);
+//        return mapping;
+//    }
 
 
  */

@@ -14,9 +14,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import javax.persistence.Cacheable;
 import javax.persistence.Table;
 
 @Entity
+@Cacheable
 @Table(name = "sys_param")
 public class SystemConfigurationDb implements Serializable {
 

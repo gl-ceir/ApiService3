@@ -41,8 +41,9 @@ public class AlertServiceImpl {
         }
     }
 
-    public void raiseAnAlert(String alertCode, String alertMessage, String alertProcess, int userId) {
+    public void raiseAnAlert1(String alertCode, String alertMessage, String alertProcess, int userId) {
         try {
+            logger.info("Alert  " + alertMessage);
             String path = System.getenv("APP_HOME") + "alert/start.sh";
             ProcessBuilder pb = new ProcessBuilder(path, alertCode, alertMessage, alertProcess, String.valueOf(userId));
             Process p = pb.start();
@@ -52,7 +53,7 @@ public class AlertServiceImpl {
             while ((line = reader.readLine()) != null) {
                 response += line;
             }
-            logger.info("Alert is generated :response " + response);
+            logger.info("Alert is generated ");
         } catch (Exception ex) {
             logger.error("Not able to execute Alert mgnt jar ", ex.getLocalizedMessage() + " ::: " + ex.getMessage());
         }

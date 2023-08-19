@@ -46,6 +46,7 @@ import java.util.List;
 import org.json.JSONObject;
 //import org.json.JSONObject;
 import com.google.gson.Gson;
+import org.hibernate.exception.SQLGrammarException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
@@ -125,16 +126,16 @@ public class CheckImeiServiceImpl {
         GsmaTacDetails gsmaTacDetails = null;
         LinkedHashMap mappedDeviceDetails = null;
         try {
-            var ruleResponseStatus = getRuleResponse(checkImeiRequest, startTime);
-            logger.debug("Rule Response Status :" + ruleResponseStatus);
+            //   var ruleResponseStatus = getRuleResponse(checkImeiRequest, startTime);
             boolean nationalWhiteListResponse = getnationalWhiteListResponse(checkImeiRequest.getImei().length() > 14 ? checkImeiRequest.getImei().substring(0, 14) : checkImeiRequest.getImei());
             logger.info("Is imei present in natinoal whitelist  :" + nationalWhiteListResponse);
-            if (ruleResponseStatus.contains("CheckImeiPass")) {
+            //   if (ruleResponseStatus.contains("CheckImeiPass")) {
+            gsmaTacDetails = gsmaTacDetailsRepository.getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
+            if (gsmaTacDetails != null) {
                 isValidImei = true;
-                gsmaTacDetails = gsmaTacDetailsRepository.getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
                 deviceDetails = deviceDetails(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
                 mappedDeviceDetails = new Gson().fromJson(deviceDetails.toString(), LinkedHashMap.class);
-                logger.debug("Going for Message Tac Details  :" + gsmaTacDetails);
+                logger.info("Going for Message Tac Details  :" + gsmaTacDetails);
                 if (gsmaTacDetails.getDevice_type().equalsIgnoreCase("Smartphone") || gsmaTacDetails.getDevice_type().contains("phone")) {
                     if (nationalWhiteListResponse) {
                         status = "WhiteListedSmartphone";
@@ -152,7 +153,8 @@ public class CheckImeiServiceImpl {
                         complianceValue = 4;
                     }
                 }
-            } else if (ruleResponseStatus.contains("EXISTS_IN_GSMA_DETAILS_DB")) {
+                //   } else if (ruleResponseStatus.contains("EXISTS_IN_GSMA_DETAILS_DB")) {
+            } else {
                 if (nationalWhiteListResponse) {
                     status = "WhiteListedNoDevice";
                     complianceValue = 5;
@@ -160,10 +162,11 @@ public class CheckImeiServiceImpl {
                     status = "NonWhiteListedNoDevice";
                     complianceValue = 6;
                 }
-            } else {
-                status = ruleResponseStatus;
             }
-            logger.info("Status is  :->" + status);
+            //          else {
+//                status = ruleResponseStatus;
+//            }
+            logger.info("Status is  :->" + status + "!!! isValidImei" + isValidImei);
             var message = checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName(
                     checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
                     ? status + "ForUssd" : status,
@@ -176,7 +179,7 @@ public class CheckImeiServiceImpl {
                     checkImeiRequest.getLanguage().contains("kh") ? 2 : 1, "CheckImei");
             logger.debug("Comp Status:::::::  :" + compStatus);
             var complianceStatus = compStatus == null ? null : compStatus.getValue();
-            logger.info("Compliance Status::  :" + complianceStatus + ",Response via  mobileDeviceRepository :" + mappedDeviceDetails);
+            logger.debug("Compliance Status::  :" + complianceStatus + ",Response via  mobileDeviceRepository :" + mappedDeviceDetails);
             var symbol_color = systemConfigurationDbRepositry.getByTag(status + "SymbolColor").getValue();
             var result = new Result(isValidImei, symbol_color, complianceStatus, message, deviceDetails == null ? null : mappedDeviceDetails);
             checkImeiRequest.setRequestProcessStatus("Success");
@@ -191,12 +194,14 @@ public class CheckImeiServiceImpl {
             }
             return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()), StatusMessage.FOUND.getName(), checkImeiRequest.getLanguage(), result);
         } catch (Exception e) {
+            logger.error("Failed at " + e.getLocalizedMessage() + " ----- " + e.toString() + " ::::: " + e.getMessage() + " $$$$$$$$$$$ " + e);
             if (e instanceof NullPointerException) {
                 saveCheckImeiFailDetails(checkImeiRequest, startTime, nullPointerException);
             } else if (e instanceof SQLException) {
                 saveCheckImeiFailDetails(checkImeiRequest, startTime, sQLException);
-            } else {
-                saveCheckImeiFailDetails(checkImeiRequest, startTime, someWentWrongException);
+            } //  else if (e instanceof SQLGrammarException) { saveCheckImeiFailDetails(checkImeiRequest, startTime, e.getLocalizedMessage());            }
+            else {
+                saveCheckImeiFailDetails(checkImeiRequest, startTime, e.getLocalizedMessage());
             }
             alertServiceImpl.raiseAnAlert(Alerts.ALERT_1103.getName(), 0);
             logger.error("Failed at " + e.getLocalizedMessage());
@@ -207,8 +212,10 @@ public class CheckImeiServiceImpl {
 
     public void saveCheckImeiFailDetails(CheckImeiRequest checkImeiRequest, long startTime, String desc) {
         checkImeiRequest.setRequestProcessStatus("Fail");
-        logger.warn("-------------------------------------------------------Fail Details at " + desc);
+        logger.warn("------------------------------------------------------- " + desc);
         checkImeiRequest.setFail_process_description(desc);
+        // alertServiceImpl.raiseAnAlert(Alerts.ALERT_1110.getName(), desc, "Check Imei ", 0);
+        logger.info("   Start Time = " + startTime + "; End Time  = " + System.currentTimeMillis() + "  !!! Request = " + checkImeiRequest.toString() + " ########## Response =" + desc);
         saveCheckImeiRequest(checkImeiRequest, startTime);
     }
 
@@ -217,8 +224,7 @@ public class CheckImeiServiceImpl {
             checkImeiRequest.setCheckProcessTime(String.valueOf(System.currentTimeMillis() - startTime));
             checkImeiRequestRepository.save(checkImeiRequest);
         } catch (Exception e) {
-            //  alertServiceImpl.raiseAnAlert(Alerts.ALERT_1104.getName(), 0);
-            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1110.getName(), "Not able to save in db", "Check Imei ", 0);
+            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1110.getName(), 0);
             throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
         }
     }
@@ -229,7 +235,6 @@ public class CheckImeiServiceImpl {
     }
 
     private JSONObject deviceDetails(String brand_name, String modelName, String device_type, String manufacturer, String marketing_name, String lang) {
-
         JSONObject item = new JSONObject();
         try {
             Field map = item.getClass().getDeclaredField("map");
@@ -320,6 +325,7 @@ public class CheckImeiServiceImpl {
                     break;
                 }
             }
+            conn.close();
             return ruleResponseStatus;
         } catch (SQLException e) {
             logger.error(e.getMessage() + " : " + e.getLocalizedMessage());

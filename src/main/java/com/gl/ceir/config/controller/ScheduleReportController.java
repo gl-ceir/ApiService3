@@ -16,7 +16,7 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.RestController;
 import com.gl.ceir.config.service.ScheduleReportService;
 import com.gl.ceir.config.service.impl.ScheduleReportControllerImpl;
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.persistence.criteria.Join;
 import org.springframework.data.domain.Page;
@@ -56,7 +56,7 @@ public class ScheduleReportController {
 
 //    @Autowired
 //    ScheduleReportService ScheduleReportService;
-    @ApiOperation(value = "View All witout Pagenation  ", response = ScheduleReportDb.class, responseContainer = "list")
+    //@ApiOperation(value = "View All witout Pagenation  ", response = ScheduleReportDb.class, responseContainer = "list")
     @RequestMapping(path = "/ScheduleReport/getAllValues", method = RequestMethod.GET)
     public MappingJacksonValue getAll() {
         List<ScheduleReportDb> allActions = scheduleReportControllerImpl.getAll();
@@ -99,7 +99,7 @@ public class ScheduleReportController {
     
     
     
-    @ApiOperation(value = "  View  By Pagination  ", response = ScheduleReportDb.class)
+    //@ApiOperation(value = "  View  By Pagination  ", response = ScheduleReportDb.class)
     @PostMapping("/ScheduleReport/getAll")
     public MappingJacksonValue getFilteredData(
             @RequestBody FilterRequest filterRequest,
@@ -123,7 +123,7 @@ public class ScheduleReportController {
     
     
 
-    @ApiOperation(value = "  Values  By Pagination  ", response = ScheduleReportDb.class)
+    //@ApiOperation(value = "  Values  By Pagination  ", response = ScheduleReportDb.class)
     @PostMapping("/ScheduleReport/getAllValues")
     public MappingJacksonValue getFilteredDataValues(
             @RequestBody FilterRequest filterRequest,

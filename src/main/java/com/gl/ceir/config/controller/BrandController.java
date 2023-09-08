@@ -1,7 +1,7 @@
 package com.gl.ceir.config.controller;
 
 import com.gl.ceir.config.service.impl.BrandServiceImpl;
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiOperation;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,7 +20,7 @@ public class BrandController { //sachin
     
     private static final Logger logger = LogManager.getLogger(BrandController.class);
 
-    @ApiOperation(value = "View All list of Brands", response = String.class)
+    //@ApiOperation(value = "View All list of Brands", response = String.class)
     @RequestMapping(path = "gsma/brandName", method = RequestMethod.GET)
     public MappingJacksonValue getAllBrands() {
         var getBrands =brandServiceImpl.getAllBrands();

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gl.ceir.config.model.app.ActionParameters;
 import com.gl.ceir.config.service.ActionParametersService;
 
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiOperation;
 
 @RestController
 public class ActionParametersController {
@@ -21,7 +21,7 @@ public class ActionParametersController {
 	@Autowired
 	private ActionParametersService actionParametersService;
 
-	@ApiOperation(value = "View All available Action Parameters", response = ActionParameters.class, responseContainer = "list")
+	//@ApiOperation(value = "View All available Action Parameters", response = ActionParameters.class, responseContainer = "list")
 
 	@RequestMapping(path = "/ActionParameters/", method = RequestMethod.GET)
 	public MappingJacksonValue getAll() {
@@ -38,7 +38,7 @@ public class ActionParametersController {
 		return mapping;
 	}
 
-	@ApiOperation(value = "View All available Action Parameters of particular Action Name (USER_REGULARIZED / SYSTEM_REGULARIZED)", response = ActionParameters.class, responseContainer = "list")
+	//@ApiOperation(value = "View All available Action Parameters of particular Action Name (USER_REGULARIZED / SYSTEM_REGULARIZED)", response = ActionParameters.class, responseContainer = "list")
 	@RequestMapping(path = "/ActionParameters/{action_name}", method = RequestMethod.GET)
 	public MappingJacksonValue get(@PathVariable(value = "action_name") String action) {
 		List<ActionParameters> actionParameters = actionParametersService.findByAction(action);

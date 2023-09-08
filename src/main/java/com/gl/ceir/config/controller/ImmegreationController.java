@@ -19,7 +19,7 @@ import com.gl.ceir.config.model.app.SingleImeiDetails;
 import com.gl.ceir.config.service.impl.ForeignerServiceImpl;
 import com.gl.ceir.config.service.impl.ImmegreationServiceImpl;
 
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiOperation;
 
 @RestController
 public class ImmegreationController {
@@ -31,7 +31,7 @@ public class ImmegreationController {
 	ImmegreationServiceImpl immegreationServiceImpl;
 
 
-	@ApiOperation(value = "View All foreigner Details ", response = ForeignerDetails.class)
+	//@ApiOperation(value = "View All foreigner Details ", response = ForeignerDetails.class)
 	@RequestMapping(path = "/immegreation/view", method = RequestMethod.GET)
 	public MappingJacksonValue viewAllInfo() {
 
@@ -43,7 +43,7 @@ public class ImmegreationController {
 	}
 
 
-	@ApiOperation(value = "Update imei Action Status ", response = GenricResponse.class)
+	//@ApiOperation(value = "Update imei Action Status ", response = GenricResponse.class)
 	@RequestMapping(path = "/immegreation/imeiAction", method = RequestMethod.POST)
 
 	public GenricResponse updateActionStatus(@RequestBody SingleImeiDetails immegreationImeiDetails)
@@ -53,7 +53,7 @@ public class ImmegreationController {
 	}
 
 
-	@ApiOperation(value = "Update File Action Status ", response = GenricResponse.class)
+	//@ApiOperation(value = "Update File Action Status ", response = GenricResponse.class)
 	@RequestMapping(path = "/immegreation/fileAction", method = RequestMethod.POST)
 
 	public GenricResponse updatefileActionStatus(@RequestParam("file") MultipartFile file, String blockingType, String blockingTime ,String fileType)

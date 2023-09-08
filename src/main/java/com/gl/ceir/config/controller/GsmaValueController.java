@@ -16,7 +16,7 @@ import com.gl.ceir.config.service.impl.GsmaValueServiceImpl;
 import com.gl.ceir.config.model.app.AuditTrail;
 import com.gl.ceir.config.repository.app.AuditTrailRepository;
 
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
@@ -27,7 +27,7 @@ public class GsmaValueController {   // sachin Maverick
     @Autowired
     GsmaValueServiceImpl GsmaValueServiceImpl;
 
-    @ApiOperation(value = "View All list of Values of Gsma", response = GsmaValueModel.class)
+    //@ApiOperation(value = "View All list of Values of Gsma", response = GsmaValueModel.class)
     @PostMapping(path = "gsma/GsmaValues")
     public MappingJacksonValue getAllValues(@RequestBody FilterRequest checkImeiValuesEntity) {
 
@@ -135,7 +135,7 @@ public class GsmaValueController {   // sachin Maverick
         return mapping;
     }
 
-    @ApiOperation(value = " Check Imei Msisdn Combination Present ")
+    //@ApiOperation(value = " Check Imei Msisdn Combination Present ")
     @PostMapping(path = "gsma/CheckImeiMsisdnValues")
     public String CheckImeiMsisdnValues(String imei, String msisdn) {
         logger.info("Imei:   " + imei + " ;msisdn: " + msisdn);

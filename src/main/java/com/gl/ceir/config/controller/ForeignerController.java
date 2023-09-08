@@ -18,7 +18,7 @@ import com.gl.ceir.config.model.app.GenricResponse;
 import com.gl.ceir.config.service.impl.ForeignerServiceImpl;
 import com.gl.ceir.config.service.impl.SmsAccountServiceImpl;
 
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiOperation;
 
 @RestController
 public class ForeignerController {
@@ -29,7 +29,7 @@ public class ForeignerController {
 	@Autowired
 	ForeignerServiceImpl foreignerServiceImpl;
 
-	@ApiOperation(value = "Add foreigner Details ", response = GenricResponse.class)
+	//@ApiOperation(value = "Add foreigner Details ", response = GenricResponse.class)
 	@RequestMapping(path = "/foreigner/add", method = RequestMethod.POST)
 
 	public GenricResponse saveForeignerInfo(@RequestBody ForeignerRequest foreignerDetails  ) {
@@ -42,7 +42,7 @@ public class ForeignerController {
 
 	}
 
-	@ApiOperation(value = "View  foreigner Imei  Details using passport Number ", response = ForeignerImeiDetails.class)
+	//@ApiOperation(value = "View  foreigner Imei  Details using passport Number ", response = ForeignerImeiDetails.class)
 	@RequestMapping(path = "/foreigner/view", method = RequestMethod.GET)
 	public MappingJacksonValue viewImeiDetails(String passportNumber) {
 
@@ -55,7 +55,7 @@ public class ForeignerController {
 
 	}
 
-	@ApiOperation(value = "Update foreigner Details ", response = GenricResponse.class)
+	//@ApiOperation(value = "Update foreigner Details ", response = GenricResponse.class)
 	@RequestMapping(path = "/foreigner/update", method = RequestMethod.POST)
 	public GenricResponse updateForeignerInfo(@RequestBody ForeignerRequest foreignerDetails  ) {
 
@@ -65,7 +65,7 @@ public class ForeignerController {
 
 	}
 
-	@ApiOperation(value = "View passportNumber Record", response = ForeignerRequest.class)
+	//@ApiOperation(value = "View passportNumber Record", response = ForeignerRequest.class)
 	@RequestMapping(path = "/foreigner/view/record", method = RequestMethod.GET)
 	public MappingJacksonValue viewRecord(String passportNumber) {
 

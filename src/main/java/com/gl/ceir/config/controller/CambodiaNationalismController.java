@@ -15,7 +15,7 @@ import com.gl.ceir.config.model.app.NationalismImeiDetails;
 import com.gl.ceir.config.model.app.NationlismDetails;
 import com.gl.ceir.config.service.impl.NationalislmServiceImpl;
 
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiOperation;
 
 @RestController
 public class CambodiaNationalismController {
@@ -23,7 +23,7 @@ public class CambodiaNationalismController {
 	@Autowired
 	NationalislmServiceImpl nationalislmServiceImpl;
 
-	@ApiOperation(value = "Add Nationalism Details ", response = GenricResponse.class)
+	//@ApiOperation(value = "Add Nationalism Details ", response = GenricResponse.class)
 	@RequestMapping(path = "/nationallism/add", method = RequestMethod.POST)
 
 	public GenricResponse saveNationlismInfo(@RequestBody ForeignerRequest foreignerDetails){
@@ -32,7 +32,7 @@ public class CambodiaNationalismController {
 		return response;
 	}
 
-	@ApiOperation(value = "Update Nationalism Details ", response = GenricResponse.class)
+	//@ApiOperation(value = "Update Nationalism Details ", response = GenricResponse.class)
 	@RequestMapping(path = "/nationallism/update", method = RequestMethod.POST)
 
 	public GenricResponse updateNationlismInfo(@RequestBody ForeignerRequest foreignerDetails) {
@@ -43,7 +43,7 @@ public class CambodiaNationalismController {
 
 	}
 
-	@ApiOperation(value = "View  Nationalism Details ", response = NationalismImeiDetails.class)
+	//@ApiOperation(value = "View  Nationalism Details ", response = NationalismImeiDetails.class)
 	@RequestMapping(path = "/nationallism/view", method = RequestMethod.GET)
 
 	public MappingJacksonValue viewPassortDetails(String passportNumber) {
@@ -56,7 +56,7 @@ public class CambodiaNationalismController {
 
 	}
 
-	@ApiOperation(value = "View Passport UserName Nationalism Details.", response = NationalismImeiDetails.class)
+	//@ApiOperation(value = "View Passport UserName Nationalism Details.", response = NationalismImeiDetails.class)
 	@RequestMapping(path = "/nationallism/name", method = RequestMethod.GET)
 
 	public MappingJacksonValue viewUserName(String passportNumber) {
@@ -70,7 +70,7 @@ public class CambodiaNationalismController {
 
 
 
-	@ApiOperation(value = "View Passport UserName Nationalism Record.", response = ForeignerRequest.class)
+	//@ApiOperation(value = "View Passport UserName Nationalism Record.", response = ForeignerRequest.class)
 	@RequestMapping(path = "/nationallism/Record", method = RequestMethod.GET)
 
 	public MappingJacksonValue getRecord(String passportNumber) {
@@ -84,7 +84,7 @@ public class CambodiaNationalismController {
 	}
 
 
-	@ApiOperation(value = "Update TaxPaid Status.", response = GenricResponse.class)
+	//@ApiOperation(value = "Update TaxPaid Status.", response = GenricResponse.class)
 	@RequestMapping(path = "/nationallism/update/status", method = RequestMethod.POST)
 
 	public GenricResponse updateStatus(@RequestBody NationalismImeiDetails nationalismImeiDetails) {

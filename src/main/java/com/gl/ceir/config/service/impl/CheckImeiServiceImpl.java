@@ -119,7 +119,7 @@ public class CheckImeiServiceImpl {
 
  /*  *******************************  */
     public CheckImeiResponse getImeiDetailsDevices(CheckImeiRequest checkImeiRequest, long startTime) {
-        JSONObject deviceDetails = null;
+        //  JSONObject deviceDetails = null;
         String status = null;
         int complianceValue = 0;
         var isValidImei = false;
@@ -133,9 +133,10 @@ public class CheckImeiServiceImpl {
             gsmaTacDetails = gsmaTacDetailsRepository.getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
             if (gsmaTacDetails != null) {
                 isValidImei = true;
-                deviceDetails = deviceDetails(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
-                mappedDeviceDetails = new Gson().fromJson(deviceDetails.toString(), LinkedHashMap.class);
-                logger.info("Going for Message Tac Details  :" + gsmaTacDetails);
+                //  deviceDetails = deviceDetails(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
+                //  mappedDeviceDetails = new Gson().fromJson(deviceDetails.toString(), LinkedHashMap.class);
+                mappedDeviceDetails = deviceDetailsNew(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
+
                 if (gsmaTacDetails.getDevice_type().equalsIgnoreCase("Smartphone") || gsmaTacDetails.getDevice_type().contains("phone")) {
                     if (nationalWhiteListResponse) {
                         status = "WhiteListedSmartphone";
@@ -166,22 +167,22 @@ public class CheckImeiServiceImpl {
             //          else {
 //                status = ruleResponseStatus;
 //            }
-            logger.info("Status is  :->" + status + "!!! isValidImei" + isValidImei);
+            logger.info("Going for Message Tac Details  :" + gsmaTacDetails + "Status is  :->" + status + "!!! isValidImei" + isValidImei);
             var message = checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName(
                     checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
                     ? status + "ForUssd" : status,
                     checkImeiRequest.getLanguage().contains("kh") ? 2 : 1, "CheckImei").getValue()
-                    .replace("$imei", checkImeiRequest.getImei());
+                    .replace("<imei>", checkImeiRequest.getImei());
             logger.debug("Semi Response  message::  :" + message);
             var compStatus = checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName(
                     checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
                     ? status + "ComplianceForUssd" : status + "Compliance",
                     checkImeiRequest.getLanguage().contains("kh") ? 2 : 1, "CheckImei");
             logger.debug("Comp Status:::::::  :" + compStatus);
-            var complianceStatus = compStatus == null ? null : compStatus.getValue();
+            var complianceStatus = compStatus == null ? null : compStatus.getValue().replace("<imei>", checkImeiRequest.getImei());;
             logger.debug("Compliance Status::  :" + complianceStatus + ",Response via  mobileDeviceRepository :" + mappedDeviceDetails);
-            var symbol_color = systemConfigurationDbRepositry.getByTag(status + "SymbolColor").getValue();
-            var result = new Result(isValidImei, symbol_color, complianceStatus, message, deviceDetails == null ? null : mappedDeviceDetails);
+            var symbol_color = systemConfigurationDbRepositry.getByTag(status + "SymbolColor").getValue();    //  message, deviceDetails == null ? null :
+            var result = new Result(isValidImei, symbol_color, complianceStatus, message, mappedDeviceDetails == null ? null : mappedDeviceDetails);
             checkImeiRequest.setRequestProcessStatus("Success");
             checkImeiRequest.setImeiProcessStatus(isValidImei == true ? "Valid" : "Invalid");
             checkImeiRequest.setComplianceStatus(complianceStatus);
@@ -215,7 +216,7 @@ public class CheckImeiServiceImpl {
         logger.warn("------------------------------------------------------- " + desc);
         checkImeiRequest.setFail_process_description(desc);
         // alertServiceImpl.raiseAnAlert(Alerts.ALERT_1110.getName(), desc, "Check Imei ", 0);
-        logger.info("   Start Time = " + startTime + "; End Time  = " + System.currentTimeMillis() + "  !!! Request = " + checkImeiRequest.toString() + " ########## Response =" + desc);
+        logger.info(" CHECK_IMEI :  Start Time = " + startTime + "; End Time  = " + System.currentTimeMillis() + "  !!! Request = " + checkImeiRequest.toString() + " ########## Response =" + desc);
         saveCheckImeiRequest(checkImeiRequest, startTime);
     }
 
@@ -232,24 +233,6 @@ public class CheckImeiServiceImpl {
     public String globalErrorMsgs(String language) {
         return checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName("CheckImeiErrorMessage",
                 language.contains("kh") ? 2 : 1, "CheckImei").getValue();
-    }
-
-    private JSONObject deviceDetails(String brand_name, String modelName, String device_type, String manufacturer, String marketing_name, String lang) {
-        JSONObject item = new JSONObject();
-        try {
-            Field map = item.getClass().getDeclaredField("map");
-            map.setAccessible(true);//because the field is private final...
-            map.set(item, new LinkedHashMap<>());
-            map.setAccessible(false);//return flag
-        } catch (Exception e) {
-            logger.error("Json serial at " + e.getLocalizedMessage() + " ie " + e.getMessage());
-        }
-        item.put(lang.equals("en") ? "Brand Name" : languageLabelDbRepository.getKhmerNameFromLabel("brandName"), brand_name);
-        item.put(lang.equals("en") ? "Model Name" : languageLabelDbRepository.getKhmerNameFromLabel("modelName"), modelName);
-        item.put(lang.equals("en") ? "Manufacturer" : languageLabelDbRepository.getKhmerNameFromLabel("manufacturer"), manufacturer);
-        item.put(lang.equals("en") ? "Marketing Name" : languageLabelDbRepository.getKhmerNameFromLabel("marketingName"), marketing_name);
-        item.put(lang.equals("en") ? "Device Type" : languageLabelDbRepository.getKhmerNameFromLabel("deviceType"), device_type);
-        return item;
     }
 
     private void createPostRequestForNotification(CheckImeiRequest checkImeiRequest, Result result) {
@@ -307,33 +290,6 @@ public class CheckImeiServiceImpl {
         return nationalWhitelistRepository.getByImei(imei) == null ? false : true;
     }
 
-    private String getRuleResponse(CheckImeiRequest checkImeiRequest, long startTime) {
-        var ruleResponseStatus
-                = checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
-                ? "CheckImeiPassForUssd" : "CheckImeiPass";
-        try (Connection conn = connectionConfiguration.getConnection()) {
-            List<RuleEngineMapping> ruleList = checkImeiRepository.getByFeatureAndUserTypeOrderByRuleOrder("CheckImei", "default");
-            for (RuleEngineMapping rules : ruleList) {
-                Rule rule = new Rule(rules.getName(), rules.getOutput(), rules.getRuleMessage());
-                String[] my_arr = {
-                    rule.rule_name, "1", "NONCDR",
-                    checkImeiRequest.getImei(),
-                    "", "", "", "", "", "IMEI", "", " ", " ", ""};
-                String expOutput = RuleEngineApplication.startRuleEngine(my_arr, conn, null);
-                if (!rule.output.equalsIgnoreCase(expOutput)) {
-                    ruleResponseStatus = rule.rule_name;
-                    break;
-                }
-            }
-            conn.close();
-            return ruleResponseStatus;
-        } catch (SQLException e) {
-            logger.error(e.getMessage() + " : " + e.getLocalizedMessage());
-            saveCheckImeiFailDetails(checkImeiRequest, startTime, ruleResponseError);
-            throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
-        }
-
-    }
 
     public DeviceidBaseUrlDb getPreinitApi(String deviceId) {
         try {
@@ -362,4 +318,58 @@ public class CheckImeiServiceImpl {
         }
     }
 
+    private LinkedHashMap deviceDetailsNew(String brand_name, String model_name, String device_type, String manufacturer, String marketing_name, String lang) {
+        LinkedHashMap<String, String> item = new LinkedHashMap();
+        item.put(lang.equals("en") ? "Brand Name" : languageLabelDbRepository.getKhmerNameFromLabel("brandName"), brand_name);
+        item.put(lang.equals("en") ? "Model Name" : languageLabelDbRepository.getKhmerNameFromLabel("modelName"), model_name);
+        item.put(lang.equals("en") ? "Manufacturer" : languageLabelDbRepository.getKhmerNameFromLabel("manufacturer"), manufacturer);
+        item.put(lang.equals("en") ? "Marketing Name" : languageLabelDbRepository.getKhmerNameFromLabel("marketingName"), marketing_name);
+        item.put(lang.equals("en") ? "Device Type" : languageLabelDbRepository.getKhmerNameFromLabel("deviceType"), device_type);
+        return item;
+    }
 }
+
+//      private JSONObject deviceDetails(String brand_name, String modelName, String device_type, String manufacturer, String marketing_name, String lang) {
+//        JSONObject item = new JSONObject();
+//        try {
+//            Field map = item.getClass().getDeclaredField("map");
+//            map.setAccessible(true);//because the field is private final...
+//            map.set(item, new LinkedHashMap<>());
+//            map.setAccessible(false);//return flag
+//        } catch (Exception e) {
+//            logger.error("Json serial at " + e.getLocalizedMessage() + " ie " + e.getMessage());
+//        }
+//        item.put(lang.equals("en") ? "Brand Name" : languageLabelDbRepository.getKhmerNameFromLabel("brandName"), brand_name);
+//        item.put(lang.equals("en") ? "Model Name" : languageLabelDbRepository.getKhmerNameFromLabel("modelName"), modelName);
+//        item.put(lang.equals("en") ? "Manufacturer" : languageLabelDbRepository.getKhmerNameFromLabel("manufacturer"), manufacturer);
+//        item.put(lang.equals("en") ? "Marketing Name" : languageLabelDbRepository.getKhmerNameFromLabel("marketingName"), marketing_name);
+//        item.put(lang.equals("en") ? "Device Type" : languageLabelDbRepository.getKhmerNameFromLabel("deviceType"), device_type);
+//        return item;
+//    }
+
+//    private String getRuleResponse(CheckImeiRequest checkImeiRequest, long startTime) {
+//        var ruleResponseStatus
+//                = checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
+//                ? "CheckImeiPassForUssd" : "CheckImeiPass";
+//        try (Connection conn = connectionConfiguration.getConnection()) {
+//            List<RuleEngineMapping> ruleList = checkImeiRepository.getByFeatureAndUserTypeOrderByRuleOrder("CheckImei", "default");
+//            for (RuleEngineMapping rules : ruleList) {
+//                Rule rule = new Rule(rules.getName(), rules.getOutput(), rules.getRuleMessage());
+//                String[] my_arr = {
+//                    rule.rule_name, "1", "NONCDR",
+//                    checkImeiRequest.getImei(),
+//                    "", "", "", "", "", "IMEI", "", " ", " ", ""};
+//                String expOutput = RuleEngineApplication.startRuleEngine(my_arr, conn, null);
+//                if (!rule.output.equalsIgnoreCase(expOutput)) {
+//                    ruleResponseStatus = rule.rule_name;
+//                    break;
+//                }
+//            }
+//            conn.close();
+//            return ruleResponseStatus;
+//        } catch (SQLException e) {
+//            logger.error(e.getMessage() + " : " + e.getLocalizedMessage());
+//            saveCheckImeiFailDetails(checkImeiRequest, startTime, ruleResponseError);
+//            throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
+//        }
+//    }

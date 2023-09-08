@@ -24,7 +24,7 @@
 //import com.gl.ceir.config.model.SystemConfigurationHistoryDb;
 //import com.gl.ceir.config.service.impl.HistoryServiceImpl;
 //
-//import io.swagger.annotations.ApiOperation;
+////import io.swagger.annotations.ApiOperation;
 //
 //@RestController
 //public class HistoryController {
@@ -36,7 +36,7 @@
 //	HistoryServiceImpl historyServiceImpl;
 //
 //
-//	@ApiOperation(value = "View All Record of policy history Db.", response = PolicyConfigurationHistoryDb.class)
+//	//@ApiOperation(value = "View All Record of policy history Db.", response = PolicyConfigurationHistoryDb.class)
 //	@RequestMapping(path = "/history/policy", method = RequestMethod.POST)
 //	public MappingJacksonValue viewPolicy(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
 //			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -49,7 +49,7 @@
 //		return mapping;
 //	}
 //
-//	@ApiOperation(value = "View All Record of Message history Db.", response = MessageConfigurationHistoryDb.class)
+//	//@ApiOperation(value = "View All Record of Message history Db.", response = MessageConfigurationHistoryDb.class)
 //	@RequestMapping(path = "/history/message", method = RequestMethod.POST)
 //	public MappingJacksonValue viewMessage(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
 //			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -64,7 +64,7 @@
 //
 //	}
 //
-//	@ApiOperation(value = "View All Record of System history Db.", response = SystemConfigurationHistoryDb.class)
+//	//@ApiOperation(value = "View All Record of System history Db.", response = SystemConfigurationHistoryDb.class)
 //	@RequestMapping(path = "/history/system", method = RequestMethod.POST)
 //	public MappingJacksonValue viewSystem(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
 //			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -78,7 +78,7 @@
 //
 //	}
 //
-//	@ApiOperation(value = "View All Record of BlackList history Db.", response = BlacklistDbHistory.class)
+//	//@ApiOperation(value = "View All Record of BlackList history Db.", response = BlacklistDbHistory.class)
 //	@RequestMapping(path = "/history/Black", method = RequestMethod.POST)
 //	public MappingJacksonValue viewBlackList(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
 //			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -93,7 +93,7 @@
 //
 //	}
 //
-//	@ApiOperation(value = "View All Record of GreyList history Db.", response = GreylistDbHistory.class)
+//	//@ApiOperation(value = "View All Record of GreyList history Db.", response = GreylistDbHistory.class)
 //	@RequestMapping(path = "/history/Grey", method = RequestMethod.POST)
 //	public MappingJacksonValue viewGreyList(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
 //			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -108,7 +108,7 @@
 //
 //	}
 //
-//	@ApiOperation(value = "View All Record of Device history Db.", response = DeviceDbHistory.class)
+//	//@ApiOperation(value = "View All Record of Device history Db.", response = DeviceDbHistory.class)
 //	@RequestMapping(path = "/history/device", method = RequestMethod.POST)
 //	public MappingJacksonValue viewDevice(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
 //			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -125,7 +125,7 @@
 //
 //
 //
-//	@ApiOperation(value = "View All Record of Device history Db.", response = StolenAndRecoveryHistoryMgmt.class)
+//	//@ApiOperation(value = "View All Record of Device history Db.", response = StolenAndRecoveryHistoryMgmt.class)
 //	@RequestMapping(path = "/history/StlAndRcry", method = RequestMethod.POST)
 //	public MappingJacksonValue viewStolenAndRecovery(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
 //			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -141,7 +141,7 @@
 //	}
 //
 //
-//	@ApiOperation(value = "View All Record of Consignment history Db.", response = ConsignmentMgmtHistoryDb.class)
+//	//@ApiOperation(value = "View All Record of Consignment history Db.", response = ConsignmentMgmtHistoryDb.class)
 //	@RequestMapping(path = "/history/consignment", method = RequestMethod.POST)
 //	public MappingJacksonValue viewConsignment(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
 //			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -157,7 +157,7 @@
 //
 //
 //
-//	@ApiOperation(value = "View All Record of Device history Db.", response = StockMgmtHistoryDb.class)
+//	//@ApiOperation(value = "View All Record of Device history Db.", response = StockMgmtHistoryDb.class)
 //	@RequestMapping(path = "/history/Stock", method = RequestMethod.POST)
 //	public MappingJacksonValue viewStock(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
 //			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -172,7 +172,7 @@
 //	}
 //
 //
-//	@ApiOperation(value = "View All Record of Audit  Db.", response = AuditTrail.class)
+//	//@ApiOperation(value = "View All Record of Audit  Db.", response = AuditTrail.class)
 //	@RequestMapping(path = "/history/audit", method = RequestMethod.POST)
 //	public MappingJacksonValue viewAudit(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
 //			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -186,7 +186,7 @@
 //		return mapping;
 //	}
 //
-//	@ApiOperation(value = "View All Record of Audit  Db.", response = Notification.class)
+//	//@ApiOperation(value = "View All Record of Audit  Db.", response = Notification.class)
 //	@RequestMapping(path = "/history/Notification", method = RequestMethod.POST)
 //	public MappingJacksonValue viewNotification(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
 //			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
@@ -200,7 +200,7 @@
 //		return mapping;
 //	}
 //	
-//	@ApiOperation(value = "View All Record of Notification Db.", response = Notification.class)
+//	//@ApiOperation(value = "View All Record of Notification Db.", response = Notification.class)
 //	@RequestMapping(path = "v2/history/Notification", method = RequestMethod.POST)
 //	public MappingJacksonValue viewNotification(@RequestBody FilterRequest filterRequest,
 //			@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,

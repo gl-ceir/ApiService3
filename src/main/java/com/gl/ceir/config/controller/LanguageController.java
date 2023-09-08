@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
@@ -24,7 +24,7 @@ public class LanguageController {
     @Autowired
     LanguageServiceImpl languageServiceImpl;
 
-    @ApiOperation(value = "Get All Labels as Per Language", response = String.class)
+    //@ApiOperation(value = "Get All Labels as Per Language", response = String.class)
     @RequestMapping(path = "services/mobile_api/dialectRetreiver", method = RequestMethod.GET)
     public MappingJacksonValue getLanguageLabels(@RequestParam("language") String language,
             @RequestParam("feature_name") String feature_name) {

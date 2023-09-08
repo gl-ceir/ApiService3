@@ -7,12 +7,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
+
 @Table(name = "dev_brand_name")
 public class DevBrandName implements Serializable {
 
@@ -21,5 +18,37 @@ public class DevBrandName implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String brandName;
+    // brand_name is used by GUI not brandName
+    private String brand_name;
+
+    public DevBrandName(int id, String brand_name) {
+        this.id = id;
+        this.brand_name = brand_name;
+    }
+
+
+    public DevBrandName() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getBrand_name() {
+        return brand_name;
+    }
+
+    public void setBrand_name(String brand_name) {
+        this.brand_name = brand_name;
+    }
+
+    @Override
+    public String toString() {
+        return "DevBrandName{" + "id=" + id + ", brand_name=" + brand_name + '}';
+    }
+
 }

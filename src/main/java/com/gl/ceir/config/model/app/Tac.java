@@ -5,9 +5,9 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-import io.swagger.annotations.ApiModel;
+//import io.swagger.annotations.ApiModel;
 
-@ApiModel
+//@ApiModel
 @Entity
 public class Tac implements Serializable {
 	/**

@@ -7,7 +7,7 @@ package com.gl.ceir.config.model.app;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.simple.JSONObject;
-import springfox.documentation.spring.web.json.Json;
+//import springfox.documentation.spring.web.json.Json;
 
 /**
  *

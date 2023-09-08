@@ -31,7 +31,7 @@ import com.gl.ceir.config.repository.app.SystemConfigurationDbRepository;
 import com.gl.ceir.config.repository.app.UserFeatureIpAccessListRepository;
 import com.gl.ceir.config.repository.app.UserRepository;
 
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiOperation;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Base64;
@@ -109,7 +109,7 @@ public class CheckImeiController {  //sachin
     @Autowired
     AppDeviceDetailsRepository appDeviceDetailsRepository;
 
-    @ApiOperation(value = "Pre Init Api to get  Server", response = DeviceidBaseUrlDb.class)
+    //@ApiOperation(value = "Pre Init Api to get  Server", response = DeviceidBaseUrlDb.class)
     @RequestMapping(path = "services/mobile_api/preInit", method = RequestMethod.GET)
     public MappingJacksonValue getPreInit(@RequestParam("deviceId") String deviceId) {
         MappingJacksonValue mapping = new MappingJacksonValue(checkImeiServiceImpl.getPreinitApi(deviceId));
@@ -117,7 +117,7 @@ public class CheckImeiController {  //sachin
         return mapping;
     }
 
-    @ApiOperation(value = "Mobile Details", response = String.class)
+    //@ApiOperation(value = "Mobile Details", response = String.class)
     @PostMapping("services/mobile_api/mobileDeviceDetails/save")
     public MappingJacksonValue getMobileDeviceDetails(@RequestBody AppDeviceDetailsDb appDeviceDetailsDb) {
         errorValidationChecker(appDeviceDetailsDb);
@@ -141,7 +141,7 @@ public class CheckImeiController {  //sachin
     }
 
     /*  *******************************  */
-    @ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
+    //@ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
     @PostMapping("services/checkIMEI")
     public ResponseEntity checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
         String userIp = request.getHeader("HTTP_CLIENT_IP") == null
@@ -264,7 +264,7 @@ public class CheckImeiController {  //sachin
 //
 //                    checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, someWentWrongException);
 //                }
-//    @ApiOperation(value = "check Imei Api v2", response = CheckImeiResponse.class)
+//    //@ApiOperation(value = "check Imei Api v2", response = CheckImeiResponse.class)
 //    @PostMapping("checkImeiApiV1")
 //    public MappingJacksonValue checkImeiDeviceV1(@RequestBody CheckImeiRequest checkImeiRequest) {
 //        var result = checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest);

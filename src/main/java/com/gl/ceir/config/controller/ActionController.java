@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gl.ceir.config.model.app.Action;
 import com.gl.ceir.config.service.ActionService;
 
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiOperation;
 
 @RestController
 public class ActionController {
@@ -21,7 +21,7 @@ public class ActionController {
 	@Autowired
 	private ActionService actionService;
 
-	@ApiOperation(value = "View All available Action ", response = Action.class, responseContainer = "list")
+	//@ApiOperation(value = "View All available Action ", response = Action.class, responseContainer = "list")
 	@RequestMapping(path = "/Action/", method = RequestMethod.GET)
 	public MappingJacksonValue getAll() {
 		List<Action> allActions = actionService.getAll();

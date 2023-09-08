@@ -12,7 +12,7 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.RestController;
 import com.gl.ceir.config.service.impl.NotificationServiceImpl;
 
-import io.swagger.annotations.ApiOperation;
+//import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -23,7 +23,7 @@ public class NotificationController {//sachin
     @Autowired
     private NotificationServiceImpl notificationServiceImpl;
 
-    @ApiOperation(value = "Save all Notifications", response = String.class)
+    //@ApiOperation(value = "Save all Notifications", response = String.class)
     @PostMapping("addNotifications")
     public MappingJacksonValue addNotifications(@RequestBody Notification notification) {
         logger.info("Notification Request " + notification.toString());

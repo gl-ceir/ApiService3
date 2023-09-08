@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
@@ -29,5 +30,6 @@ public class ConfigApplication {
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(ConfigApplication.class, args);
     }
+
 
 }

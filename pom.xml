@@ -21,6 +21,7 @@
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -47,10 +48,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>
-     </dependency>
-
-   
-
+        </dependency>
 
         <dependency>
             <groupId>com.h2database</groupId>
@@ -58,35 +56,17 @@
             <scope>runtime</scope>
         </dependency>
 
-
-      
-
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20180130</version>
+            <version>20230618</version>
         </dependency>
-        
-        
+             
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency> 
-        
-        <!--        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>2.9.2</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>2.9.2</version>
-        </dependency>-->
-
-
-
+      
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
@@ -96,13 +76,7 @@
             <artifactId>hibernate-core</artifactId>
             <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>com.gl</groupId>
-            <artifactId>Rule_engine</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-
+ 
 
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
@@ -131,7 +105,6 @@
             <type>jar</type>
         </dependency>
 
-
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-envers</artifactId>
@@ -143,42 +116,12 @@
             <scope>runtime</scope>
         </dependency>
 
-
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
             <version>1.5.20</version>
             <type>jar</type>
         </dependency>
-
-
-
-
-
-
-        <!--To automatically  run on change-->
-
-        <!--   
-          <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-config</artifactId>
-        </dependency>
-
-     <dependency>
-           <groupId>org.springframework.boot</groupId>
-           <artifactId>spring-boot-starter-actuator</artifactId>
-       </dependency>
-       <dependency>
-           <groupId>org.springframework.security</groupId>
-           <artifactId>spring-security-config</artifactId>
-           <type>jar</type>
-       </dependency>
-       <dependency>
-           <groupId>org.springframework.security</groupId>
-           <artifactId>spring-security-web</artifactId>
-           <type>jar</type>
-        </dependency>-->
-
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -191,6 +134,48 @@
             <artifactId>log4j-core</artifactId>
             <version>2.20.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.gl</groupId>
+            <artifactId>Rule_engine</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.glocks</groupId>
+            <artifactId>Alert</artifactId>
+            <version>1.0</version>
+            <type>jar</type>
+        </dependency>
+
+
+        <!--   <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-web</artifactId>
+        </dependency> -->
+
+        <!--        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
 
 
     </dependencies>
@@ -242,6 +227,17 @@
 
 
 
+<!--        <dependency>
+    <groupId>io.springfox</groupId>
+    <artifactId>springfox-swagger2</artifactId>
+    <version>2.9.2</version>
+</dependency>
+
+<dependency>
+    <groupId>io.springfox</groupId>
+    <artifactId>springfox-swagger-ui</artifactId>
+    <version>2.9.2</version>
+</dependency>-->
 
 
 
@@ -309,4 +305,29 @@
 <!--        <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency> -->
+
+
+
+<!--To automatically  run on change-->
+
+<!--   
+  <dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-config</artifactId>
+</dependency>
+
+<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+<dependency>
+   <groupId>org.springframework.security</groupId>
+   <artifactId>spring-security-config</artifactId>
+   <type>jar</type>
+</dependency>
+<dependency>
+   <groupId>org.springframework.security</groupId>
+   <artifactId>spring-security-web</artifactId>
+   <type>jar</type>
 </dependency>-->

@@ -13,13 +13,13 @@ import org.springframework.context.annotation.Configuration;
 @EnableCaching
 public class CachingConfig {
 
-	@Bean
+    @Bean
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
-       
+
         cacheManager.setCaches(Arrays.asList(
-          new ConcurrentMapCache("system_config_list")));
-        
+                new ConcurrentMapCache("system_config_list")));
+
         return cacheManager;
     }
 }

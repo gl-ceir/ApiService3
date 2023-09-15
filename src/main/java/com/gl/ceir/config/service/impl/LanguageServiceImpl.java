@@ -40,9 +40,39 @@ public class LanguageServiceImpl {
             }
             return new LanguageResponse(language, (JSONObject) new JSONParser().parse(responseValue));
         } catch (Exception e) {
-            logger.error(e.getMessage() +" : "+ e.getLocalizedMessage());
+            logger.error(e + " : " + e.getLocalizedMessage());
             alertServiceImpl.raiseAnAlert(Alerts.ALERT_1105.getName(), 0);
-            throw new InternalServicesException(this.getClass().getName(), e.getLocalizedMessage());
+            throw new InternalServicesException("en", e.getLocalizedMessage());
         }
     }
+
+//    public LanguageResponse getLanguageLabels1(String featureName, String language) {
+//        String responseValue;
+//        try {
+//            if (language.contains("kh")) {
+//                responseValue = languageLabelDbRepository.getKhmerNameAndLabelFromFeatureName(featureName);
+//            } else {
+//                responseValue = languageLabelDbRepository.getEnglishNameAndLabelFromFeatureName(featureName);
+//            }
+//            logger.info("Value " + responseValue);
+//
+//            JsonObject jo = JsonParser.parseString(responseValue).getAsJsonObject();
+//
+//            logger.info("JsonObject " + jo);
+//
+//            return new LanguageResponse(language, jo);
+//
+////            var n1 = new JSONParser().parse(responseValue);
+////            logger.info("n1 " + n1);
+////            var n2 = (JSONObject) n1;
+////            logger.info("n2 " + n2);
+//
+//            //  return new LanguageResponse(language, (JSONObject) new JSONParser().parse(responseValue));
+//        } catch (Exception e) {
+//            logger.error(e + " : " + e.getLocalizedMessage());
+//            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1105.getName(), 0);
+//            throw new InternalServicesException("en", e.getLocalizedMessage());
+//        }
+//    }
+
 }

@@ -5,6 +5,7 @@
 package com.gl.ceir.config.service.impl;
 
 import com.gl.ceir.config.model.app.AlertDb;
+import com.gl.ceir.config.model.app.AlertRequest;
 import com.gl.ceir.config.model.app.RunningAlertDb;
 import com.gl.ceir.config.repository.app.AlertDbRepository;
 import com.gl.ceir.config.repository.app.RunningAlertDbRepository;
@@ -29,6 +30,40 @@ public class AlertServiceImpl {
 
     @Autowired
     RunningAlertDbRepository runningAlertDbRepository;
+
+    public GenricResponse raiseAlertById(String alertId) {
+        try {
+            AlertDb alertDb = alertDbRepository.getByAlertId(alertId);
+            if (alertDb == null) {
+                return new GenricResponse(1, "Fail", "No id found");
+            }
+            logger.info("Description:::" + alertDb.getDescription());
+            runningAlertDbRepository.save(new RunningAlertDb(0, alertId, alertDb.getDescription(), 0));
+            return new GenricResponse(0, "Success");
+        } catch (Exception e) {
+            logger.error("Error while raising error by  alert Id " + alertId + "" + e.getMessage(), e);
+            return new GenricResponse(1, "Fail", e.getLocalizedMessage());
+        }
+    }
+
+    public GenricResponse saveAlertWithParam(AlertRequest alertRequest) {
+        try {
+            AlertDb alertDb = alertDbRepository.getByAlertId(alertRequest.getAlertId());
+            if (alertDb == null) {
+                return new GenricResponse(1, "Fail", "Alert id Not Found");
+            }
+            alertDb.setDescription(alertDb.getDescription()
+                    .replaceAll("<e>", alertRequest.getAlertMessage() == null ? "" : alertRequest.getAlertMessage())
+                    .replaceAll("<process_name>", alertRequest.getAlertProcess() == null ? "" : alertRequest.getAlertProcess()));
+
+            runningAlertDbRepository.save(new RunningAlertDb(alertRequest.getUserId(), alertRequest.getAlertId(), alertDb.getDescription(), 0));
+            return new GenricResponse(0, "Success");
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return new GenricResponse(1, "Fail", e.getLocalizedMessage());
+        }
+
+    }
 
     public GenricResponse raiseAnAlert(String alertId, int userId) {
         try {
@@ -67,27 +102,8 @@ public class AlertServiceImpl {
 //            if (upload.exitValue() == 0) {
 //                logger.info("Process successfully executed ");
 //            }            //      return new GenricResponse(0);
-
 //        } catch (Exception e) { //      return new GenricResponse(1);
 //            logger.error("Not able to execute Alert mgnt jar ", e);
 //        }
 //    }
-
-
 }
-
-//        try { 
-//            AlertDb alertDb = alertDbRepository.getByAlertId(alertId);
-//            // Replace Placeholders from bodyPlaceHolderMap.
-//            if (Objects.nonNull(bodyPlaceHolderMap)) {
-//                for (Map.Entry<String, String> entry : bodyPlaceHolderMap.entrySet()) {
-//                    logger.info("Placeholder key : " + entry.getKey() + " value : " + entry.getValue());
-//                    alertDb.setDescription(alertDb.getDescription().replaceAll(entry.getKey(), entry.getValue()));
-//                }
-//            }
-//            runningAlertDbRepository.save(new RunningAlertDb(userId, alertId, alertDb.getDescription(), 0));
-//            return new GenricResponse(0);
-//        } catch (Exception e) {
-//            logger.error(e.getMessage(), e);
-//            return new GenricResponse(1);
-//        }

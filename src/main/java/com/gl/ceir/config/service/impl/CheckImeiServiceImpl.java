@@ -169,18 +169,19 @@ public class CheckImeiServiceImpl {
 //            }
             logger.info("Going for Message Tac Details  :" + gsmaTacDetails + "Status is  :->" + status + "!!! isValidImei" + isValidImei);
             var message = checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName(
-                    checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
-                    ? status + "ForUssd" : status,
-                    checkImeiRequest.getLanguage().contains("kh") ? 2 : 1, "CheckImei").getValue()
+                    checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? status + "ForUssd" : checkImeiRequest.getChannel().equalsIgnoreCase("sms")
+                    ? status + "ForSms" : status,
+                    checkImeiRequest.getLanguage().contains("kh") ? 2 : 1,
+                    "CheckImei")
+                    .getValue()
                     .replace("<imei>", checkImeiRequest.getImei());
-            logger.debug("Semi Response  message::  :" + message);
+            logger.info("Semi Response  message::  :" + message);
             var compStatus = checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName(
-                    checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")
-                    ? status + "ComplianceForUssd" : status + "Compliance",
+                    checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? status + "ComplianceForUssd" : checkImeiRequest.getChannel().equalsIgnoreCase("sms") ? status + "ComplianceForSms" : status + "Compliance",
                     checkImeiRequest.getLanguage().contains("kh") ? 2 : 1, "CheckImei");
-            logger.debug("Comp Status:::::::  :" + compStatus);
+            logger.info("Comp Status:::::::  :" + compStatus);
             var complianceStatus = compStatus == null ? null : compStatus.getValue().replace("<imei>", checkImeiRequest.getImei());;
-            logger.debug("Compliance Status::  :" + complianceStatus + ",Response via  mobileDeviceRepository :" + mappedDeviceDetails);
+            logger.info("Compliance Status::  :" + complianceStatus + ",Response via  mobileDeviceRepository :" + mappedDeviceDetails);
             var symbol_color = systemConfigurationDbRepositry.getByTag(status + "SymbolColor").getValue();    //  message, deviceDetails == null ? null :
             var result = new Result(isValidImei, symbol_color, complianceStatus, message, mappedDeviceDetails == null ? null : mappedDeviceDetails);
             checkImeiRequest.setRequestProcessStatus("Success");

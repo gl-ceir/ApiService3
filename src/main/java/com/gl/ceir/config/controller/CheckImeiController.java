@@ -35,6 +35,7 @@ import com.gl.ceir.config.repository.app.UserRepository;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,6 +79,9 @@ public class CheckImeiController {  //sachin
     private String sQLException;
     @Value("${someWentWrongException}")
     private String someWentWrongException;
+
+    @Value("#{'${languageType}'.split(',')}")
+    public List<String> languageType;
 
     @Autowired
     CheckImeiServiceImpl checkImeiServiceImpl;
@@ -130,13 +134,13 @@ public class CheckImeiController {  //sachin
     void errorValidationChecker(AppDeviceDetailsDb appDeviceDetailsDb) {
         logger.info(appDeviceDetailsDb.toString());
         if (appDeviceDetailsDb.getDeviceDetails() == null || appDeviceDetailsDb.getDeviceId() == null || appDeviceDetailsDb.getLanguageType() == null || appDeviceDetailsDb.getOsType() == null) {
-            throw new MissingRequestParameterException(this.getClass().getName(), "parameter missing");
+            throw new MissingRequestParameterException("en", "parameter missing");
         }
         if (appDeviceDetailsDb.getDeviceId().isBlank()
                 || appDeviceDetailsDb.getLanguageType().trim().length() < 2
                 || appDeviceDetailsDb.getOsType().isBlank()
                 || appDeviceDetailsDb.getDeviceId().trim().length() > 50) {
-            throw new UnprocessableEntityException(this.getClass().getName(), "provide specified field value");
+            throw new UnprocessableEntityException("en", "provide specified field value");
         }
     }
 

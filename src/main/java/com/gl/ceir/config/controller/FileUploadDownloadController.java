@@ -4,14 +4,14 @@
  */
 package com.gl.ceir.config.controller;
 
+import co.glocks.AlertApplication;
+import com.gl.ceir.config.configuration.ConnectionConfiguration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -21,11 +21,13 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.io.IOException;
+import java.sql.Connection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -88,6 +90,20 @@ public class FileUploadDownloadController {
                 .body(resource);
     }
 
+    @GetMapping("/testController")
+    public MappingJacksonValue getMobileDeviceDetails(@RequestParam("user") String user, @RequestParam("pass") String pass) {
+        logger.info("Going to raise  = " + pass);
+
+        // ConnectionConfiguration connectionConfiguration = null;
+        Connection conn = new ConnectionConfiguration().getConnection();
+        //  AlarmApplication.raiseAlertnew("alert006", " Sample alert ", "Test  No Process", 0);
+     AlertApplication.raiseAlert(conn, "alert006", " Sample alert ", "Test  No Process", 0);
+        // AlertApplication.raiseAlert("alert006", " Sample alert ", "Test  No Process", 0);
+        // boolean d = Alarm.raiseAlert("alert006", " Sample alert ", "Test  No Process", 0);
+
+        logger.info("Going to raise  = ");
+        return new MappingJacksonValue(null);
+    }
 }
 
 //    public String getResult(String user_type, String feature, String imei, Long imei_type) {

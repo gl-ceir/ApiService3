@@ -5,16 +5,10 @@
 package com.gl.ceir.config.service.impl;
 
 import com.gl.ceir.config.exceptions.InternalServicesException;
-import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
 import com.gl.ceir.config.model.app.Notification;
 import com.gl.ceir.config.model.constants.Alerts;
-import com.gl.ceir.config.repository.app.AuditTrailRepository;
-import com.gl.ceir.config.repository.app.CheckImeiRepository;
 import com.gl.ceir.config.repository.app.NotificationRepository;
 import com.gl.ceir.config.repository.app.OperatorSeriesRepository;
-import com.gl.ceir.config.repository.app.SystemConfigurationDbRepository;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,7 +4,7 @@
  */
 package com.gl.ceir.config.model.app;
 
-import com.google.gson.JsonObject;
+// import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.simple.JSONObject;

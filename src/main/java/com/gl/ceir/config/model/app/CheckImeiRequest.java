@@ -31,29 +31,32 @@ public class CheckImeiRequest implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Transient
-    private Date createdOn;
-
     private String imei;
     private String msisdn;
     private String operator;
     private String imsi;
     private String language;
     private String channel;
-    private String requestProcessStatus;
-    private String imeiProcessStatus;
-    private String checkProcessTime;
-    private String complianceStatus;
-    private int complianceValue;
     private String utm_source;
     private String browser;
     private String public_ip;
     private String header_browser;
     private String header_public_ip;
+    private String os_type;
+
+    private String requestProcessStatus;
+    private String imeiProcessStatus;
+    private String checkProcessTime;
+    private String complianceStatus;
+
     private String symbol_color;
     private String device_id;
-    private String os_type;
     private String fail_process_description;
+    private int complianceValue;
+
+    @Transient
+    private Date createdOn;
+
 
     @Override
     public String toString() {

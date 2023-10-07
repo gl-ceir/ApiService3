@@ -1,4 +1,4 @@
-package com.gl.ceir.config;
+package com.gl.ceir;
 
 
 import org.springframework.boot.SpringApplication;
@@ -16,10 +16,11 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableConfigurationProperties
-@EnableJpaAuditing
+//@EnableJpaAuditing
 @EnableAutoConfiguration
-@EnableCaching
-@EntityScan({"com.gl.ceir.config.audit.model"})
+// @EnableCaching
+@EntityScan({"com.gl.ceir.config.model"})
+
 @ComponentScan({"com.gl.ceir.config"})
 
 @EnableEncryptableProperties

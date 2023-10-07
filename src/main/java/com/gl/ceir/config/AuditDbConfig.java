@@ -18,14 +18,19 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
 import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 
 @Configuration
 @EnableTransactionManagement
+
 @EnableJpaRepositories(
-        basePackages = {"com.gl.ceir.config.repository.audit"},  // 
+        basePackages = {"com.gl.ceir.config.repository.aud"}, // 
         entityManagerFactoryRef = "auditEntityManagerFactory",
-        transactionManagerRef = "auditTransactionManager")
-@EntityScan( "com.gl.ceir.config.model.audit" )
+        transactionManagerRef = "auditTransactionManager",
+        repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
+
+@EntityScan("com.gl.ceir.config.model.aud")
 
 public class AuditDbConfig {
 
@@ -35,7 +40,7 @@ public class AuditDbConfig {
             EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.gl.ceir.config.model.audit")  //
+                .packages("com.gl.ceir.config.model.aud") //
                 .persistenceUnit("aud")                   //
                .properties(jpaProperties())
                 .build();
@@ -52,7 +57,6 @@ public class AuditDbConfig {
             @Qualifier("auditEntityManagerFactory") LocalContainerEntityManagerFactoryBean auditEntityManagerFactory) {
         return new JpaTransactionManager(Objects.requireNonNull(auditEntityManagerFactory.getObject()));
     }
-    
     
    protected Map<String, Object> jpaProperties() {
     Map<String, Object> props = new HashMap<>();

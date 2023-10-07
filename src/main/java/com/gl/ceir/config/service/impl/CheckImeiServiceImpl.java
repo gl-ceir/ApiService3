@@ -11,8 +11,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.gl.Rule_engine_Old.RuleEngineApplication;
-import com.gl.ceir.config.configuration.ConnectionConfiguration;
+//import com.gl.Rule_engine_Old.RuleEngineApplication;
+// import com.gl.ceir.config.configuration.ConnectionConfiguration;
 import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
 import com.gl.ceir.config.model.app.CheckImeiRequest;
@@ -23,7 +23,7 @@ import com.gl.ceir.config.model.app.GsmaTacDetails;
 import com.gl.ceir.config.model.app.Notification;
 import com.gl.ceir.config.model.app.RuleEngineMapping;
 import com.gl.ceir.config.model.constants.Alerts;
-import com.gl.ceir.config.repository.app.AuditTrailRepository;
+import com.gl.ceir.config.repository.aud.AuditTrailRepository;
 import com.gl.ceir.config.repository.app.CheckImeiRepository;
 import com.gl.ceir.config.repository.app.GsmaTacDetailsRepository;
 import com.gl.ceir.config.repository.app.SystemConfigurationDbRepository;
@@ -46,6 +46,7 @@ import java.util.List;
 import org.json.JSONObject;
 //import org.json.JSONObject;
 import com.google.gson.Gson;
+import javax.servlet.http.HttpServletRequest;
 import org.hibernate.exception.SQLGrammarException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -73,9 +74,6 @@ public class CheckImeiServiceImpl {
     @Autowired
     CheckImeiRepository checkImeiRepository;
 
-    @Autowired
-    AuditTrailRepository auditTrailRepository;
-
     @PersistenceContext
     EntityManager entityManager;
 
@@ -91,8 +89,8 @@ public class CheckImeiServiceImpl {
     @Autowired
     GsmaTacDetailsRepository gsmaTacDetailsRepository;
 
-    @Autowired
-    ConnectionConfiguration connectionConfiguration;
+//    @Autowired
+//    ConnectionConfiguration connectionConfiguration;
 
     @Autowired
     CheckImeiRequestRepository checkImeiRequestRepository;
@@ -167,7 +165,7 @@ public class CheckImeiServiceImpl {
             //          else {
 //                status = ruleResponseStatus;
 //            }
-            logger.info("Going for Message Tac Details  :" + gsmaTacDetails + "Status is  :->" + status + "!!! isValidImei" + isValidImei);
+            logger.info("Status is  :->" + status + ", For Channel -" + checkImeiRequest.getChannel() + ", For Language -" + checkImeiRequest.getLanguage() + "  isValidImei:-> " + isValidImei);
             var message = checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName(
                     checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? status + "ForUssd" : checkImeiRequest.getChannel().equalsIgnoreCase("sms")
                     ? status + "ForSms" : status,
@@ -192,7 +190,13 @@ public class CheckImeiServiceImpl {
             saveCheckImeiRequest(checkImeiRequest, startTime);
             if (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && systemConfigurationDbRepositry.getByTag("send_sms_flag").getValue().equalsIgnoreCase("true")) {
                 logger.info("Going for ussd and send_sms_flag true  ");
-                createPostRequestForNotification(checkImeiRequest, result);
+                var smsMessage = checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName(
+                        status + "ForSms",
+                        checkImeiRequest.getLanguage().contains("kh") ? 2 : 1,
+                        "CheckImei")
+                        .getValue()
+                        .replace("<imei>", checkImeiRequest.getImei());
+                createPostRequestForNotification(checkImeiRequest, result, smsMessage);
             }
             return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()), StatusMessage.FOUND.getName(), checkImeiRequest.getLanguage(), result);
         } catch (Exception e) {
@@ -236,8 +240,8 @@ public class CheckImeiServiceImpl {
                 language.contains("kh") ? 2 : 1, "CheckImei").getValue();
     }
 
-    private void createPostRequestForNotification(CheckImeiRequest checkImeiRequest, Result result) {
-        var notification = new Notification("SMS", result.getMessage(), "CheckImei", 0, 0, checkImeiRequest.getMsisdn(),
+    private void createPostRequestForNotification(CheckImeiRequest checkImeiRequest, Result result, String smsMessage) {
+        var notification = new Notification("SMS", smsMessage, "CheckImei", 0, 0, checkImeiRequest.getMsisdn(),
                 checkImeiRequest.getOperator(), checkImeiRequest.getLanguage(), checkImeiRequest.getOperator());
         Gson gson = new Gson();
         String body = gson.toJson(notification, Notification.class);

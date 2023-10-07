@@ -20,17 +20,19 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
 import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
         basePackages = {"com.gl.ceir.config.repository.app"},
         entityManagerFactoryRef = "appEntityManagerFactory",
-        transactionManagerRef = "appTransactionManager")
+        transactionManagerRef = "appTransactionManager",
+        repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
+
 @EntityScan("com.gl.ceir.config.model.app")
 
 public class AppDbConfig {
-
     @Primary
     @Bean(name = "appEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean appEntityManagerFactory(
@@ -42,39 +44,19 @@ public class AppDbConfig {
                 .persistenceUnit("app") // CHANGE TO CEIR 
                 .properties(jpaProperties())
                 .build();
-        // builder.dataSource(dataSource).packages("com.javadevjournal.product.data").persistenceUnit("db2").build();
-
     }
-
     @Primary
     @Bean(name = "appTransactionManager")
     public PlatformTransactionManager appTransactionManager(
             @Qualifier("appEntityManagerFactory") LocalContainerEntityManagerFactoryBean appEntityManagerFactory) {
         return new JpaTransactionManager(Objects.requireNonNull(appEntityManagerFactory.getObject()));
     }
-
-    // DataSource Configs
     @Primary
     @Bean(name = "appDataSource")
     @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource appDataSource() {
         return DataSourceBuilder.create().build();
     }
-
-//    @Bean
-//    @ConfigurationProperties("spring.datasource")
-//    public DataSourceProperties appDataSourceProperties() {
-//        return new DataSourceProperties();
-//    }
-//
-//    
-//     @Primary
-//    @Bean(name = "appDataSource")
-//    public DataSource appDataSource() {
-//        return appDataSourceProperties()
-//                .initializeDataSourceBuilder()
-//                .build();
-//    }
     
     protected Map<String, Object> jpaProperties() {
         Map<String, Object> props = new HashMap<>();
@@ -84,3 +66,18 @@ public class AppDbConfig {
     }
 
 }
+
+//    @Bean
+//    @ConfigurationProperties("spring.datasource")
+//    public DataSourceProperties appDataSourceProperties() {
+//        return new DataSourceProperties();
+//    }
+//
+//            // builder.dataSource(dataSource).packages("com.javadevjournal.product.data").persistenceUnit("db2").build();
+//     @Primary
+//    @Bean(name = "appDataSource")
+//    public DataSource appDataSource() {
+//        return appDataSourceProperties()
+//                .initializeDataSourceBuilder()
+//                .build();
+//    }

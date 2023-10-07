@@ -4,8 +4,7 @@
  */
 package com.gl.ceir.config.controller;
 
-import co.glocks.AlertApplication;
-import com.gl.ceir.config.configuration.ConnectionConfiguration;
+// import com.gl.ceir.config.configuration.ConnectionConfiguration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.gl.ceir.config.model.app.FileUploadDownloadResponse;
+import com.gl.ceir.config.repository.app.CheckImeiPreInitRepository;
+import com.gl.ceir.config.repository.aud.AuditTrailRepository;
+import com.gl.ceir.config.repository.app.ModulesAuditTrailRepository;
 import com.gl.ceir.config.service.impl.FileStorageService;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
@@ -39,6 +41,15 @@ public class FileUploadDownloadController {
 
     @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired
+    CheckImeiPreInitRepository checkImeiPreInitRepository;
+
+//    @Autowired
+//    ModulesAuditTrailRepository modulesAuditTrailRepository;
+//
+//    @Autowired
+//    AuditTrailRepository auditTrailRepository;
 
     private static final Logger logger = LogManager.getLogger(FileUploadDownloadController.class);
 
@@ -95,15 +106,45 @@ public class FileUploadDownloadController {
         logger.info("Going to raise  = " + pass);
 
         // ConnectionConfiguration connectionConfiguration = null;
-        Connection conn = new ConnectionConfiguration().getConnection();
+     //   Connection conn = new ConnectionConfiguration().getConnection();
         //  AlarmApplication.raiseAlertnew("alert006", " Sample alert ", "Test  No Process", 0);
-     AlertApplication.raiseAlert(conn, "alert006", " Sample alert ", "Test  No Process", 0);
+    // AlertApplication.raiseAlert(conn, "alert006", " Sample alert ", "Test  No Process", 0);
         // AlertApplication.raiseAlert("alert006", " Sample alert ", "Test  No Process", 0);
         // boolean d = Alarm.raiseAlert("alert006", " Sample alert ", "Test  No Process", 0);
 
         logger.info("Going to raise  = ");
         return new MappingJacksonValue(null);
     }
+
+    @GetMapping("/multiDbController")
+    public MappingJacksonValue multiChecks() {
+        logger.info("Going to Checks   ");
+        try {
+//            var result = modulesAuditTrailRepository.getById(100);
+//            logger.info("Details Get : " + result.toString());
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage() + "::#########************##########::" + e.toString());
+        }
+
+        logger.info("Going to NEW    ");
+        try {
+//            var result = auditTrailRepository.getById(1);
+//            logger.info("NEW Details Get : " + result.toString());
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage() + "::#########************##########::" + e.toString());
+        }
+        try {
+            var response = checkImeiPreInitRepository.getByDeviceId("default_setup");
+            logger.info("Response  " + response.toString());
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage() + "::###################::" + e.toString());
+        }
+
+        //  ModulesAuditTrail modulesAuditTrail = new ModulesAuditTrail("Code 0", "Staus ", 0, "Error Message", "Module", "test_feature");
+        return new MappingJacksonValue("Success Test");
+    }
+
+
 }
 
 //    public String getResult(String user_type, String feature, String imei, Long imei_type) {

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 //import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,6 +32,7 @@ public class LanguageController {
     LanguageServiceImpl languageServiceImpl;
 
     //@ApiOperation(value = "Get All Labels as Per Language", response = String.class)
+    @CrossOrigin(origins = "", allowedHeaders = "")
     @RequestMapping(path = "services/mobile_api/dialectRetreiver", method = RequestMethod.GET)
     public MappingJacksonValue getLanguageLabels(@RequestParam("language") String language,
             @RequestParam("feature_name") String feature_name) {

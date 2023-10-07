@@ -1,5 +1,6 @@
-package com.gl.ceir.config;
+package com.gl.ceir.config.security;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +23,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                //.addFilter(hostHeaderValidationFilter())
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/**").permitAll()
@@ -40,7 +42,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .frameOptions().sameOrigin() //    .contentTypeOptions().disable()
                  ; // Disable X-Content-Type-Options for development
     }
+
+//    @Bean
+//    public HostHeaderValidationFilter hostHeaderValidationFilter() {
+//        return new HostHeaderValidationFilter();
+//    }
 }
+
 
 //.addHeaderWriter(new StaticHeadersWriter("X-Content-Security-Policy", "script-src 'self'"))
 //

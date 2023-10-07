@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -114,14 +115,19 @@ public class CheckImeiController {  //sachin
     AppDeviceDetailsRepository appDeviceDetailsRepository;
 
     //@ApiOperation(value = "Pre Init Api to get  Server", response = DeviceidBaseUrlDb.class)
+    @CrossOrigin(origins = "", allowedHeaders = "")
     @RequestMapping(path = "services/mobile_api/preInit", method = RequestMethod.GET)
     public MappingJacksonValue getPreInit(@RequestParam("deviceId") String deviceId) {
+        String host = request.getHeader("Host");
+        System.out.println("Host Name " + host);
+        logger.info("Host Name::: " + host);
         MappingJacksonValue mapping = new MappingJacksonValue(checkImeiServiceImpl.getPreinitApi(deviceId));
         logger.info("Response of View =" + mapping);
         return mapping;
     }
 
     //@ApiOperation(value = "Mobile Details", response = String.class)
+    @CrossOrigin(origins = "", allowedHeaders = "")
     @PostMapping("services/mobile_api/mobileDeviceDetails/save")
     public MappingJacksonValue getMobileDeviceDetails(@RequestBody AppDeviceDetailsDb appDeviceDetailsDb) {
         errorValidationChecker(appDeviceDetailsDb);
@@ -146,13 +152,14 @@ public class CheckImeiController {  //sachin
 
     /*  *******************************  */
     //@ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
+    @CrossOrigin(origins = "", allowedHeaders = "")
     @PostMapping("services/checkIMEI")
     public ResponseEntity checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
+        var startTime = System.currentTimeMillis();  // this can be stored in setRequestProcessStatus
         String userIp = request.getHeader("HTTP_CLIENT_IP") == null
                 ? (request.getHeader("X-FORWARDED-FOR") == null ? request.getRemoteAddr()
                 : request.getHeader("X-FORWARDED-FOR"))
                 : request.getHeader("HTTP_CLIENT_IP");
-        var startTime = System.currentTimeMillis();  // this can be stored in setRequestProcessStatus
 //        try {
 //            logger.debug("user-agent " + request.getHeader("user-agent") + ";ClientIP " + request.getHeader("Client-IP") + ";userIp " + userIp + ";getRemoteHost " + request.getRemoteHost() + ";getLocalAddr " + request.getLocalAddr() + ";getAuthType " + request.getAuthType() + ";getRemoteAddr " + request.getRemoteAddr() + ";getServletPath " + request.getServletPath() + ";getRemoteAddr " + request.getRemoteAddr() + ";X-FORWARDED-FOR " + request.getHeader("X-FORWARDED-FOR") + "; HTTP_CLIENT_IP " + request.getHeader("HTTP_CLIENT_IP"));
 //        } catch (Exception e) {
@@ -163,7 +170,7 @@ public class CheckImeiController {  //sachin
         checkImeiRequest.setHeader_public_ip(userIp);
         var language = checkImeiRequest.getLanguage() == null ? "en" : checkImeiRequest.getLanguage().equalsIgnoreCase("kh") ? "kh" : "en";
         checkImeiRequest.setLanguage(language);    // needs refactoring
-        logger.debug(checkImeiRequest.toString());
+        logger.info(checkImeiRequest.toString());
         errorValidationChecker(checkImeiRequest, startTime);
         authorizationChecker(checkImeiRequest, startTime);
         logger.debug("Going for values ");
@@ -185,9 +192,9 @@ public class CheckImeiController {  //sachin
                 || (checkImeiRequest.getMsisdn() != null && (checkImeiRequest.getMsisdn().trim().length() > 20 || !(checkImeiRequest.getMsisdn().matches("[0-9 ]+"))))
                 || (checkImeiRequest.getLanguage() != null && checkImeiRequest.getLanguage().trim().length() > 2)
                 || (checkImeiRequest.getOperator() != null && checkImeiRequest.getOperator().trim().length() > 20)
-                || (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getImsi() == null || checkImeiRequest.getOperator() == null || checkImeiRequest.getOperator().isBlank() || checkImeiRequest.getMsisdn().isBlank() || checkImeiRequest.getImsi().length() != 15 || !checkImeiRequest.getImsi().matches("[0-9]+")))
+                || (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getOperator() == null || checkImeiRequest.getOperator().isBlank() || checkImeiRequest.getMsisdn().isBlank()))
                 || (checkImeiRequest.getChannel().equalsIgnoreCase("sms") && (checkImeiRequest.getMsisdn() == null || checkImeiRequest.getMsisdn().isBlank() || checkImeiRequest.getOperator() == null || checkImeiRequest.getOperator().isBlank()))) {
-            logger.debug("Not allowed " + checkImeiRequest.getChannel());
+            logger.info("Not allowed " + checkImeiRequest.getChannel());
             checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, requiredValueNotPresent);
             throw new UnprocessableEntityException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
         }
@@ -196,7 +203,7 @@ public class CheckImeiController {  //sachin
     private void authorizationChecker(CheckImeiRequest checkImeiRequest, long startTime) {
         if (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || (checkImeiRequest.getChannel().equalsIgnoreCase("sms"))) {
             if (!Optional.ofNullable(request.getHeader("Authorization")).isPresent() || !request.getHeader("Authorization").startsWith("Basic ")) {
-                logger.info("Rejected Due to  Authorization  Not Present");
+                logger.info("Rejected Due to  Authorization  Not Present" + request.getHeader("Authorization"));
                 checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authNotPresent);
                 throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
             }
@@ -228,7 +235,7 @@ public class CheckImeiController {  //sachin
                         throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
                     }
                     if (featureIpAccessList.getTypeOfCheck() == 1) {
-                        if (!featureIpAccessList.getIpAddress().contains(checkImeiRequest.getPublic_ip())) {
+                        if (!featureIpAccessList.getIpAddress().contains(checkImeiRequest.getHeader_public_ip())) {
                             logger.info("Type Check 1 But Ip not allowed ");
                             checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authFeatureIpNotMatch);
                             throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
@@ -237,7 +244,7 @@ public class CheckImeiController {  //sachin
                         logger.info("Type Check 2 with featureid  " + featureIpAccessList.getFeatureIpListId() + " And User id " + userValue.getId());
                         UserFeatureIpAccessList userFeatureIpAccessList = userFeatureIpAccessListRepository.getByFeatureIpListIdAndUserId(featureIpAccessList.getFeatureIpListId(), userValue.getId());
                         logger.info("Response from  UserFeatureIpAccessList " + userFeatureIpAccessList);
-                        if (userFeatureIpAccessList == null || !(userFeatureIpAccessList.getIpAddress().contains(checkImeiRequest.getPublic_ip()))) {
+                        if (userFeatureIpAccessList == null || !(userFeatureIpAccessList.getIpAddress().contains(checkImeiRequest.getHeader_public_ip()))) {
                             logger.info("Type Check 2 But Ip not allowed ");
                             checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authUserIpNotMatch);
                             throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));

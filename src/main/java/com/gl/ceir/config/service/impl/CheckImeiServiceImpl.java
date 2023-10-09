@@ -23,7 +23,7 @@ import com.gl.ceir.config.model.app.GsmaTacDetails;
 import com.gl.ceir.config.model.app.Notification;
 import com.gl.ceir.config.model.app.RuleEngineMapping;
 import com.gl.ceir.config.model.constants.Alerts;
-import com.gl.ceir.config.repository.aud.AuditTrailRepository;
+import com.gl.ceir.config.repository.audit.AuditTrailRepository;
 import com.gl.ceir.config.repository.app.CheckImeiRepository;
 import com.gl.ceir.config.repository.app.GsmaTacDetailsRepository;
 import com.gl.ceir.config.repository.app.SystemConfigurationDbRepository;

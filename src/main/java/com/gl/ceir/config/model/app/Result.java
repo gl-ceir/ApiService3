@@ -1,7 +1,6 @@
 package com.gl.ceir.config.model.app;
 
 import com.gl.ceir.config.model.app.DeviceDetails;
-import com.google.gson.JsonObject;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;

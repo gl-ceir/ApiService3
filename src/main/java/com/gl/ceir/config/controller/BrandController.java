@@ -25,7 +25,6 @@ public class BrandController { //sachin
     public MappingJacksonValue getAllBrands() {
         var getBrands =brandServiceImpl.getAllBrands();
         MappingJacksonValue mapping = new MappingJacksonValue(getBrands);
-        logger.info("Response of View =" + mapping);
         return mapping;
     }
 }

@@ -16,14 +16,13 @@ import com.gl.ceir.config.model.app.ForeignerImeiDetails;
 import com.gl.ceir.config.model.app.ForeignerRequest;
 import com.gl.ceir.config.model.app.GenricResponse;
 import com.gl.ceir.config.service.impl.ForeignerServiceImpl;
-import com.gl.ceir.config.service.impl.SmsAccountServiceImpl;
 
 //import io.swagger.annotations.ApiOperation;
 
 @RestController
 public class ForeignerController {
 
-	private static final Logger logger = LogManager.getLogger(SmsAccountServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(ForeignerController.class);
 
 
 	@Autowired

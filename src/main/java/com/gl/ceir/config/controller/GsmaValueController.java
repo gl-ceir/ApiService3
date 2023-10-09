@@ -10,11 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gl.ceir.config.model.app.GsmaValueModel;
 import com.gl.ceir.config.model.app.UsagesValueModel;
-import com.gl.ceir.config.repository.app.AuditTrailRepository;
 import com.gl.ceir.config.service.impl.GsmaValueServiceImpl;
-
-import com.gl.ceir.config.model.app.AuditTrail;
-import com.gl.ceir.config.repository.app.AuditTrailRepository;
 
 //import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestBody;

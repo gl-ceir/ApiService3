@@ -28,21 +28,20 @@ public class BrandServiceImpl {
 
             logger.info("Going for top 5 brands");
             List<String> topBrands = propertiesReader.getTop5Brands();
-            logger.info("B Rands for top 5 brands" + topBrands.size());
             if (topBrands.size() < 5) {
                     logger.error("Brands size is less than 5, Please provide  Top 5 Brand Name in properties via  Top5Brands  :: size " + topBrands.size() + "[]");
             }
+            logger.info("Size " + topBrands.size() + " ,List" + topBrands.get(0) + topBrands.get(1) + topBrands.get(2) + topBrands.get(3) + topBrands.get(4));
             //   try {
             list1 = brandRepository.getBrandNameWithTop5New(topBrands.get(0), topBrands.get(1), topBrands.get(2), topBrands.get(3), topBrands.get(4));
-            logger.info("result 2:: " + list1.size() + "[]" + list1.get(0) + "[]" + list1.get(1) + "[]" + list1.get(4));
+            logger.info("Result  " + list1.size() + "[]" + list1.get(0) + "[]" + list1.get(1) + "[]" + list1.get(4));
 //            } catch (Exception e) {
 //                logger.error("Error in 2 " + e.getLocalizedMessage() + "+++" + e.getMessage());
 //            }
-
             return list1;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new ResourceServicesException(this.getClass().getName(), e.getMessage());
+            throw new ResourceServicesException("en", e.getMessage());
         }
 
     }

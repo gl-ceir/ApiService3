@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.gl.ceir.config.configuration.FileStorageProperties;
 import com.gl.ceir.config.exceptions.FileStorageException;
 import com.gl.ceir.config.model.app.GenricResponse;
 import com.gl.ceir.config.model.app.ImmegreationFileDetails;
@@ -36,8 +35,8 @@ public class ImmegreationServiceImpl {
 
 	private final static String NUMERIC_STRING = "0123456789";
 
-	@Autowired
-	FileStorageProperties fileStorageProperties;
+//	@Autowired
+//	FileStorageProperties fileStorageProperties;
 
 
 	@Transactional
@@ -46,7 +45,8 @@ public class ImmegreationServiceImpl {
 		try {
 			String txnId = getTxnId();
 
-			String serverPath=fileStorageProperties.getImmegreationUploadDir();
+                    String serverPath = "";
+                    //fileStorageProperties.getImmegreationUploadDir();
 			serverPath = serverPath.replace("txnId", txnId);
 
 			File dir = new File(serverPath);

@@ -2,7 +2,7 @@
   * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
   * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.gl.ceir.config;
+package com.gl.ceir.config.exceptions;
 
 import com.gl.ceir.config.controller.CheckImeiController;
 import com.gl.ceir.config.dto.ApiResponse;

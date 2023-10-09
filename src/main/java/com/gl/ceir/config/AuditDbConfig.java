@@ -2,8 +2,15 @@ package com.gl.ceir.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
+import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -11,26 +18,14 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import javax.sql.DataSource;
-import java.util.Objects;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.jdbc.DataSourceBuilder;
-import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
-import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
-import org.springframework.context.annotation.Primary;
-import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 
 @Configuration
 @EnableTransactionManagement
-
 @EnableJpaRepositories(
-        basePackages = {"com.gl.ceir.config.repository.aud"}, // 
+        basePackages = {"com.gl.ceir.config.repository.audit"}, //
         entityManagerFactoryRef = "auditEntityManagerFactory",
-        transactionManagerRef = "auditTransactionManager",
-        repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
-
-@EntityScan("com.gl.ceir.config.model.aud")
+        transactionManagerRef = "auditTransactionManager")
+@EntityScan("com.gl.ceir.config.model.audit")
 
 public class AuditDbConfig {
 
@@ -40,9 +35,9 @@ public class AuditDbConfig {
             EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.gl.ceir.config.model.aud") //
-                .persistenceUnit("aud")                   //
-               .properties(jpaProperties())
+                .packages("com.gl.ceir.config.model.audit") //
+                .persistenceUnit("aud") //
+                .properties(jpaProperties())
                 .build();
     }
 
@@ -57,19 +52,14 @@ public class AuditDbConfig {
             @Qualifier("auditEntityManagerFactory") LocalContainerEntityManagerFactoryBean auditEntityManagerFactory) {
         return new JpaTransactionManager(Objects.requireNonNull(auditEntityManagerFactory.getObject()));
     }
-    
-   protected Map<String, Object> jpaProperties() {
-    Map<String, Object> props = new HashMap<>();
-    props.put("hibernate.physical_naming_strategy", SpringPhysicalNamingStrategy.class.getName());
-    props.put("hibernate.implicit_naming_strategy", SpringImplicitNamingStrategy.class.getName());
-    return props;
+
+    protected Map<String, Object> jpaProperties() {
+        Map<String, Object> props = new HashMap<>();
+        props.put("hibernate.physical_naming_strategy", SpringPhysicalNamingStrategy.class.getName());
+        props.put("hibernate.implicit_naming_strategy", SpringImplicitNamingStrategy.class.getName());
+        return props;
+    }
 }
-}
-
-
-
-
-
 
 //     @Bean(name = "barDataSource")
 //  @ConfigurationProperties(prefix = "bar.datasource")
@@ -81,7 +71,7 @@ public class AuditDbConfig {
 //    public DataSourceProperties auditDataSourceProperties() {
 //        return new DataSourceProperties();
 //    }
-//    
+//
 //    public DataSource auditDataSource() {
 //        return auditDataSourceProperties()
 //                .initializeDataSourceBuilder()

@@ -1,4 +1,4 @@
-package com.gl.ceir.config.model.aud;
+package com.gl.ceir.config.model.audit;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

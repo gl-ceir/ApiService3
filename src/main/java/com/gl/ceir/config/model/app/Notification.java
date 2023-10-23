@@ -92,7 +92,7 @@ public class Notification implements Serializable {
     // @ColumnDefault(value = "")
     private String sendSmsInterface;
 
-    public Notification(String channelType, String message, String featureName, Integer status, Integer retryCount, String msisdn, String operatorName, String msgLang, String sendSmsInterface) {
+    public Notification(String channelType, String message, String featureName, Integer status, Integer retryCount, String msisdn, String operatorName, String msgLang, String sendSmsInterface, String corelationId) {
         this.channelType = channelType;
         this.message = message;
         this.featureName = featureName;
@@ -102,6 +102,7 @@ public class Notification implements Serializable {
         this.operatorName = operatorName;
         this.msgLang = msgLang;
         this.sendSmsInterface = sendSmsInterface;
+        this.corelationId = corelationId;
     }
 
     public Notification() {

@@ -18,6 +18,7 @@ import com.gl.ceir.config.model.app.FileUploadDownloadResponse;
 import com.gl.ceir.config.repository.app.CheckImeiPreInitRepository;
 import com.gl.ceir.config.service.ModulesAuditTrailService;
 import com.gl.ceir.config.service.impl.FileStorageService;
+import com.gl.ceir.config.util.VirtualIpAddressUtil;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,8 +48,13 @@ public class FileUploadDownloadController {
 //    @Autowired
 //    ModulesAuditTrailRepository modulesAuditTrailRepository;
 //
-   @Autowired
+    @Autowired
     ModulesAuditTrailService modulesAuditTrailService;
+
+    @Autowired
+    VirtualIpAddressUtil virtualIpAddressUtil;
+
+    // getVirtualIpDetails getVirtualIpDetails
 
     private static final Logger logger = LogManager.getLogger(FileUploadDownloadController.class);
 
@@ -107,13 +113,12 @@ public class FileUploadDownloadController {
         logger.info("Going to raise  = " + response);
         modulesAuditTrailService.save();
         // ConnectionConfiguration connectionConfiguration = null;
-     //   Connection conn = new ConnectionConfiguration().getConnection();
-    //      AlarmApplication.raiseAlertnew("alert006", " Sample alert ", "Test  No Process", 0);
-    // AlertApplication.raiseAlert(conn, "alert006", " Sample alert ", "Test  No Process", 0);
+        //   Connection conn = new ConnectionConfiguration().getConnection();
+        //      AlarmApplication.raiseAlertnew("alert006", " Sample alert ", "Test  No Process", 0);
+        // AlertApplication.raiseAlert(conn, "alert006", " Sample alert ", "Test  No Process", 0);
         // AlertApplication.raiseAlert("alert006", " Sample alert ", "Test  No Process", 0);
 
         //   boolean d = Alarm.raiseAlert("alert006", " Sample alert ", "Test  No Process", 0);
-
         logger.info("Going to raise  = ");
         return new MappingJacksonValue("");
     }
@@ -146,6 +151,17 @@ public class FileUploadDownloadController {
         return new MappingJacksonValue("Success Test");
     }
 
+    @GetMapping("/getVirtualIpDetails")
+    public MappingJacksonValue getVirtualIpDetails() {
+        logger.info("Going for vip :");
+        String vvip = virtualIpAddressUtil.getVirtualIp();
+        logger.info("Going to Full list  = " + vvip);
+        virtualIpAddressUtil.getFullList();
+
+        logger.info("Exiting the controller = ");
+
+        return new MappingJacksonValue("");
+    }
 
 }
 

@@ -11,8 +11,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-//import com.gl.Rule_engine_Old.RuleEngineApplication;
-// import com.gl.ceir.config.configuration.ConnectionConfiguration;
 import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
 import com.gl.ceir.config.model.app.CheckImeiRequest;
@@ -91,7 +89,6 @@ public class CheckImeiServiceImpl {
 
 //    @Autowired
 //    ConnectionConfiguration connectionConfiguration;
-
     @Autowired
     CheckImeiRequestRepository checkImeiRequestRepository;
 
@@ -187,7 +184,7 @@ public class CheckImeiServiceImpl {
             checkImeiRequest.setComplianceStatus(complianceStatus);
             checkImeiRequest.setSymbol_color(symbol_color);
             checkImeiRequest.setComplianceValue(complianceValue);
-            saveCheckImeiRequest(checkImeiRequest, startTime);
+            var response = saveCheckImeiRequest(checkImeiRequest, startTime);
             if (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && systemConfigurationDbRepositry.getByTag("send_sms_flag").getValue().equalsIgnoreCase("true")) {
                 logger.info("Going for ussd and send_sms_flag true  ");
                 var smsMessage = checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName(
@@ -196,7 +193,7 @@ public class CheckImeiServiceImpl {
                         "CheckImei")
                         .getValue()
                         .replace("<imei>", checkImeiRequest.getImei());
-                createPostRequestForNotification(checkImeiRequest, result, smsMessage);
+                createPostRequestForNotification(checkImeiRequest, result, smsMessage, response.getId());
             }
             return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()), StatusMessage.FOUND.getName(), checkImeiRequest.getLanguage(), result);
         } catch (Exception e) {
@@ -225,10 +222,11 @@ public class CheckImeiServiceImpl {
         saveCheckImeiRequest(checkImeiRequest, startTime);
     }
 
-    public void saveCheckImeiRequest(CheckImeiRequest checkImeiRequest, long startTime) {
+    public CheckImeiRequest saveCheckImeiRequest(CheckImeiRequest checkImeiRequest, long startTime) {
         try {
             checkImeiRequest.setCheckProcessTime(String.valueOf(System.currentTimeMillis() - startTime));
-            checkImeiRequestRepository.save(checkImeiRequest);
+            var response = checkImeiRequestRepository.save(checkImeiRequest);
+            return response;
         } catch (Exception e) {
             alertServiceImpl.raiseAnAlert(Alerts.ALERT_1110.getName(), 0);
             throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
@@ -240,9 +238,9 @@ public class CheckImeiServiceImpl {
                 language.contains("kh") ? 2 : 1, "CheckImei").getValue();
     }
 
-    private void createPostRequestForNotification(CheckImeiRequest checkImeiRequest, Result result, String smsMessage) {
+    private void createPostRequestForNotification(CheckImeiRequest checkImeiRequest, Result result, String smsMessage, long id) {
         var notification = new Notification("SMS", smsMessage, "CheckImei", 0, 0, checkImeiRequest.getMsisdn(),
-                checkImeiRequest.getOperator(), checkImeiRequest.getLanguage(), checkImeiRequest.getOperator());
+                checkImeiRequest.getOperator(), checkImeiRequest.getLanguage(), checkImeiRequest.getOperator(), String.valueOf(id));
         Gson gson = new Gson();
         String body = gson.toJson(notification, Notification.class);
         sendPostForSmsNotification(body);
@@ -294,7 +292,6 @@ public class CheckImeiServiceImpl {
         logger.debug("NationalWhiteListResponse:" + nationalWhitelistRepository.getByImei(imei));
         return nationalWhitelistRepository.getByImei(imei) == null ? false : true;
     }
-
 
     public DeviceidBaseUrlDb getPreinitApi(String deviceId) {
         try {
@@ -351,7 +348,6 @@ public class CheckImeiServiceImpl {
 //        item.put(lang.equals("en") ? "Device Type" : languageLabelDbRepository.getKhmerNameFromLabel("deviceType"), device_type);
 //        return item;
 //    }
-
 //    private String getRuleResponse(CheckImeiRequest checkImeiRequest, long startTime) {
 //        var ruleResponseStatus
 //                = checkImeiRequest.getChannel().equalsIgnoreCase("ussd") || checkImeiRequest.getChannel().equalsIgnoreCase("sms")

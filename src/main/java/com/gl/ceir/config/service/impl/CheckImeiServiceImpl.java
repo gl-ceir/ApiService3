@@ -69,11 +69,6 @@ public class CheckImeiServiceImpl {
     @Value("${someWentWrongException}")
     private String someWentWrongException;
 
-    @Autowired
-    CheckImeiRepository checkImeiRepository;
-
-    @PersistenceContext
-    EntityManager entityManager;
 
     @Autowired
     AlertServiceImpl alertServiceImpl;
@@ -87,8 +82,6 @@ public class CheckImeiServiceImpl {
     @Autowired
     GsmaTacDetailsRepository gsmaTacDetailsRepository;
 
-//    @Autowired
-//    ConnectionConfiguration connectionConfiguration;
     @Autowired
     CheckImeiRequestRepository checkImeiRequestRepository;
 
@@ -98,8 +91,6 @@ public class CheckImeiServiceImpl {
     @Autowired
     LanguageLabelDbRepository languageLabelDbRepository;
 
-    @Autowired
-    OperatorSeriesRepository operatorSeriesRepository;
 
     @Autowired
     CheckImeiPreInitRepository checkImeiPreInitRepository;
@@ -193,8 +184,9 @@ public class CheckImeiServiceImpl {
                         "CheckImei")
                         .getValue()
                         .replace("<imei>", checkImeiRequest.getImei());
-                createPostRequestForNotification(checkImeiRequest, result, smsMessage, response.getId());
+                createPostRequestForNotification(checkImeiRequest, smsMessage, response.getId().intValue());
             }
+
             return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()), StatusMessage.FOUND.getName(), checkImeiRequest.getLanguage(), result);
         } catch (Exception e) {
             logger.error("Failed at " + e.getLocalizedMessage() + " ----- " + e.toString() + " ::::: " + e.getMessage() + " $$$$$$$$$$$ " + e);
@@ -238,12 +230,20 @@ public class CheckImeiServiceImpl {
                 language.contains("kh") ? 2 : 1, "CheckImei").getValue();
     }
 
-    private void createPostRequestForNotification(CheckImeiRequest checkImeiRequest, Result result, String smsMessage, long id) {
+    public String checkImeiServiceDownMsg(String language) {
+        return checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName("CheckImeiServiceDownMessage",
+                language.contains("kh") ? 2 : 1, "CheckImei").getValue();
+    }
+
+
+    private void createPostRequestForNotification(CheckImeiRequest checkImeiRequest, String smsMessage, int id) {
         var notification = new Notification("SMS", smsMessage, "CheckImei", 0, 0, checkImeiRequest.getMsisdn(),
-                checkImeiRequest.getOperator(), checkImeiRequest.getLanguage(), checkImeiRequest.getOperator(), String.valueOf(id));
+                checkImeiRequest.getOperator(), checkImeiRequest.getLanguage(), id);
         Gson gson = new Gson();
         String body = gson.toJson(notification, Notification.class);
         sendPostForSmsNotification(body);
+        //    Notification notif = gson.fromJson(response, Notification.class);
+        //  return notif.getId();
     }
 
     private String sendPostForSmsNotification(String body) {
@@ -277,7 +277,7 @@ public class CheckImeiServiceImpl {
                 }
                 in.close();
                 // print result
-                logger.info(response.toString());
+                logger.info("Notification Response:" + response.toString());
             } else {
                 logger.warn("POST request not worked");
                 alertServiceImpl.raiseAnAlert(Alerts.ALERT_1107.getName(), 0);

@@ -92,7 +92,9 @@ public class Notification implements Serializable {
     // @ColumnDefault(value = "")
     private String sendSmsInterface;
 
-    public Notification(String channelType, String message, String featureName, Integer status, Integer retryCount, String msisdn, String operatorName, String msgLang, String sendSmsInterface, String corelationId) {
+    private Integer checkImeiId;
+
+    public Notification(String channelType, String message, String featureName, Integer status, Integer retryCount, String msisdn, String operatorName, String msgLang, Integer checkImeiId) {
         this.channelType = channelType;
         this.message = message;
         this.featureName = featureName;
@@ -101,8 +103,7 @@ public class Notification implements Serializable {
         this.msisdn = msisdn;
         this.operatorName = operatorName;
         this.msgLang = msgLang;
-        this.sendSmsInterface = sendSmsInterface;
-        this.corelationId = corelationId;
+        this.checkImeiId = checkImeiId;
     }
 
     public Notification() {
@@ -308,9 +309,17 @@ public class Notification implements Serializable {
         this.sendSmsInterface = sendSmsInterface;
     }
 
+    public Integer getCheckImeiId() {
+        return checkImeiId;
+    }
+
+    public void setCheckImeiId(Integer checkImeiId) {
+        this.checkImeiId = checkImeiId;
+    }
+
     @Override
     public String toString() {
-        return "Notification{" + "id=" + id + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + ", channelType=" + channelType + ", message=" + message + ", userId=" + userId + ", featureId=" + featureId + ", featureTxnId=" + featureTxnId + ", featureName=" + featureName + ", subFeature=" + subFeature + ", status=" + status + ", subject=" + subject + ", retryCount=" + retryCount + ", referTable=" + referTable + ", roleType=" + roleType + ", receiverUserType=" + receiverUserType + ", email=" + email + ", msisdn=" + msisdn + ", operatorName=" + operatorName + ", notificationSentTime=" + notificationSentTime + ", corelationId=" + corelationId + ", msgLang=" + msgLang + ", deliveryStatus=" + deliveryStatus + ", deliveryTime=" + deliveryTime + ", sendSmsInterface=" + sendSmsInterface + '}';
+        return "Notification{" + "id=" + id + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + ", channelType=" + channelType + ", message=" + message + ", userId=" + userId + ", featureId=" + featureId + ", featureTxnId=" + featureTxnId + ", featureName=" + featureName + ", subFeature=" + subFeature + ", status=" + status + ", subject=" + subject + ", retryCount=" + retryCount + ", referTable=" + referTable + ", roleType=" + roleType + ", receiverUserType=" + receiverUserType + ", email=" + email + ", msisdn=" + msisdn + ", operatorName=" + operatorName + ", notificationSentTime=" + notificationSentTime + ", corelationId=" + corelationId + ", msgLang=" + msgLang + ", deliveryStatus=" + deliveryStatus + ", deliveryTime=" + deliveryTime + ", sendSmsInterface=" + sendSmsInterface + ", checkImeiId=" + checkImeiId + '}';
     }
 
 }

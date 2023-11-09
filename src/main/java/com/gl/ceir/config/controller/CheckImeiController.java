@@ -1,6 +1,7 @@
 package com.gl.ceir.config.controller;
 
 import com.gl.ceir.config.exceptions.MissingRequestParameterException;
+import com.gl.ceir.config.exceptions.ServiceUnavailableException;
 import com.gl.ceir.config.exceptions.UnAuthorizationException;
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
@@ -134,7 +135,7 @@ public class CheckImeiController {  //sachin
         logger.info("Request = " + appDeviceDetailsDb);
         checkImeiServiceImpl.saveDeviceDetails(appDeviceDetailsDb);
         logger.info("Going to fetch response according to  = " + appDeviceDetailsDb.getLanguageType());
-        return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.name(), appDeviceDetailsDb.getLanguageType()));
+        return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.getName(), appDeviceDetailsDb.getLanguageType()));
     }
 
     void errorValidationChecker(AppDeviceDetailsDb appDeviceDetailsDb) {
@@ -180,6 +181,12 @@ public class CheckImeiController {  //sachin
     }
 
     void errorValidationChecker(CheckImeiRequest checkImeiRequest, long startTime) {
+        var sysConfigsServiceDownFlag = systemConfigurationDbRepositry.getByTag("service_down_flag");
+        if (sysConfigsServiceDownFlag != null && sysConfigsServiceDownFlag.getValue().toLowerCase().contains(checkImeiRequest.getChannel().toLowerCase())) {
+            logger.info(" Channel Not Allowed --" + checkImeiRequest.getChannel());
+            checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, "Service Down for " + checkImeiRequest.getChannel());
+            throw new ServiceUnavailableException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.checkImeiServiceDownMsg(checkImeiRequest.getLanguage()));
+        }
         if (checkImeiRequest.getImei() == null || checkImeiRequest.getChannel() == null) {
             logger.debug("Null Values " + checkImeiRequest.getImei());
             checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, mandatoryParameterMissing);

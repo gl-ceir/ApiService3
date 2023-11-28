@@ -23,6 +23,17 @@ public interface BrandRepository extends CrudRepository<DevBrandName, Long>,
     public List<DevBrandName> getBrandNameWithTop5New(String brand1, String brand2, String brand3, String brand4, String brand5);
     //  public List<DevBrandName> getBrandNameWithTop5New1();
 
+    
+    
+   @Query(value = "select id , brand_name from dev_brand_name ORDER BY CASE "
+           + "WHEN brand_name = :brand1 THEN 1 "
+           + "WHEN brand_name = :brand2 THEN 2 "
+           + "WHEN brand_name = :brand3 THEN 3 "
+          + "WHEN brand_name = :brand4 THEN 4 "
+          + "WHEN brand_name = :brand5 THEN 5 "
+           + "ELSE 6    END , brand_name ASC  ", nativeQuery = true)
+    public List<DevBrandName> getBrandNameWithTop5NewOracle(String brand1, String brand2, String brand3, String brand4, String brand5);
+    
 //    @Query("SELECT NEW com.gl.ceir.config.model.app.DevBrandName(id, brandName) FROM DevBrandName order by brandName= :brand1 desc,brandName= :brand2 desc,brandName =:brand3 desc,brandName =:brand4 desc,brandName =:brand5 desc,brandName asc ")
 //    public List<DevBrandName> getBrandNameWithTop5(String brand1, String brand2, String brand3, String brand4, String brand5);
 }

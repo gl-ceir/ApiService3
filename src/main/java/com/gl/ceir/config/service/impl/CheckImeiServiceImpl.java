@@ -119,10 +119,7 @@ public class CheckImeiServiceImpl {
             gsmaTacDetails = gsmaTacDetailsRepository.getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
             if (gsmaTacDetails != null) {
                 isValidImei = true;
-                //  deviceDetails = deviceDetails(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
-                //  mappedDeviceDetails = new Gson().fromJson(deviceDetails.toString(), LinkedHashMap.class);
-                mappedDeviceDetails = deviceDetailsNew(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
-
+                 mappedDeviceDetails = deviceDetailsNew(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
                 if (gsmaTacDetails.getDevice_type().equalsIgnoreCase("Smartphone") || gsmaTacDetails.getDevice_type().contains("phone")) {
                     if (nationalWhiteListResponse) {
                         status = "WhiteListedSmartphone";
@@ -140,7 +137,6 @@ public class CheckImeiServiceImpl {
                         complianceValue = 4;
                     }
                 }
-                //   } else if (ruleResponseStatus.contains("EXISTS_IN_GSMA_DETAILS_DB")) {
             } else {
                 if (nationalWhiteListResponse) {
                     status = "WhiteListedNoDevice";
@@ -150,9 +146,6 @@ public class CheckImeiServiceImpl {
                     complianceValue = 6;
                 }
             }
-            //          else {
-//                status = ruleResponseStatus;
-//            }
             logger.info("Status is  :->" + status + ", For Channel -" + checkImeiRequest.getChannel() + ", For Language -" + checkImeiRequest.getLanguage() + "  isValidImei:-> " + isValidImei);
             var message = checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName(
                     checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? status + "ForUssd" : checkImeiRequest.getChannel().equalsIgnoreCase("sms")
@@ -237,6 +230,7 @@ public class CheckImeiServiceImpl {
 
 
     private void createPostRequestForNotification(CheckImeiRequest checkImeiRequest, String smsMessage, int id) {
+                 logger.info(" Notification ::  :" );
         var notification = new Notification("SMS", smsMessage, "CheckImei", 0, 0, checkImeiRequest.getMsisdn(),
                 checkImeiRequest.getOperator(), checkImeiRequest.getLanguage(), id);
         Gson gson = new Gson();
@@ -247,6 +241,7 @@ public class CheckImeiServiceImpl {
     }
 
     private String sendPostForSmsNotification(String body) {
+         logger.info("Going to send notification::  :" + body);
         String url = systemConfigurationDbRepositry.getByTag("notificationTableUrl")
                 .getValue()
                 .replace("{localIp}", localIp);
@@ -322,11 +317,11 @@ public class CheckImeiServiceImpl {
 
     private LinkedHashMap deviceDetailsNew(String brand_name, String model_name, String device_type, String manufacturer, String marketing_name, String lang) {
         LinkedHashMap<String, String> item = new LinkedHashMap();
-        item.put(lang.equals("en") ? "Brand Name" : languageLabelDbRepository.getKhmerNameFromLabel("brandName"), brand_name);
-        item.put(lang.equals("en") ? "Model Name" : languageLabelDbRepository.getKhmerNameFromLabel("modelName"), model_name);
-        item.put(lang.equals("en") ? "Manufacturer" : languageLabelDbRepository.getKhmerNameFromLabel("manufacturer"), manufacturer);
-        item.put(lang.equals("en") ? "Marketing Name" : languageLabelDbRepository.getKhmerNameFromLabel("marketingName"), marketing_name);
-        item.put(lang.equals("en") ? "Device Type" : languageLabelDbRepository.getKhmerNameFromLabel("deviceType"), device_type);
+        item.put(lang.equals("en") ? languageLabelDbRepository.getEnglishNameFromLabel("brandName"): languageLabelDbRepository.getKhmerNameFromLabel("brandName"), brand_name);
+        item.put(lang.equals("en") ? languageLabelDbRepository.getEnglishNameFromLabel("modelName") : languageLabelDbRepository.getKhmerNameFromLabel("modelName"), model_name);
+        item.put(lang.equals("en") ? languageLabelDbRepository.getEnglishNameFromLabel("manufacturer") : languageLabelDbRepository.getKhmerNameFromLabel("manufacturer"), manufacturer);
+        item.put(lang.equals("en") ? languageLabelDbRepository.getEnglishNameFromLabel("marketingName") : languageLabelDbRepository.getKhmerNameFromLabel("marketingName"), marketing_name);
+        item.put(lang.equals("en") ? languageLabelDbRepository.getEnglishNameFromLabel("deviceType") : languageLabelDbRepository.getKhmerNameFromLabel("deviceType"), device_type);
         return item;
     }
 }

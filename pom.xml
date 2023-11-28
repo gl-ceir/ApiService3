@@ -107,13 +107,8 @@
         <dependency>
             <groupId>com.github.ulisesbocchio</groupId>
             <artifactId>jasypt-spring-boot</artifactId>    <!--  IF NOT WORKING MIGHT BE   -spring-boot-starter?-->
-            <version>2.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>1.18</version>
+          <type>jar</type>
         </dependency>
 
         <dependency>

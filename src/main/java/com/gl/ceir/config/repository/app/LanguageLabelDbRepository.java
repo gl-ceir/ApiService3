@@ -16,6 +16,10 @@ public interface LanguageLabelDbRepository extends JpaRepository<LanguageLabelDb
 
     @Query(value = "select  khmer_name  from  label_mul_lingual_text where label = :label", nativeQuery = true)
     public String getKhmerNameFromLabel(String label);
+    
+      @Query(value = "select  english_name  from  label_mul_lingual_text where label = :label", nativeQuery = true)
+    public String getEnglishNameFromLabel(String label);
+    
 }
 
 /* 6:04    working labelDetails

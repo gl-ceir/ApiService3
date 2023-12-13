@@ -5,24 +5,10 @@ import com.gl.ceir.config.exceptions.ServiceUnavailableException;
 import com.gl.ceir.config.exceptions.UnAuthorizationException;
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.gl.ceir.config.model.app.CheckImeiValuesEntity;
-import com.gl.ceir.config.model.app.CheckImeiMess;
 import com.gl.ceir.config.model.app.CheckImeiRequest;
-import com.gl.ceir.config.model.app.CheckImeiResponse;
-import com.gl.ceir.config.model.app.DeviceidBaseUrlDb;
 import com.gl.ceir.config.model.app.FeatureIpAccessList;
 import com.gl.ceir.config.model.app.User;
 import com.gl.ceir.config.model.app.UserFeatureIpAccessList;
-import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
-import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 import com.gl.ceir.config.model.constants.LanguageFeatureName;
 import com.gl.ceir.config.repository.app.AppDeviceDetailsRepository;
 import com.gl.ceir.config.repository.app.CheckImeiResponseParamRepository;
@@ -31,24 +17,28 @@ import com.gl.ceir.config.repository.app.SystemConfigListRepository;
 import com.gl.ceir.config.repository.app.SystemConfigurationDbRepository;
 import com.gl.ceir.config.repository.app.UserFeatureIpAccessListRepository;
 import com.gl.ceir.config.repository.app.UserRepository;
-
-//import io.swagger.annotations.ApiOperation;
-import java.sql.SQLException;
+import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
+import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
-
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CheckImeiController {  //sachin

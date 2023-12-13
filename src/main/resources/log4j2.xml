@@ -3,7 +3,7 @@
         <Console name="ConsoleAppender" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} :%L - %msg%n" />
         </Console>
-        <RollingFile name="rollingFile" fileName="/home/sachin/glocks/extras/apiservice3logs.log" filePattern="/home/sachin/glocks/extras/ApiService3logs-%d{dd-MMM}.log" ignoreExceptions="false">
+        <RollingFile name="rollingFile" fileName="/home/maverick/glocks/extras/apiservice3logs.log" filePattern="/home/sachin/glocks/extras/ApiService3logs-%d{dd-MMM}.log" ignoreExceptions="false">
             <PatternLayout>
                 <Pattern>%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} :%L - %msg%n</Pattern>
             </PatternLayout>

@@ -11,7 +11,7 @@ import com.gl.ceir.config.model.app.CheckDeviceReponse;
 import com.gl.ceir.config.model.app.GenricResponse;
 import com.gl.ceir.config.service.impl.CheckDeviceImpl;
 
-//import io.swagger.annotations.ApiOperation;
+ import io.swagger.annotations.ApiOperation;
 
 @RestController
 public class CheckDeviceController {
@@ -19,7 +19,7 @@ public class CheckDeviceController {
 	@Autowired
 	CheckDeviceImpl checkDeviceImpl;
 	
-	//@ApiOperation(value = "check device", response = GenricResponse.class)
+	 @ApiOperation(value = "check device", response = GenricResponse.class)
 	@PostMapping("checkDevice")
 	public MappingJacksonValue checkDevice(@RequestBody CheckDevice checkDevice) {
 		GenricResponse genricResponse=checkDeviceImpl.checkDevices(checkDevice);

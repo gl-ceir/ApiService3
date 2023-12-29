@@ -6,7 +6,6 @@ package com.gl.ceir.config.controller;
 
 import com.gl.ceir.config.service.impl.AlertServiceImpl;
 
-import com.gl.ceir.config.service.impl.FileCopyServiceImpl;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,38 +17,25 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gl.ceir.config.model.app.AlertRequest;
-import com.gl.ceir.config.model.app.UploadedFileDB;
 
 @RestController
 public class AlertController {
 
     @Autowired
     private AlertServiceImpl alertServiceImpl;
-    
-    
-    @Autowired
-    private FileCopyServiceImpl fileCopyServiceImpl;
-    
 
     @RequestMapping(path = "/alert/{id}", method = RequestMethod.GET)
     public MappingJacksonValue raiseAlertById(@PathVariable(value = "id") String id) {
         var response = alertServiceImpl.raiseAlertById(id);
-        MappingJacksonValue mapping = new MappingJacksonValue(response);
-        return mapping;
+        return new MappingJacksonValue(response);
     }
 
     @PostMapping("/alert")
     public MappingJacksonValue save(@RequestBody AlertRequest alertRequest) {
         var action = alertServiceImpl.saveAlertWithParam(alertRequest);
-        MappingJacksonValue mapping = new MappingJacksonValue(action);
-        return mapping;
+        return new MappingJacksonValue(action);
     }
     
-        @PostMapping("/addFileToSync")
-    public MappingJacksonValue saveFileCopyDetails(@RequestBody UploadedFileDB uploadedFileDB) {
-        var action = fileCopyServiceImpl.saveDetailsWithParam(uploadedFileDB);
-        MappingJacksonValue mapping = new MappingJacksonValue(action);
-        return mapping;
-    }
+   
     
 }

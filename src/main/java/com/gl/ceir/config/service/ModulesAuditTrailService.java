@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ModulesAuditTrailService {
 
-    @Autowired
-    ModulesAuditTrailRepository auditRepo;
+//    @Autowired
+//    ModulesAuditTrailRepository auditRepo;
 
     private final Logger logger = LogManager.getLogger(getClass());
 
@@ -27,10 +27,10 @@ public class ModulesAuditTrailService {
         try {
             ModulesAuditTrail moduleTrail = new ModulesAuditTrail(200, "Success", "", "Apiservice3", "CheckImei", "Testing Purpose", "Server1", 5, 10);
             logger.info("Going to save in audit db ");
-            return auditRepo.save(moduleTrail);
+            return null;
+          //  return auditRepo.save(moduleTrail);
         } catch (Exception e) {
             logger.error("Error occurs when saving  Message data in db  " + e.getLocalizedMessage());
-            logger.error("$$$$$$$$Error occurs when " + e.toString());
 
             return null;
         }

@@ -11,9 +11,13 @@ import org.springframework.stereotype.Service;
 import com.gl.ceir.config.exceptions.ResourceServicesException;
 import com.gl.ceir.config.model.app.DevBrandName;
 import com.gl.ceir.config.repository.app.BrandRepository;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class BrandServiceImpl {
+
+    @Value("${spring.jpa.properties.hibernate.dialect}")
+    public String dialect;
 
     @Autowired
     private BrandRepository brandRepository;
@@ -29,15 +33,17 @@ public class BrandServiceImpl {
             logger.info("Going for top 5 brands");
             List<String> topBrands = propertiesReader.getTop5Brands();
             if (topBrands.size() < 5) {
-                    logger.error("Brands size is less than 5, Please provide  Top 5 Brand Name in properties via  Top5Brands  :: size " + topBrands.size() + "[]");
+                logger.error("Brands size is less than 5, Please provide  Top 5 Brand Name in properties via  Top5Brands  :: size " + topBrands.size() + "[]");
             }
             logger.info("Size " + topBrands.size() + " ,List" + topBrands.get(0) + topBrands.get(1) + topBrands.get(2) + topBrands.get(3) + topBrands.get(4));
-            //   try {
-            list1 = brandRepository.getBrandNameWithTop5New(topBrands.get(0), topBrands.get(1), topBrands.get(2), topBrands.get(3), topBrands.get(4));
+
+            if (dialect.contains("Oracle")) {
+                list1 = brandRepository.getBrandNameWithTop5NewOracle(topBrands.get(0), topBrands.get(1), topBrands.get(2), topBrands.get(3), topBrands.get(4));
+            } else {
+                list1 = brandRepository.getBrandNameWithTop5New(topBrands.get(0), topBrands.get(1), topBrands.get(2), topBrands.get(3), topBrands.get(4));
+            }
             logger.info("Result  " + list1.size() + "[]" + list1.get(0) + "[]" + list1.get(1) + "[]" + list1.get(4));
-//            } catch (Exception e) {
-//                logger.error("Error in 2 " + e.getLocalizedMessage() + "+++" + e.getMessage());
-//            }
+
             return list1;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

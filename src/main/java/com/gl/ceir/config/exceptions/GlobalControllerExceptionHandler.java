@@ -8,13 +8,6 @@ import com.gl.ceir.config.controller.CheckImeiController;
 import com.gl.ceir.config.dto.ApiResponse;
 import com.gl.ceir.config.dto.ExceptionResponse;
 import com.gl.ceir.config.dto.Result;
-import com.gl.ceir.config.exceptions.FileStorageException;
-import com.gl.ceir.config.exceptions.InternalServicesException;
-import com.gl.ceir.config.exceptions.MissingRequestParameterException;
-import com.gl.ceir.config.exceptions.MyFileNotFoundException;
-import com.gl.ceir.config.exceptions.ResourceNotFoundException;
-import com.gl.ceir.config.exceptions.UnAuthorizationException;
-import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
 import java.util.Enumeration;
 import java.util.Scanner;
@@ -164,6 +157,14 @@ public class GlobalControllerExceptionHandler {
                 new ExceptionResponse(
                         HttpStatus.BAD_REQUEST.value(), "bad request", exception.getResourceName(), new Result(exception.getMessage())),
                 HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = ServiceUnavailableException.class)
+    public ResponseEntity<Object> exception(ServiceUnavailableException exception) {
+        return new ResponseEntity<>(
+                new ExceptionResponse(
+                        HttpStatus.SERVICE_UNAVAILABLE.value(), HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase(), exception.getResourceName(), new Result(exception.getMessage())),
+                HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @ExceptionHandler(value = InternalServicesException.class)

@@ -3,11 +3,13 @@ package com.gl.ceir.config.repository.app;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
-import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+
+import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
+import javax.transaction.Transactional;
 
 public interface AppDeviceDetailsRepository extends JpaRepository<AppDeviceDetailsDb, Long>, JpaSpecificationExecutor<AppDeviceDetailsDb> {
 

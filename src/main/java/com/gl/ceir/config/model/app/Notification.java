@@ -20,13 +20,13 @@ public class Notification implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @CreationTimestamp
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime createdOn;
+//    @CreationTimestamp
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+//    private LocalDateTime createdOn;
 
-    @CreationTimestamp
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime modifiedOn;
+//    @CreationTimestamp
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+//    private LocalDateTime modifiedOn;
 
     // @ColumnDefault(value = "")
     private String channelType;
@@ -76,7 +76,7 @@ public class Notification implements Serializable {
     // @ColumnDefault(value = "")
     private String operatorName;
 
-    private LocalDateTime notificationSentTime;
+//    private LocalDateTime notificationSentTime;
 
     // @ColumnDefault(value = "")
     private String corelationId;
@@ -87,12 +87,14 @@ public class Notification implements Serializable {
     // @ColumnDefault(value = "")
     private String deliveryStatus;
 
-    private LocalDateTime deliveryTime;
+//    private LocalDateTime deliveryTime;
 
     // @ColumnDefault(value = "")
     private String sendSmsInterface;
 
-    public Notification(String channelType, String message, String featureName, Integer status, Integer retryCount, String msisdn, String operatorName, String msgLang, String sendSmsInterface, String corelationId) {
+    private Integer checkImeiId;
+
+    public Notification(String channelType, String message, String featureName, Integer status, Integer retryCount, String msisdn, String operatorName, String msgLang, Integer checkImeiId) {
         this.channelType = channelType;
         this.message = message;
         this.featureName = featureName;
@@ -101,8 +103,7 @@ public class Notification implements Serializable {
         this.msisdn = msisdn;
         this.operatorName = operatorName;
         this.msgLang = msgLang;
-        this.sendSmsInterface = sendSmsInterface;
-        this.corelationId = corelationId;
+        this.checkImeiId = checkImeiId;
     }
 
     public Notification() {
@@ -116,22 +117,7 @@ public class Notification implements Serializable {
         this.id = id;
     }
 
-    public LocalDateTime getCreatedOn() {
-        return createdOn;
-    }
-
-    public void setCreatedOn(LocalDateTime createdOn) {
-        this.createdOn = createdOn;
-    }
-
-    public LocalDateTime getModifiedOn() {
-        return modifiedOn;
-    }
-
-    public void setModifiedOn(LocalDateTime modifiedOn) {
-        this.modifiedOn = modifiedOn;
-    }
-
+  
     public String getChannelType() {
         return channelType;
     }
@@ -260,13 +246,7 @@ public class Notification implements Serializable {
         this.operatorName = operatorName;
     }
 
-    public LocalDateTime getNotificationSentTime() {
-        return notificationSentTime;
-    }
-
-    public void setNotificationSentTime(LocalDateTime notificationSentTime) {
-        this.notificationSentTime = notificationSentTime;
-    }
+  
 
     public String getCorelationId() {
         return corelationId;
@@ -292,13 +272,7 @@ public class Notification implements Serializable {
         this.deliveryStatus = deliveryStatus;
     }
 
-    public LocalDateTime getDeliveryTime() {
-        return deliveryTime;
-    }
-
-    public void setDeliveryTime(LocalDateTime deliveryTime) {
-        this.deliveryTime = deliveryTime;
-    }
+  
 
     public String getSendSmsInterface() {
         return sendSmsInterface;
@@ -308,9 +282,18 @@ public class Notification implements Serializable {
         this.sendSmsInterface = sendSmsInterface;
     }
 
-    @Override
-    public String toString() {
-        return "Notification{" + "id=" + id + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + ", channelType=" + channelType + ", message=" + message + ", userId=" + userId + ", featureId=" + featureId + ", featureTxnId=" + featureTxnId + ", featureName=" + featureName + ", subFeature=" + subFeature + ", status=" + status + ", subject=" + subject + ", retryCount=" + retryCount + ", referTable=" + referTable + ", roleType=" + roleType + ", receiverUserType=" + receiverUserType + ", email=" + email + ", msisdn=" + msisdn + ", operatorName=" + operatorName + ", notificationSentTime=" + notificationSentTime + ", corelationId=" + corelationId + ", msgLang=" + msgLang + ", deliveryStatus=" + deliveryStatus + ", deliveryTime=" + deliveryTime + ", sendSmsInterface=" + sendSmsInterface + '}';
+    public Integer getCheckImeiId() {
+        return checkImeiId;
     }
 
+    public void setCheckImeiId(Integer checkImeiId) {
+        this.checkImeiId = checkImeiId;
+    }
+
+    @Override
+    public String toString() {
+        return "Notification{" + "id=" + id + ", channelType=" + channelType + ", message=" + message + ", userId=" + userId + ", featureId=" + featureId + ", featureTxnId=" + featureTxnId + ", featureName=" + featureName + ", subFeature=" + subFeature + ", status=" + status + ", subject=" + subject + ", retryCount=" + retryCount + ", referTable=" + referTable + ", roleType=" + roleType + ", receiverUserType=" + receiverUserType + ", email=" + email + ", msisdn=" + msisdn + ", operatorName=" + operatorName + ", corelationId=" + corelationId + ", msgLang=" + msgLang + ", deliveryStatus=" + deliveryStatus + ", sendSmsInterface=" + sendSmsInterface + ", checkImeiId=" + checkImeiId + '}';
+    }
+
+    
 }

@@ -32,7 +32,7 @@ public class CallbackController {
             logger.info("Callback from kanel: operatorName: "+operatorName+", answer: "+answer+", corelationId: "+myId+", status: "+ DeliveryStatus.fromValue(status)+", deliveryTime: "+deliveryTime);
             Notification noti = notificationRepository.findByCorelationIdAndOperatorName(myId, operatorName);
             if(noti != null) {
-                noti.setDeliveryTime(deliveryTime);
+//                noti.setDeliveryTime(deliveryTime);
                 noti.setDeliveryStatus(DeliveryStatus.fromValue(status));
                 notificationRepository.save(noti);
             }
@@ -55,7 +55,7 @@ public class CallbackController {
                 logger.info("deliveryStatus: " + deliveryStatus + ", deliveryAddress: " + msisdn + ", corelationId: "+ deliveryInfoNotificationDto.getDeliveryInfoNotification().getCallbackData());
                 Notification noti = notificationRepository.findByCorelationIdAndOperatorName(deliveryInfoNotificationDto.getDeliveryInfoNotification().getCallbackData(), "smart");
                 if(noti != null) {
-                    noti.setDeliveryTime(LocalDateTime.now());
+//                    noti.setDeliveryTime(LocalDateTime.now());
                     noti.setDeliveryStatus(deliveryStatus);
                     notificationRepository.save(noti);
                 }

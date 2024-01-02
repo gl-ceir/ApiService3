@@ -5,6 +5,7 @@
 package com.gl.ceir.config.controller;
 
 import com.gl.ceir.config.service.impl.AlertServiceImpl;
+
 import org.springframework.web.bind.annotation.PostMapping;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +27,15 @@ public class AlertController {
     @RequestMapping(path = "/alert/{id}", method = RequestMethod.GET)
     public MappingJacksonValue raiseAlertById(@PathVariable(value = "id") String id) {
         var response = alertServiceImpl.raiseAlertById(id);
-        MappingJacksonValue mapping = new MappingJacksonValue(response);
-        return mapping;
+        return new MappingJacksonValue(response);
     }
 
     @PostMapping("/alert")
     public MappingJacksonValue save(@RequestBody AlertRequest alertRequest) {
         var action = alertServiceImpl.saveAlertWithParam(alertRequest);
-        MappingJacksonValue mapping = new MappingJacksonValue(action);
-        return mapping;
+        return new MappingJacksonValue(action);
     }
+    
+   
+    
 }

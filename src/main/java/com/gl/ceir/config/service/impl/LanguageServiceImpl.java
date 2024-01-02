@@ -32,6 +32,7 @@ public class LanguageServiceImpl {
 
     public LanguageResponse getLanguageLabels(String featureName, String language) {
         String responseValue;
+        logger.info("Feature Name " + featureName);
         try {
             if (language.contains("kh")) {
                 responseValue = languageLabelDbRepository.getKhmerNameAndLabelFromFeatureName(featureName);

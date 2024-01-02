@@ -4,9 +4,9 @@
  */
 package com.gl.ceir.config.model.app;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.AllArgsConstructor;
 import lombok.ToString;
 
 /**

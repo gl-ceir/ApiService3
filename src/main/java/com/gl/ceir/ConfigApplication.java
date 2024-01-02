@@ -31,6 +31,4 @@ public class ConfigApplication {
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(ConfigApplication.class, args);
     }
-
-
 }

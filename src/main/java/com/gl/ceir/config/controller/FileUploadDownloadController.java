@@ -10,8 +10,8 @@ import com.gl.ceir.config.model.app.FileUploadDownloadResponse;
 import com.gl.ceir.config.repository.app.CheckImeiPreInitRepository;
 import com.gl.ceir.config.service.ModulesAuditTrailService;
 import com.gl.ceir.config.service.impl.FileStorageService;
+import com.gl.ceir.config.service.userlogic.UserDiffImpl;
 import com.gl.ceir.config.util.VirtualIpAddressUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +40,9 @@ public class FileUploadDownloadController {
     @Autowired
     CheckImeiPreInitRepository checkImeiPreInitRepository;
 
-//    @Autowired
-//    ModulesAuditTrailRepository modulesAuditTrailRepository;
-//
+    @Autowired
+    UserDiffImpl userDiffImpl;
+    //
     @Autowired
     ModulesAuditTrailService modulesAuditTrailService;
 
@@ -69,16 +69,16 @@ public class FileUploadDownloadController {
     }
 
     @PostMapping("/uploadMultipleFiles")
-    public List< FileUploadDownloadResponse> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
+    public List<FileUploadDownloadResponse> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
         return Arrays.asList(files)
                 .stream()
                 .map(file -> uploadFile(file))
                 .collect(Collectors.toList());
     }
 
-//    Downlaoder
+    //    Downlaoder
     @GetMapping("/downloadFile/{fileName:.+}")
-    public ResponseEntity< Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
+    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
         // Load file as Resource
         Resource resource = fileStorageService.loadFileAsResource(fileName);
 
@@ -169,15 +169,35 @@ public class FileUploadDownloadController {
 //                "", "", "", "operator",
 //                "", "", "txn_id", "fileArray", "period", null, null);
 
-     //   RuleEngineApplication.startRuleEngine(re);
+        //   RuleEngineApplication.startRuleEngine(re);
 
-     logger.info("Going to raise  = ");
+        logger.info("Going to raise  = ");
         return new MappingJacksonValue("");
     }
 
 
+    @GetMapping("/testControllerForUser")
+    public MappingJacksonValue testControllerForUserUsers(@RequestParam("user") String user, @RequestParam("pass") String pass) {
 
+        userDiffImpl.getDetailsByUser(user, pass, 1);
+        //        try {
+//            T response = userDiffImpl.getByUsernameAndPasswordAndParentId(user, pass, 1);
+//            logger.info("Going response UUUUuu USER = " + response);
+//            logger.info("Response Username  = " + response.username);
+//        } catch (Exception e) {
+//            logger.error("Error at User:" + e);
+//        }
+//        try {
+//            Users responses = userDiffImpl.getByUsernameAndPasswordAndParentId(user, pass, 1);
+//            logger.info("Going responses = USERS" + responses);
+//            logger.info("Responses Username  = " + responses.getUsername());
+//        } catch (Exception e) {
+//            logger.error("Error at Users:" + e);
+//        }
+        return new MappingJacksonValue("");
+    }
 }
+
 
 //    public String getResult(String user_type, String feature, String imei, Long imei_type) {
 //        String rulePass = "true";

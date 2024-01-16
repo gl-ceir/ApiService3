@@ -4,26 +4,12 @@ import com.gl.ceir.config.exceptions.MissingRequestParameterException;
 import com.gl.ceir.config.exceptions.ServiceUnavailableException;
 import com.gl.ceir.config.exceptions.UnAuthorizationException;
 import com.gl.ceir.config.exceptions.UnprocessableEntityException;
-import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
-import com.gl.ceir.config.model.app.CheckImeiRequest;
-import com.gl.ceir.config.model.app.FeatureIpAccessList;
-import com.gl.ceir.config.model.app.User;
-import com.gl.ceir.config.model.app.UserFeatureIpAccessList;
+import com.gl.ceir.config.model.app.*;
 import com.gl.ceir.config.model.constants.LanguageFeatureName;
-import com.gl.ceir.config.repository.app.AppDeviceDetailsRepository;
-import com.gl.ceir.config.repository.app.CheckImeiResponseParamRepository;
-import com.gl.ceir.config.repository.app.FeatureIpAccessListRepository;
-import com.gl.ceir.config.repository.app.SystemConfigListRepository;
-import com.gl.ceir.config.repository.app.SystemConfigurationDbRepository;
-import com.gl.ceir.config.repository.app.UserFeatureIpAccessListRepository;
-import com.gl.ceir.config.repository.app.UserRepository;
+import com.gl.ceir.config.repository.app.*;
 import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
 import com.gl.ceir.config.service.impl.LanguageServiceImpl;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
+import com.gl.ceir.config.service.userlogic.UserFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +18,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class CheckImeiController {  //sachin
@@ -74,6 +60,9 @@ public class CheckImeiController {  //sachin
 
     @Value("#{'${languageType}'.split(',')}")
     public List<String> languageType;
+
+    @Autowired
+    UserFactory userFactory;
 
     @Autowired
     CheckImeiServiceImpl checkImeiServiceImpl;
@@ -215,8 +204,10 @@ public class CheckImeiController {  //sachin
                 logger.info("Found operator with  value " + systemConfig.getValue());
                 var decodedString = new String(Base64.getDecoder().decode(request.getHeader("Authorization").substring(6)));
                 logger.info("user:" + decodedString.split(":")[0] + "pass:" + decodedString.split(":")[1]);
-                User userValue = userRepository
-                        .getByUsernameAndPasswordAndParentId(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
+                // User userValue = userRepository.getByUsernameAndPasswordAndParentId(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
+
+                UserVars userValue =  (UserVars) userFactory.createUser()
+                        .getUserDetailDao(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
                 if (userValue == null || !userValue.getUsername().equals(decodedString.split(":")[0]) || !userValue.getPassword().equals(decodedString.split(":")[1])) {
                     logger.info("username password not match");
                     checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authUserPassNotMatch);

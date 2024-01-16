@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gl.ceir.config.model.app.UploadedFileDB;
+import com.gl.ceir.config.model.app.UploadedFileDBOld;
 
 @RestController
 public class UploadedFileController {
@@ -23,6 +24,13 @@ public class UploadedFileController {
     @PostMapping("/fileCopyApi")
     public MappingJacksonValue saveFileCopyDetails(@RequestBody UploadedFileDB uploadedFileDB) {
         var action = fileCopyServiceImpl.saveDetailsWithParam(uploadedFileDB);
+        MappingJacksonValue mapping = new MappingJacksonValue(action);
+        return mapping;
+    }
+    
+       @PostMapping("/addFileToSync")
+    public MappingJacksonValue saveFileCopyToSync(@RequestBody UploadedFileDBOld uploadedFileDBOld) {
+        var action = fileCopyServiceImpl.saveFileCopyToSync(uploadedFileDBOld);
         MappingJacksonValue mapping = new MappingJacksonValue(action);
         return mapping;
     }

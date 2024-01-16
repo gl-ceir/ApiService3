@@ -1,15 +1,9 @@
 package com.gl.ceir.config.model.app;
 
-import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.DynamicInsert;
+
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -17,7 +11,7 @@ import org.hibernate.annotations.DynamicInsert;
  
 @Table(name = "users")
 
-public class Users {
+public class Users extends UserVars {
 
     private static long serialVersionUID = 1L;
 

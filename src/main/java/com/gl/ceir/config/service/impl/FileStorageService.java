@@ -1,21 +1,19 @@
 package com.gl.ceir.config.service.impl;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @Service
 public class FileStorageService {
@@ -28,25 +26,13 @@ public class FileStorageService {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
         logger.info("File Name" + fileName);
         try {
-
-            // Check if the file's name contains invalid characters
-            if (fileName.contains("..")) {
-                logger.error("Sorry! Filename contains invalid path sequence " + fileName);
-            }
-
-            var fileStorageLocation = Paths.get("/home/maverick/").toAbsolutePath().normalize();
-            logger.info("File Storage Location Name" + fileStorageLocation);
-
-            try {
-                Files.createDirectories(fileStorageLocation);
-            } catch (Exception ex) {
-                logger.error("Could not create the directory where the uploaded files will be stored.", ex);
-            }
-
-            // Copy file to the target location (Replacing existing file with the same name)
-            Path targetLocation = fileStorageLocation.resolve(fileName);
+            if (fileName.contains(".."))
+                logger.error("Sorry! Filename contains invalid path sequence " + fileName);  // Check if the file's name contains invalid characters
+            var fileStorageLocation = Paths.get("/home/sachin/Glocks/").toAbsolutePath().normalize();
+            Files.createDirectories(fileStorageLocation);
+            Path targetLocation = fileStorageLocation.resolve(fileName); // Copy file to the target location (Replacing existing file with the same name)
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-            return fileName;
+            return fileStorageLocation.toString();
         } catch (IOException ex) {
             logger.error("Could not store file " + fileName + ". Please try again!", ex);
             return null;
@@ -54,8 +40,8 @@ public class FileStorageService {
     }
 
     /*  File Download */
- /*  */
- /*  */
+    /*  */
+    /*  */
     public Resource loadFileAsResource(String fileName) {
 
         var fileStorageLocation = Paths.get("/home/maverick/").toAbsolutePath().normalize();

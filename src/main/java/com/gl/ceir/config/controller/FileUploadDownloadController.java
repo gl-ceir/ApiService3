@@ -22,7 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -55,25 +54,23 @@ public class FileUploadDownloadController {
 
     @PostMapping("/uploadFile")
     public FileUploadDownloadResponse uploadFile(@RequestParam("file") MultipartFile file) {
-
-        String fileName = fileStorageService.storeFile(file);
-        logger.info("fileName" + fileName);
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/downloadFile/")
-                .path(fileName)
-                .toUriString();
-        logger.info("fileDownloadUri" + fileDownloadUri);
-
-        return new FileUploadDownloadResponse(fileName, fileDownloadUri,
-                file.getContentType(), file.getSize());
+        String filePath  = fileStorageService.storeFile(file);
+        logger.info("fileName:" + filePath);
+       // String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadFile/").path(fileName).toUriString();
+        return new FileUploadDownloadResponse(file.getOriginalFilename(), filePath+"/"+file.getOriginalFilename(), file.getContentType(), file.getSize());
     }
 
     @PostMapping("/uploadMultipleFiles")
     public List<FileUploadDownloadResponse> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
-        return Arrays.asList(files)
-                .stream()
+        logger.info("Upload multiple File " + files.length);
+
+        var response =
+                Arrays.stream(files)
                 .map(file -> uploadFile(file))
                 .collect(Collectors.toList());
+
+        logger.info("Upload multiple response " + response.toString());
+        return response;
     }
 
     //    Downlaoder
@@ -81,7 +78,6 @@ public class FileUploadDownloadController {
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
         // Load file as Resource
         Resource resource = fileStorageService.loadFileAsResource(fileName);
-
         // Try to determine file's content type
         String contentType = null;
         try {

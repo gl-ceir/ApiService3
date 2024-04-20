@@ -1,25 +1,22 @@
 package com.gl.ceir.config.model.app;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import javax.persistence.Cacheable;
-import javax.persistence.Table;
-
 @Entity
 @Cacheable
+@Audited
 @Table(name = "sys_param")
+// @AuditTable(value = "sys_param_aud", schema = "aud")
+
 public class SystemConfigurationDb implements Serializable {
 
 	private static final long serialVersionUID = 1L;

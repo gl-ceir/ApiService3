@@ -6,8 +6,11 @@ package com.gl.ceir.config.controller;
 
 // import com.gl.ceir.config.configuration.ConnectionConfiguration;
 
+import com.gl.ceir.config.model.app.DeviceidBaseUrlDb;
 import com.gl.ceir.config.model.app.FileUploadDownloadResponse;
+import com.gl.ceir.config.model.app.SystemConfigurationDb;
 import com.gl.ceir.config.repository.app.CheckImeiPreInitRepository;
+import com.gl.ceir.config.repository.app.SystemConfigurationDbRepository;
 import com.gl.ceir.config.service.ModulesAuditTrailService;
 import com.gl.ceir.config.service.impl.FileStorageService;
 import com.gl.ceir.config.service.userlogic.UserDiffImpl;
@@ -20,11 +23,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,17 +54,43 @@ public class FileUploadDownloadController {
     @Autowired
     VirtualIpAddressUtil virtualIpAddressUtil;
 
+    @Autowired
+    SystemConfigurationDbRepository systemConfigurationDbRepository;
+
+
     // getVirtualIpDetails getVirtualIpDetails
 
     private static final Logger logger = LogManager.getLogger(FileUploadDownloadController.class);
 
-    @PostMapping("/uploadFile")
-    public FileUploadDownloadResponse uploadFile(@RequestParam("file") MultipartFile file) {
-        String filePath  = fileStorageService.storeFile(file);
-        logger.info("fileName:" + filePath);
-       // String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadFile/").path(fileName).toUriString();
-        return new FileUploadDownloadResponse(file.getOriginalFilename(), filePath+"/"+file.getOriginalFilename(), file.getContentType(), file.getSize());
+
+    @PostMapping ("/saveAud")
+    public MappingJacksonValue saveAudDetails(@RequestBody SystemConfigurationDb systemConfigurationDb) {
+        systemConfigurationDbRepository.save(systemConfigurationDb);
+        return new MappingJacksonValue("Done");
     }
+
+
+    @PostMapping("/uploadFile")
+    public FileUploadDownloadResponse uploadFile(@RequestParam("file") MultipartFile file ,
+                                                 @RequestBody DeviceidBaseUrlDb request) {
+        String filePath = fileStorageService.storeFile(file);
+        logger.info("fileName:" + filePath);
+        logger.info(" dvcBaseUrl request:" + request.toString());
+        // String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadFile/").path(fileName).toUriString();
+        return new FileUploadDownloadResponse(file.getOriginalFilename(), filePath + "/" + file.getOriginalFilename(), file.getContentType(), file.getSize());
+    }
+
+
+    @RequestMapping(value = "/uploadStuff", method = RequestMethod.POST)
+    public FileUploadDownloadResponse doStuff(@RequestPart("json") @Valid DeviceidBaseUrlDb request,
+                             @RequestPart("file") MultipartFile file) {
+        String filePath = fileStorageService.storeFile(file);
+        logger.info(":: fileName:" + filePath);
+        logger.info(":: dvcBaseUrl request:" + request.toString());
+        return new FileUploadDownloadResponse(file.getOriginalFilename(), filePath + "/" + file.getOriginalFilename(), file.getContentType(), file.getSize());
+    }
+
+
 
     @PostMapping("/uploadMultipleFiles")
     public List<FileUploadDownloadResponse> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
@@ -66,8 +98,8 @@ public class FileUploadDownloadController {
 
         var response =
                 Arrays.stream(files)
-                .map(file -> uploadFile(file))
-                .collect(Collectors.toList());
+                        .map(file -> uploadFile(file , null))
+                        .collect(Collectors.toList());
 
         logger.info("Upload multiple response " + response.toString());
         return response;
@@ -76,12 +108,10 @@ public class FileUploadDownloadController {
     //    Downlaoder
     @GetMapping("/downloadFile/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
-        // Load file as Resource
-        Resource resource = fileStorageService.loadFileAsResource(fileName);
-        // Try to determine file's content type
-        String contentType = null;
+        var fileRes = fileStorageService.getFileForDownload(fileName);   //
+        String contentType = null;    // Try to determine file's content type
         try {
-            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+            contentType = request.getServletContext().getMimeType(fileRes.getFile().getAbsolutePath());
         } catch (IOException ex) {
             logger.info("Could not determine file type.");
         }
@@ -93,8 +123,8 @@ public class FileUploadDownloadController {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileRes.getFilename() + "\"")
+                .body(fileRes);
     }
 
     @GetMapping("/testController")
@@ -118,6 +148,14 @@ public class FileUploadDownloadController {
     public MappingJacksonValue multiChecks() {
         logger.info("Going to Checks   ");
         try {
+            List<DeviceidBaseUrlDb> dataList = new ArrayList<>();
+            //      dataList.add(new DeviceidBaseUrlDb(1L,"1sfs","sdfs"));
+
+            //      dataList.add(new DeviceidBaseUrlDb(5L,"3sdfs","sdf"));
+            //      dataList.add(new DeviceidBaseUrlDb(2L,"22sdf","sdf"));
+            //      dataList.add(new DeviceidBaseUrlDb(5L,"55sdfs","sdf"));
+
+            saveData(dataList);
 //            var result = modulesAuditTrailRepository.getById(100);
 //            logger.info("Details Get : " + result.toString());
         } catch (Exception e) {
@@ -132,14 +170,26 @@ public class FileUploadDownloadController {
             logger.error(e.getLocalizedMessage() + "::#########************##########::" + e.toString());
         }
         try {
-            var response = checkImeiPreInitRepository.getByDeviceId("default_setup");
-            logger.info("Response  " + response.toString());
+
+
+            //       var response = checkImeiPreInitRepository.getByDeviceId("default_setup");
+
+
+            //       logger.info("Response  " + response.toString());
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage() + "::###################::" + e.toString());
         }
 
         //  ModulesAuditTrail modulesAuditTrail = new ModulesAuditTrail("Code 0", "Staus ", 0, "Error Message", "Module", "test_feature");
         return new MappingJacksonValue("Success Test");
+    }
+
+
+    @Transactional(noRollbackFor = Exception.class)
+    public void saveData(List<DeviceidBaseUrlDb> dataList) {
+
+        logger.info("Going to saveData ::::::::::::::  " + dataList.size());
+        checkImeiPreInitRepository.saveAll(dataList);
     }
 
     @GetMapping("/getVirtualIpDetails")

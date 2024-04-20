@@ -8,10 +8,11 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableConfigurationProperties
-//@EnableJpaAuditing
+@EnableJpaAuditing
 
 // @EnableCaching
 @EntityScan({"com.gl.ceir.config.model"})

@@ -28,7 +28,7 @@ public class FileStorageService {
         try {
             if (fileName.contains(".."))
                 logger.error("Sorry! Filename contains invalid path sequence " + fileName);  // Check if the file's name contains invalid characters
-            var fileStorageLocation = Paths.get("/home/sachin/Glocks/").toAbsolutePath().normalize();
+            var fileStorageLocation = Paths.get("/home/sachin/glocks/").toAbsolutePath().normalize();
             Files.createDirectories(fileStorageLocation);
             Path targetLocation = fileStorageLocation.resolve(fileName); // Copy file to the target location (Replacing existing file with the same name)
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
@@ -42,9 +42,9 @@ public class FileStorageService {
     /*  File Download */
     /*  */
     /*  */
-    public Resource loadFileAsResource(String fileName) {
+    public Resource getFileForDownload(String fileName) {
 
-        var fileStorageLocation = Paths.get("/home/maverick/").toAbsolutePath().normalize();
+        var fileStorageLocation = Paths.get("/home/sachin/").toAbsolutePath().normalize();
         logger.info("File Storage Location " + fileStorageLocation);
         try {
             Files.createDirectories(fileStorageLocation);

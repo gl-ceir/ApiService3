@@ -1,53 +1,25 @@
 package com.gl.ceir.config.service.impl;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
+import com.gl.ceir.config.exceptions.InternalServicesException;
+import com.gl.ceir.config.model.app.*;
+import com.gl.ceir.config.model.constants.Alerts;
+import com.gl.ceir.config.model.constants.StatusMessage;
+import com.gl.ceir.config.repository.app.*;
+import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.gl.ceir.config.exceptions.InternalServicesException;
-import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
-import com.gl.ceir.config.model.app.CheckImeiRequest;
-import com.gl.ceir.config.model.app.Result;
-import com.gl.ceir.config.model.app.CheckImeiResponse;
-import com.gl.ceir.config.model.app.DeviceidBaseUrlDb;
-import com.gl.ceir.config.model.app.GsmaTacDetails;
-import com.gl.ceir.config.model.app.Notification;
-import com.gl.ceir.config.model.app.RuleEngineMapping;
-import com.gl.ceir.config.model.constants.Alerts;
-import com.gl.ceir.config.repository.audit.AuditTrailRepository;
-import com.gl.ceir.config.repository.app.CheckImeiRepository;
-import com.gl.ceir.config.repository.app.GsmaTacDetailsRepository;
-import com.gl.ceir.config.repository.app.SystemConfigurationDbRepository;
-import com.gl.ceir.config.model.constants.StatusMessage;
-import com.gl.ceir.config.repository.app.AppDeviceDetailsRepository;
-import com.gl.ceir.config.repository.app.CheckImeiPreInitRepository;
-import com.gl.ceir.config.repository.app.CheckImeiRequestRepository;
-import com.gl.ceir.config.repository.app.CheckImeiResponseParamRepository;
-import com.gl.ceir.config.repository.app.LanguageLabelDbRepository;
-import com.gl.ceir.config.repository.app.NationalWhitelistRepository;
-import com.gl.ceir.config.repository.app.OperatorSeriesRepository;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
-import java.util.List;
-import org.json.JSONObject;
-//import org.json.JSONObject;
-import com.google.gson.Gson;
-import javax.servlet.http.HttpServletRequest;
-import org.hibernate.exception.SQLGrammarException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 
 @Service
 public class CheckImeiServiceImpl {
@@ -101,9 +73,9 @@ public class CheckImeiServiceImpl {
 
     /*  *******************************  */
 
- /*  *******************************  */
+    /*  *******************************  */
 
- /*  *******************************  */
+    /*  *******************************  */
     public CheckImeiResponse getImeiDetailsDevices(CheckImeiRequest checkImeiRequest, long startTime) {
         //  JSONObject deviceDetails = null;
         String status = null;
@@ -119,7 +91,7 @@ public class CheckImeiServiceImpl {
             gsmaTacDetails = gsmaTacDetailsRepository.getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
             if (gsmaTacDetails != null) {
                 isValidImei = true;
-                 mappedDeviceDetails = deviceDetailsNew(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
+                mappedDeviceDetails = deviceDetailsNew(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
                 if (gsmaTacDetails.getDevice_type().equalsIgnoreCase("Smartphone") || gsmaTacDetails.getDevice_type().contains("phone")) {
                     if (nationalWhiteListResponse) {
                         status = "WhiteListedSmartphone";
@@ -148,10 +120,10 @@ public class CheckImeiServiceImpl {
             }
             logger.info("Status is  :->" + status + ", For Channel -" + checkImeiRequest.getChannel() + ", For Language -" + checkImeiRequest.getLanguage() + "  isValidImei:-> " + isValidImei);
             var message = checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName(
-                    checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? status + "ForUssd" : checkImeiRequest.getChannel().equalsIgnoreCase("sms")
-                    ? status + "ForSms" : status,
-                    checkImeiRequest.getLanguage().contains("kh") ? 2 : 1,
-                    "CheckImei")
+                            checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? status + "ForUssd" : checkImeiRequest.getChannel().equalsIgnoreCase("sms")
+                                    ? status + "ForSms" : status,
+                            checkImeiRequest.getLanguage().contains("kh") ? 2 : 1,
+                            "CheckImei")
                     .getValue()
                     .replace("<imei>", checkImeiRequest.getImei());
             logger.info("Semi Response  message::  :" + message);
@@ -159,7 +131,8 @@ public class CheckImeiServiceImpl {
                     checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? status + "ComplianceForUssd" : checkImeiRequest.getChannel().equalsIgnoreCase("sms") ? status + "ComplianceForSms" : status + "Compliance",
                     checkImeiRequest.getLanguage().contains("kh") ? 2 : 1, "CheckImei");
             logger.info("Comp Status:::::::  :" + compStatus);
-            var complianceStatus = compStatus == null ? null : compStatus.getValue().replace("<imei>", checkImeiRequest.getImei());;
+            var complianceStatus = compStatus == null ? null : compStatus.getValue().replace("<imei>", checkImeiRequest.getImei());
+
             logger.info("Compliance Status::  :" + complianceStatus + ",Response via  mobileDeviceRepository :" + mappedDeviceDetails);
             var symbol_color = systemConfigurationDbRepositry.getByTag(status + "SymbolColor").getValue();    //  message, deviceDetails == null ? null :
             var result = new Result(isValidImei, symbol_color, complianceStatus, message, mappedDeviceDetails == null ? null : mappedDeviceDetails);
@@ -172,9 +145,9 @@ public class CheckImeiServiceImpl {
             if (checkImeiRequest.getChannel().equalsIgnoreCase("ussd") && systemConfigurationDbRepositry.getByTag("send_sms_flag").getValue().equalsIgnoreCase("true")) {
                 logger.info("Going for ussd and send_sms_flag true  ");
                 var smsMessage = checkImeiResponseParamRepository.getByTagAndTypeAndFeatureName(
-                        status + "ForSms",
-                        checkImeiRequest.getLanguage().contains("kh") ? 2 : 1,
-                        "CheckImei")
+                                status + "ForSms",
+                                checkImeiRequest.getLanguage().contains("kh") ? 2 : 1,
+                                "CheckImei")
                         .getValue()
                         .replace("<imei>", checkImeiRequest.getImei());
                 createPostRequestForNotification(checkImeiRequest, smsMessage, response.getId().intValue());
@@ -230,7 +203,7 @@ public class CheckImeiServiceImpl {
 
 
     private void createPostRequestForNotification(CheckImeiRequest checkImeiRequest, String smsMessage, int id) {
-                 logger.info(" Notification ::  :" );
+        logger.info(" Notification ::  :");
         var notification = new Notification("SMS", smsMessage, "CheckImei", 0, 0, checkImeiRequest.getMsisdn(),
                 checkImeiRequest.getOperator(), checkImeiRequest.getLanguage(), id);
         Gson gson = new Gson();
@@ -241,7 +214,7 @@ public class CheckImeiServiceImpl {
     }
 
     private String sendPostForSmsNotification(String body) {
-         logger.info("Going to send notification::  :" + body);
+        logger.info("Going to send notification::  :" + body);
         String url = systemConfigurationDbRepositry.getByTag("notificationTableUrl")
                 .getValue()
                 .replace("{localIp}", localIp);
@@ -317,7 +290,7 @@ public class CheckImeiServiceImpl {
 
     private LinkedHashMap deviceDetailsNew(String brand_name, String model_name, String device_type, String manufacturer, String marketing_name, String lang) {
         LinkedHashMap<String, String> item = new LinkedHashMap();
-        item.put(lang.equals("en") ? languageLabelDbRepository.getEnglishNameFromLabel("brandName"): languageLabelDbRepository.getKhmerNameFromLabel("brandName"), brand_name);
+        item.put(lang.equals("en") ? languageLabelDbRepository.getEnglishNameFromLabel("brandName") : languageLabelDbRepository.getKhmerNameFromLabel("brandName"), brand_name);
         item.put(lang.equals("en") ? languageLabelDbRepository.getEnglishNameFromLabel("modelName") : languageLabelDbRepository.getKhmerNameFromLabel("modelName"), model_name);
         item.put(lang.equals("en") ? languageLabelDbRepository.getEnglishNameFromLabel("manufacturer") : languageLabelDbRepository.getKhmerNameFromLabel("manufacturer"), manufacturer);
         item.put(lang.equals("en") ? languageLabelDbRepository.getEnglishNameFromLabel("marketingName") : languageLabelDbRepository.getKhmerNameFromLabel("marketingName"), marketing_name);

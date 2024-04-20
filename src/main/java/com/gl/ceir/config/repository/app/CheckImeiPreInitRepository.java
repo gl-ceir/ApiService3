@@ -16,3 +16,4 @@ public interface CheckImeiPreInitRepository extends JpaRepository<DeviceidBaseUr
 
     public DeviceidBaseUrlDb getByDeviceId(String deviceId);
 }
+

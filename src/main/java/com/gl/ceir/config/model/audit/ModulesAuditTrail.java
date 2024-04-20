@@ -42,6 +42,10 @@ public class ModulesAuditTrail implements Serializable {
         this.count = count;
     }
 
+    public ModulesAuditTrail() {
+
+    }
+
     public Long getId() {
         return id;
     }

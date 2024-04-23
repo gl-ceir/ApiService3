@@ -6,14 +6,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 //@RefreshScope
 // @EnableScheduling
 
 @PropertySources({
-    @PropertySource(value = {"file:application.properties"}, ignoreResourceNotFound = true),
+    @PropertySource(value = {"file:../../../../../../resources/applicationOracle.properties"}, ignoreResourceNotFound = true),
     @PropertySource(value = {"file:configuration.properties"}, ignoreResourceNotFound = true)
 })
 

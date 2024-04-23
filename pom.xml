@@ -152,7 +152,11 @@
             <version>2.9.2</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>com.gl</groupId>
+            <artifactId>Rule_engine</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 
         <!--        <dependency>
             <groupId>org.apache.logging.log4j</groupId>

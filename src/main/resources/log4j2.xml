@@ -1,9 +1,10 @@
 <Configuration status="INFO">
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level [%C{1}][%F][%M()] :%L - %msg%n" />
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level [%C{2}][%M()] :%L - %msg%n" />
         </Console>
-        <RollingFile name="rollingFile" fileName="/home/sachin/Glocks/extras/apiservice3logs.log" filePattern="/home/sachin/glocks/extras/ApiService3logs-%d{dd-MMM}.log" ignoreExceptions="false">
+        <RollingFile name="rollingFile" fileName="/u02/ceirdata/logs/extras/apiservice3logs.log"
+                     filePattern="/u02/ceirdata/logs/extras//ApiService3logs-%d{dd-MMM}.log" ignoreExceptions="false">
             <PatternLayout>
                 <Pattern>%d{HH:mm:ss.SSS} %-5level [%C{1}][%F][%M()] :%L - %msg%n</Pattern>
             </PatternLayout>

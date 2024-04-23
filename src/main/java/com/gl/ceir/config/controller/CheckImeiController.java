@@ -7,6 +7,7 @@ import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 import com.gl.ceir.config.model.app.*;
 import com.gl.ceir.config.model.constants.LanguageFeatureName;
 import com.gl.ceir.config.repository.app.*;
+import com.gl.ceir.config.service.impl.CheckImeiOtherApiImpl;
 import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
 import com.gl.ceir.config.service.impl.LanguageServiceImpl;
 import com.gl.ceir.config.service.userlogic.UserFactory;
@@ -65,6 +66,9 @@ public class CheckImeiController {  //sachin
     UserFactory userFactory;
 
     @Autowired
+    CheckImeiOtherApiImpl checkImeiOtherApiImpl;
+
+    @Autowired
     CheckImeiServiceImpl checkImeiServiceImpl;
 
     @Autowired
@@ -101,7 +105,7 @@ public class CheckImeiController {  //sachin
         String host = request.getHeader("Host");
         System.out.println("Host Name " + host);
         logger.info("Host Name::: " + host);
-        MappingJacksonValue mapping = new MappingJacksonValue(checkImeiServiceImpl.getPreinitApi(deviceId));
+        MappingJacksonValue mapping = new MappingJacksonValue(checkImeiOtherApiImpl.getPreinitApi(deviceId));
         logger.info("Response of View =" + mapping);
         return mapping;
     }
@@ -112,7 +116,7 @@ public class CheckImeiController {  //sachin
     public MappingJacksonValue getMobileDeviceDetails(@RequestBody AppDeviceDetailsDb appDeviceDetailsDb) {
         errorValidationChecker(appDeviceDetailsDb);
         logger.info("Request = " + appDeviceDetailsDb);
-        checkImeiServiceImpl.saveDeviceDetails(appDeviceDetailsDb);
+        checkImeiOtherApiImpl.saveDeviceDetails(appDeviceDetailsDb);
         logger.info("Going to fetch response according to  = " + appDeviceDetailsDb.getLanguageType());
         return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.getName(), appDeviceDetailsDb.getLanguageType()));
     }
@@ -130,7 +134,9 @@ public class CheckImeiController {  //sachin
         }
     }
 
+
     /*  *******************************  */
+
     //@ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
     @CrossOrigin(origins = "", allowedHeaders = "")
     @PostMapping("services/checkIMEI")
@@ -140,12 +146,6 @@ public class CheckImeiController {  //sachin
                 ? (request.getHeader("X-FORWARDED-FOR") == null ? request.getRemoteAddr()
                 : request.getHeader("X-FORWARDED-FOR"))
                 : request.getHeader("HTTP_CLIENT_IP");
-//        try {
-//            logger.debug("user-agent " + request.getHeader("user-agent") + ";ClientIP " + request.getHeader("Client-IP") + ";userIp " + userIp + ";getRemoteHost " + request.getRemoteHost() + ";getLocalAddr " + request.getLocalAddr() + ";getAuthType " + request.getAuthType() + ";getRemoteAddr " + request.getRemoteAddr() + ";getServletPath " + request.getServletPath() + ";getRemoteAddr " + request.getRemoteAddr() + ";X-FORWARDED-FOR " + request.getHeader("X-FORWARDED-FOR") + "; HTTP_CLIENT_IP " + request.getHeader("HTTP_CLIENT_IP"));
-//        } catch (Exception e) {
-//            logger.warn("Getting Ips for Testing purpose", e);
-//        }
-      //  logger.info("!!!!!!!! Request = " + checkImeiRequest.toString());
         checkImeiRequest.setHeader_browser(request.getHeader("user-agent"));
         checkImeiRequest.setHeader_public_ip(userIp);
         var language = checkImeiRequest.getLanguage() == null ? "en" : checkImeiRequest.getLanguage().equalsIgnoreCase("kh") ? "kh" : "en";
@@ -153,8 +153,7 @@ public class CheckImeiController {  //sachin
         logger.info(checkImeiRequest.toString());
         errorValidationChecker(checkImeiRequest, startTime);
         authorizationChecker(checkImeiRequest, startTime);
-        logger.debug("Going for values ");
-        var value = checkImeiServiceImpl.getImeiDetailsDevices(checkImeiRequest, startTime);
+        var value = checkImeiServiceImpl.getImeiDetailsDevicesNew(checkImeiRequest, startTime);
         logger.info("   Start Time = " + startTime + "; End Time  = " + System.currentTimeMillis() + "  !!! Request = " + checkImeiRequest.toString() + " ########## Response =" + value.toString());
         return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(new MappingJacksonValue(value));
     }
@@ -206,7 +205,7 @@ public class CheckImeiController {  //sachin
                 logger.info("user:" + decodedString.split(":")[0] + "pass:" + decodedString.split(":")[1]);
                 // User userValue = userRepository.getByUsernameAndPasswordAndParentId(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
 
-                UserVars userValue =  (UserVars) userFactory.createUser()
+                UserVars userValue = (UserVars) userFactory.createUser()
                         .getUserDetailDao(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
                 if (userValue == null || !userValue.getUsername().equals(decodedString.split(":")[0]) || !userValue.getPassword().equals(decodedString.split(":")[1])) {
                     logger.info("username password not match");

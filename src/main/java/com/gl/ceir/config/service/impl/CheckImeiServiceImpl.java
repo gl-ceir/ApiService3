@@ -49,6 +49,9 @@ public class CheckImeiServiceImpl {
     @Value("${someWentWrongException}")
     private String someWentWrongException;
 
+    @Value("#{'${checkImeiRemarkRules}'.split(',')}")
+    public List<String> remarkRules;
+
     @Autowired
     AlertServiceImpl alertServiceImpl;
 
@@ -146,15 +149,17 @@ public class CheckImeiServiceImpl {
                         checkImeiRequest.getChannel().equalsIgnoreCase("sms") ? status + "_ComplianceForSms" : status + "_Compliance",
                 checkImeiRequest.getLanguage());
         String remarksValue = "Remarks:";// get from app.prop
-        for (String str : List.of("IMEI_PAIRING", "STOLEN", "DUPLICATE_DEVICE", "EXIST_IN_BLACKLIST_DB")) {  //, "EXISTS_IN_GREYLIST_DB"
+
+        // for (String str : List.of("IMEI_PAIRING", "STOLEN", "DUPLICATE_DEVICE", "EXIST_IN_BLACKLIST_DB"  , "SMPL"  ))  {  //, "EXISTS_IN_GREYLIST_DB"
+        for (String str : remarkRules) {  //, "EXISTS_IN_GREYLIST_DB"
             var remarkTag = "CheckImeiRemark_" + str + "_" + rules.get(str);
             logger.info("Remarks  :->" + remarkTag + "::::" + rules.get(str));
-            var response = responseRepo.getByTagAndLanguage(
-                            checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? remarkTag + "ForUssd" :
-                                    checkImeiRequest.getChannel().equalsIgnoreCase("sms")
-                                            ? remarkTag + "ForSms" : remarkTag,
-                            checkImeiRequest.getLanguage())
-                    .getValue().replace("<imei>", checkImeiRequest.getImei());
+            var chkImeiResParam = responseRepo.getByTagAndLanguage(
+                    checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? remarkTag + "ForUssd" :
+                            checkImeiRequest.getChannel().equalsIgnoreCase("sms")
+                                    ? remarkTag + "ForSms" : remarkTag,
+                    checkImeiRequest.getLanguage());
+            var response = chkImeiResParam == null ? "" : chkImeiResParam.getValue().replace("<imei>", checkImeiRequest.getImei());
             remarksValue += (response.isEmpty() || response.equals("")) ? "" : (response + ",");
         }
         remarksValue = remarksValue.substring(0, remarksValue.length() - 1);

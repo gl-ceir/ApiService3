@@ -1,19 +1,15 @@
 package com.gl.ceir.config.service.impl;
 
 import com.gl.ceir.config.exceptions.InternalServicesException;
-import com.gl.ceir.config.model.app.*;
+import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
+import com.gl.ceir.config.model.app.DeviceidBaseUrlDb;
 import com.gl.ceir.config.model.constants.Alerts;
-import com.gl.ceir.config.model.constants.StatusMessage;
 import com.gl.ceir.config.repository.app.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import java.sql.SQLException;
-import java.util.LinkedHashMap;
 
 
 @Service
@@ -143,12 +139,11 @@ public class CheckImeiOtherApiImpl {
 //        }
 //    }
 
-    /*  *******************************  */
+/*  *******************************  */
 
-    /*  *******************************  */
+/*  *******************************  */
 
-    /*  *******************************  */
-
+/*  *******************************  */
 
 
 //    public CheckImeiResponse getImeiDetailsDevices(CheckImeiRequest checkImeiRequest, long startTime) {

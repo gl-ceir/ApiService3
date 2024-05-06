@@ -71,6 +71,9 @@ public class CheckImeiServiceImpl {
     CheckImeiServiceSendSMS checkImeiServiceSendSMS;
 
     @Autowired
+    NationalWhitelistRepository nationalWhitelistRepository;
+
+    @Autowired
     DbRepository dbRepository;
 
     public CheckImeiResponse getImeiDetailsDevicesNew(CheckImeiRequest checkImeiRequest, long startTime) {
@@ -102,11 +105,7 @@ public class CheckImeiServiceImpl {
     private LinkedHashMap<String, Boolean> getResponseStatusViaRuleEngine(CheckImeiRequest checkImeiRequest) {
         int complianceValue = 0;
         Connection conn = dbRepository.getConnection();
-        var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "edrapp",
-                "imei", checkImeiRequest.getImei(),
-                "msisdn", checkImeiRequest.getMsisdn() == null ? "" : checkImeiRequest.getMsisdn(),
-                "imsi", checkImeiRequest.getImsi() == null ? "" : checkImeiRequest.getImsi(),
-                "feature", "CheckImei", "operator", checkImeiRequest.getOperator() == null ? "" : checkImeiRequest.getOperator());
+        var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "edrapp", "imei", checkImeiRequest.getImei(), "msisdn", checkImeiRequest.getMsisdn() == null ? "" : checkImeiRequest.getMsisdn(), "imsi", checkImeiRequest.getImsi() == null ? "" : checkImeiRequest.getImsi(), "feature", "CheckImei", "operator", checkImeiRequest.getOperator() == null ? "" : checkImeiRequest.getOperator());
         var startTime = System.currentTimeMillis();
         LinkedHashMap<String, Boolean> rules = RuleEngineAdaptor.startAdaptor(conn, deviceInfo);
         logger.info("RuleEngine Time Taken is  :->" + (System.currentTimeMillis() - startTime));
@@ -134,37 +133,27 @@ public class CheckImeiServiceImpl {
     private Result getResult(CheckImeiRequest checkImeiRequest, LinkedHashMap<String, Boolean> rules, String status) {
 
         LinkedHashMap mappedDeviceDetails = null;
-        if (!(checkImeiRequest.getComplianceValue() == 9 || checkImeiRequest.getComplianceValue() == 10)) {
-            var gsmaTacDetails = gsmaTacDetailsRepository.getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
-            mappedDeviceDetails = deviceDetailsNew(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
-        }
-        var message = responseRepo.getByTagAndLanguage(
-                        checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? status + "ForUssd" : checkImeiRequest.getChannel().equalsIgnoreCase("sms")
-                                ? status + "ForSms" : status,
-                        checkImeiRequest.getLanguage())
-                .getValue()
-                .replace("<imei>", checkImeiRequest.getImei());
-        var compStatus = responseRepo.getByTagAndLanguage(
-                checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? status + "_ComplianceForUssd" :
-                        checkImeiRequest.getChannel().equalsIgnoreCase("sms") ? status + "_ComplianceForSms" : status + "_Compliance",
-                checkImeiRequest.getLanguage());
-        String remarksValue = "Remarks:";// get from app.prop
 
-        // for (String str : List.of("IMEI_PAIRING", "STOLEN", "DUPLICATE_DEVICE", "EXIST_IN_BLACKLIST_DB"  , "SMPL"  ))  {  //, "EXISTS_IN_GREYLIST_DB"
-        for (String str : remarkRules) {  //, "EXISTS_IN_GREYLIST_DB"
+        if (rules.get("NWL") || (rules.get("MDR") && presenceInNWL(checkImeiRequest))) { // means validity flag 1
+            var gsmaTacDetails = gsmaTacDetailsRepository.getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
+            if (gsmaTacDetails == null)
+                logger.info("No MDR detail Found ");
+            else
+                mappedDeviceDetails = deviceDetailsNew(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
+        }
+        var message = responseRepo.getByTagAndLanguage(checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? status + "ForUssd" : checkImeiRequest.getChannel().equalsIgnoreCase("sms") ? status + "ForSms" : status, checkImeiRequest.getLanguage()).getValue().replace("<imei>", checkImeiRequest.getImei());
+        var compStatus = responseRepo.getByTagAndLanguage(checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? status + "_ComplianceForUssd" : checkImeiRequest.getChannel().equalsIgnoreCase("sms") ? status + "_ComplianceForSms" : status + "_Compliance", checkImeiRequest.getLanguage());
+        String remarksValue = "Remarks:";  // get from app.prop
+
+        for (String str : remarkRules) {  // for (String str : List.of("IMEI_PAIRING", "STOLEN", "DUPLICATE_DEVICE", "EXIST_IN_BLACKLIST_DB"  , "SMPL"  ))  {  //, "EXISTS_IN_GREYLIST_DB"
             var remarkTag = "CheckImeiRemark_" + str + "_" + rules.get(str);
             logger.info("Remarks  :->" + remarkTag + "::::" + rules.get(str));
-            var chkImeiResParam = responseRepo.getByTagAndLanguage(
-                    checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? remarkTag + "ForUssd" :
-                            checkImeiRequest.getChannel().equalsIgnoreCase("sms")
-                                    ? remarkTag + "ForSms" : remarkTag,
-                    checkImeiRequest.getLanguage());
-            var response = chkImeiResParam == null ? "" : chkImeiResParam.getValue().replace("<imei>", checkImeiRequest.getImei());
-            remarksValue += (response.isEmpty() || response.equals("")) ? "" : (response + ",");
+            var chkImeiResParam = responseRepo.getByTagAndLanguage(checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? remarkTag + "ForUssd" : checkImeiRequest.getChannel().equalsIgnoreCase("sms") ? remarkTag + "ForSms" : remarkTag, checkImeiRequest.getLanguage());
+            var response = (chkImeiResParam == null || chkImeiResParam.getValue().isEmpty()) ? " " : chkImeiResParam.getValue().replace("<imei>", checkImeiRequest.getImei());
+            remarksValue += (response.isBlank() || response.equals("")) ? "" : (response + ",");
         }
         remarksValue = remarksValue.substring(0, remarksValue.length() - 1);
-        if (remarksValue.equalsIgnoreCase("Remarks"))
-            remarksValue = "";
+        if (remarksValue.equalsIgnoreCase("Remarks")) remarksValue = "";
         var complianceStatus = compStatus == null ? null : compStatus.getValue().replace("<imei>", checkImeiRequest.getImei()) + " " + remarksValue;
         logger.info("Compliance Status:::->" + complianceStatus + "MDR Response  :->" + mappedDeviceDetails);
         var symbolTag = status + "_SymbolColor";
@@ -180,6 +169,12 @@ public class CheckImeiServiceImpl {
         checkImeiRequest.setRequestProcessStatus("Success");
         var result = new Result(isValidImei, symbolColor, complianceStatus, message, mappedDeviceDetails == null ? null : mappedDeviceDetails);
         return result;
+    }
+
+    private boolean presenceInNWL(CheckImeiRequest checkImeiRequest) {
+        var response = nationalWhitelistRepository.getByImei(checkImeiRequest.getImei().length() > 14 ? checkImeiRequest.getImei().substring(0, 14) : checkImeiRequest.getImei()) == null ? false : true;
+        logger.info("Present In NWL Response :->" + response);
+        return response;
     }
 
 

@@ -12,7 +12,7 @@ import org.springframework.context.annotation.PropertySources;
 // @EnableScheduling
 
 @PropertySources({
-    @PropertySource(value = {"file:../../../../../../resources/applicationOracle.properties"}, ignoreResourceNotFound = true),
+    @PropertySource(value = {"file:../../../../../../resources/application.properties"}, ignoreResourceNotFound = true),
     @PropertySource(value = {"file:configuration.properties"}, ignoreResourceNotFound = true)
 })
 

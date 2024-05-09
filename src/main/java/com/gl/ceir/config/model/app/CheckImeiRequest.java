@@ -21,7 +21,6 @@ import org.hibernate.annotations.DynamicInsert;
 @Setter
 @NoArgsConstructor
 @Table(name = "check_imei_req_detail")
-
 @DynamicInsert
 public class CheckImeiRequest implements Serializable {
 

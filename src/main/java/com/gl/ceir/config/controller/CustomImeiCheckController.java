@@ -1,24 +1,30 @@
 package com.gl.ceir.config.controller;
 
-import com.gl.ceir.config.exceptions.*;
+import com.gl.ceir.config.exceptions.MissingRequestParameterException;
+import com.gl.ceir.config.exceptions.PayloadSizeExceeds;
+import com.gl.ceir.config.exceptions.UnAuthorizationException;
+import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 import com.gl.ceir.config.model.app.*;
 import com.gl.ceir.config.model.constants.CustomCheckImeiRequest;
 import com.gl.ceir.config.repository.app.*;
 import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
-
 import com.gl.ceir.config.service.impl.CustomImeiCheckServiceImpl;
-
+import com.gl.ceir.config.service.impl.SystemParamServiceImpl;
 import com.gl.ceir.config.service.userlogic.UserFactory;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;  // isBlank
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
@@ -59,6 +65,8 @@ public class CustomImeiCheckController {  //sachin
     @Value("${customImeiPayLoadMaxSize}")
     private String customImeiPayLoadMaxSize;
 
+    @Value("${customImeiRegisterPayLoadMaxSize}")
+    private String customImeiRegisterPayLoadMaxSize;
 
     @Value("${maxSizeDefinedException}")
     private String maxSizeDefinedException;
@@ -96,27 +104,62 @@ public class CustomImeiCheckController {  //sachin
     @Autowired
     CustomImeiCheckServiceImpl customImeiCheckServiceImpl;
 
+    @Autowired
+    GdceRegisterImeiReqRepo gdceRegisterImeiReqRepo;
+
+    @Autowired
+    SystemParamServiceImpl systemParamServiceImpl;
+
+    @Autowired
+    DbRepository dbRepository;
+
 
     @ApiOperation(value = "Custom Imei Check Api", response = CustomImeiCheckResponse.class)
     @CrossOrigin(origins = "", allowedHeaders = "")
     @PostMapping("/gdce/services/checkIMEI")
     public ResponseEntity gdceCheckImeiDevice(@RequestBody List<CustomCheckImeiRequest> customCheckImeiRequest) {
-        errorValidationChecker(customCheckImeiRequest);
-        var value = customImeiCheckServiceImpl.startService(customCheckImeiRequest);
+
+        String reqId = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+        String fileName = customImeiCheckServiceImpl.createFile(Arrays.toString(customCheckImeiRequest.toArray()), "checkIMEI", "req", reqId);
+        var obj = gdceCheckImeiReqRepository.save(new GdceCheckImeiReq("INIT", " ", reqId, customCheckImeiRequest.size(), fileName));
+        errorValidationChecker(customCheckImeiRequest, obj);
+        List<CustomImeiCheckResponse>  value = customImeiCheckServiceImpl.startCustomCheckService(customCheckImeiRequest, obj);
         return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(new MappingJacksonValue(value));
     }
 
-    void errorValidationChecker(List<CustomCheckImeiRequest> customCheckImeiRequest) {
-        String reqId;
-        try {
-            reqId = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse date: ", e);
+    @ApiOperation(value = "register Custom Imei Check Api", response = ResponseEntity.class)
+    @CrossOrigin(origins = "", allowedHeaders = "")
+    @PostMapping("/gdce/services/registerIMEI")
+    public ResponseEntity gdceRegisterDevice(@RequestBody List<GdceData> gdceData) {
+        logger.info("Request :: {} ", gdceData);
+        String reqId = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+        String fileName = customImeiCheckServiceImpl.createFile(Arrays.toString(gdceData.toArray()), "registerIMEI", "req", reqId);
+        var obj = gdceRegisterImeiReqRepo.save(new GdceRegisterImeiReq("INIT", "", reqId, gdceData.size(), fileName));
+        errorValidationCheckerForRegister(gdceData, obj);
+        var value = customImeiCheckServiceImpl.registerService(gdceData, obj);
+        return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(new MappingJacksonValue(value));
+
+    }
+
+    private void errorValidationCheckerForRegister(List<GdceData> gdceRegister, GdceRegisterImeiReq obj) {
+        // gdceRegister.stream().anyMatch(a -> a.getImei() == null || a.getImei().isBlank()|| a.getSerialNumber() == null || a.getSerialNumber().isBlank())
+        if (gdceRegister == null || gdceRegister.size() == 0) {
+            obj.setStatus("FAIL");
+            obj.setRemark("400");
+            gdceRegisterImeiReqRepo.save(obj);
+            throw new MissingRequestParameterException("en", mandatoryParameterMissing);
         }
-        var re = new GdceCheckImeiReq("INIT", "", reqId, customCheckImeiRequest.size());
-        gdceCheckImeiReqRepository.save(re);
-        if (customCheckImeiRequest == null || customCheckImeiRequest.size() == 0 ||
-                customCheckImeiRequest.stream().anyMatch(a -> a.getImei() == null || a.getImei().isBlank())) {
+        if (gdceRegister.size() > Integer.parseInt(customImeiRegisterPayLoadMaxSize)) {    //2
+            obj.setStatus("FAIL");
+            obj.setRemark("413");
+            gdceRegisterImeiReqRepo.save(obj);
+            throw new PayloadSizeExceeds("en", maxSizeDefinedException);
+        }// authorizationChecker(re,);
+    }
+
+
+    void errorValidationChecker(List<CustomCheckImeiRequest> customCheckImeiRequest, GdceCheckImeiReq re) {
+        if (customCheckImeiRequest == null || customCheckImeiRequest.size() == 0) {
             re.setStatus("FAIL");
             re.setRemark(mandatoryParameterMissing);
             gdceCheckImeiReqRepository.save(re);
@@ -139,27 +182,32 @@ public class CustomImeiCheckController {  //sachin
         }
         logger.info("Basic Authorization present " + request.getHeader("Authorization").substring(6));
         try {
-            var systemConfig = systemConfigListRepository.findByTagAndInterp("OPERATORS", checkImeiRequest.getOperator().toUpperCase());
-            if (systemConfig == null) {
-                logger.info("Operator Not allowed ");
-                checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authOperatorNotPresent);
-                throw new UnprocessableEntityException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
-            }
-            logger.info("Found operator with  value " + systemConfig.getValue());
             var decodedString = new String(Base64.getDecoder().decode(request.getHeader("Authorization").substring(6)));
             logger.info("user:" + decodedString.split(":")[0] + "pass:" + decodedString.split(":")[1]);
-            // User userValue = userRepository.getByUsernameAndPasswordAndParentId(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
+            UserVars userValue = null;
 
-            UserVars userValue = (UserVars) userFactory.createUser()
-                    .getUserDetailDao(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
+            if (systemParamServiceImpl.getValueByTag("CustomApiAuthOperatorCheck").equalsIgnoreCase("true")) {
+                var systemConfig = systemConfigListRepository.findByTagAndInterp("OPERATORS", checkImeiRequest.getOperator().toUpperCase());
+                if (systemConfig == null) {
+                    logger.info("Operator Not allowed ");
+                    checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authOperatorNotPresent);
+                    throw new UnprocessableEntityException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+                }
+                logger.info("Found operator with  value " + systemConfig.getValue());
+                userValue = (UserVars) userFactory.createUser()
+                        .getUserDetailDao(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
+            } else {
+                userValue = (UserVars) userFactory.createUser()
+                        .getUserDetailDao(decodedString.split(":")[0], decodedString.split(":")[1]);
+            }
             if (userValue == null || !userValue.getUsername().equals(decodedString.split(":")[0]) || !userValue.getPassword().equals(decodedString.split(":")[1])) {
                 logger.info("username password not match");
                 checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authUserPassNotMatch);
                 throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
             }
 
-            if (systemConfigurationDbRepositry.getByTag("CHECK_IMEI_AUTH_WITH_IP").getValue().equalsIgnoreCase("true")) {
-                var checkimeiFeatureType = systemConfigurationDbRepositry.getByTag("CHECK_IMEI_FEATURE_ID").getValue();
+            if (systemConfigurationDbRepositry.getByTag("CustomApiAuthWithIpCheck").getValue().equalsIgnoreCase("true")) {
+                var checkimeiFeatureType = systemConfigurationDbRepositry.getByTag("CUSTOM_API_FEATURE_ID").getValue();
                 FeatureIpAccessList featureIpAccessList = featureIpAccessListRepository.getByFeatureId(checkimeiFeatureType);
                 logger.info(" data in featureIpAccessList  " + featureIpAccessList);
                 if (featureIpAccessList == null) {

@@ -4,21 +4,20 @@
  */
 package com.gl.ceir.config.service.impl;
 
+import com.gl.ceir.config.configuration.ApiHttpConnection;
 import com.gl.ceir.config.model.app.AlertDb;
 import com.gl.ceir.config.model.app.AlertRequest;
+import com.gl.ceir.config.model.app.GenricResponse;
 import com.gl.ceir.config.model.app.RunningAlertDb;
 import com.gl.ceir.config.repository.app.AlertDbRepository;
 import com.gl.ceir.config.repository.app.RunningAlertDbRepository;
-
-import com.gl.ceir.config.model.app.GenricResponse;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.Map;
-import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 @Service
 public class AlertServiceImpl {
@@ -27,6 +26,9 @@ public class AlertServiceImpl {
 
     @Autowired
     AlertDbRepository alertDbRepository;
+
+    @Autowired
+    ApiHttpConnection apiHttpConnection;
 
     @Autowired
     RunningAlertDbRepository runningAlertDbRepository;
@@ -38,6 +40,8 @@ public class AlertServiceImpl {
                 return new GenricResponse(1, "Fail", "No id found");
             }
             logger.info("Description:::" + alertDb.getDescription());
+            logger.info("alert id:{} value:{}", alertDb.getAlertId(), alertDb.getDescription());
+
             runningAlertDbRepository.save(new RunningAlertDb(0, alertId, alertDb.getDescription(), 0));
             return new GenricResponse(0, "Success");
         } catch (Exception e) {
@@ -67,8 +71,9 @@ public class AlertServiceImpl {
 
     public GenricResponse raiseAnAlert(String alertId, int userId) {
         try {
-            AlertDb alertDb = alertDbRepository.getByAlertId(alertId);
-            runningAlertDbRepository.save(new RunningAlertDb(userId, alertId, alertDb.getDescription(), 0));
+            apiHttpConnection.httpConnectionForApp(alertId , "", "CheckImei");
+//            AlertDb alertDb = alertDbRepository.getByAlertId(alertId);
+//            runningAlertDbRepository.save(new RunningAlertDb(userId, alertId, alertDb.getDescription(), 0));
             return new GenricResponse(0);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

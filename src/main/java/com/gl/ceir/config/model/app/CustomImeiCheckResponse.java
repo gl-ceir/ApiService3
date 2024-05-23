@@ -27,6 +27,19 @@ public class CustomImeiCheckResponse {
         this.deviceBrand = deviceBrand;
         this.modelName = modelName;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "imei='" + imei + '\'' +
+                ", serialNumber='" + serialNumber + '\'' +
+                ", statusCode='" + statusCode + '\'' +
+                ", statusMessage='" + statusMessage + '\'' +
+                ", deviceType='" + deviceType + '\'' +
+                ", deviceBrand='" + deviceBrand + '\'' +
+                ", modelName='" + modelName + '\'' +
+                '}';
+    }
 }
 
 

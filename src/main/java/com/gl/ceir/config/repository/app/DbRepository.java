@@ -17,6 +17,8 @@ public class DbRepository {
     @PersistenceContext
     private EntityManager em;
 
+    private static Connection conn;
+
     public Connection getConnection() {
         EntityManagerFactoryInfo info = (EntityManagerFactoryInfo) em.getEntityManagerFactory();
         try {
@@ -26,4 +28,16 @@ public class DbRepository {
             return null;
         }
     }
+
+    public Connection connection() {
+        if (conn == null) {
+            conn = getConnection();
+        }
+        logger.info("Connection is :" + conn);
+        return conn;
+    }
+
+
+
+
 }

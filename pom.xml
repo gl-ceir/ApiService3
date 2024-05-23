@@ -37,37 +37,22 @@
         </dependency>
 
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-envers</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
-        
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+
+        <!--        <dependency>-->
+        <!--            <groupId>com.h2database</groupId>-->
+        <!--            <artifactId>h2</artifactId>-->
+        <!--            <scope>runtime</scope>-->
+        <!--        </dependency>-->
 
 
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-             </dependency>
+            <version>8.0.28</version>
+        </dependency>
 
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
@@ -79,12 +64,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <type>jar</type>
-        </dependency>
-
 
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
@@ -114,16 +93,40 @@
             <type>jar</type>
         </dependency>
 
+                <dependency>
+                    <groupId>org.springframework.data</groupId>
+                    <artifactId>spring-data-envers</artifactId>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-devtools</artifactId>
+                    <scope>runtime</scope>
+                </dependency>
+
+
+                <dependency>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-core</artifactId>
+                    <type>jar</type>
+                </dependency>
+
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-envers</artifactId>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-envers</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
 
         <dependency>
             <groupId>io.swagger</groupId>
@@ -131,7 +134,7 @@
             <version>1.5.20</version>
             <type>jar</type>
         </dependency>
-        
+
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
@@ -144,31 +147,17 @@
             <version>2.9.2</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.gl</groupId>
-            <artifactId>Rule_engine</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-        <!--        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.20.0</version>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.gl</groupId>-->
+        <!--            <artifactId>Rule_engine</artifactId>-->
+        <!--            <version>0.0.1-SNAPSHOT</version>-->
+        <!--        </dependency>-->
 
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.20.0</version>
-        </dependency>-->
-
-        <!--        <dependency>
             <groupId>com.gl</groupId>
-            <artifactId>Rule_engine</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>-->
-
+            <artifactId>RuleEngine</artifactId>
+            <version>1.1</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -181,26 +170,17 @@
             </exclusions>
         </dependency>
 
-
-<!--        <dependency>-->
-<!--            <groupId>com.google.code.gson</groupId>-->
-<!--            <artifactId>gson</artifactId>-->
-<!--            <version>2.8.6</version>-->
-<!--            <type>jar</type>-->
-<!--        </dependency>-->
-
-
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
         </dependency>
 
-        <!--        <dependency>
-            <groupId>com.oracle.database.jdbc</groupId>
-            <artifactId>ojdbc10</artifactId>
-            <version>19.3.0.0</version>
-        </dependency>-->
-      
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.14.0</version>
+        </dependency>
+
 
     </dependencies>
 

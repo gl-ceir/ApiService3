@@ -9,4 +9,7 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     public User getByUsernameAndPasswordAndParentId(String userName, String password, int parentId);
+
+    public User getByUsernameAndPassword(String userName, String password);
+
 }

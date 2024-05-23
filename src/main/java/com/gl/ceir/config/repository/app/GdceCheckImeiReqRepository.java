@@ -7,5 +7,4 @@ import com.gl.ceir.config.model.app.GdceCheckImeiReq;
 public interface GdceCheckImeiReqRepository extends JpaRepository<GdceCheckImeiReq, Long> {
 
     public GdceCheckImeiReq save(GdceCheckImeiReq gdceCheckImeiReq);
-
 }

@@ -18,4 +18,12 @@ public class UserDetailDao implements UserInterface {
         return (T) userRepository
                 .getByUsernameAndPasswordAndParentId(userName, password, parentId);
     }
+
+    @Override
+    public <T> T getUserDetailDao(String userName, String password) {
+        logger.info("Dao started for "+userName);
+        return (T) userRepository
+                .getByUsernameAndPassword(userName, password);
+    }
+
 }

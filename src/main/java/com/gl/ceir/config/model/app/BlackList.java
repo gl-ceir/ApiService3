@@ -1,6 +1,8 @@
 package com.gl.ceir.config.model.app;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -11,44 +13,44 @@ import javax.persistence.Id;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.annotations.ApiModel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 @ApiModel
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class BlackList implements Serializable {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
-	@EmbeddedId
-	private ImeiMsisdnIdentity imeiMsisdnIdentity;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-	@JsonIgnore
-	private String requestedBy;
-	@JsonIgnore
-	private String approvedBy;
+//	@JsonIgnore
+//	@CreationTimestamp
+//	private Date expiryDate;
 
-	public ImeiMsisdnIdentity getImeiMsisdnIdentity() {
-		return imeiMsisdnIdentity;
-	}
+//	@JsonIgnore//	@UpdateTimestamp //	private Date modifiedOn;
 
-	public void setImeiMsisdnIdentity(ImeiMsisdnIdentity imeiMsisdnIdentity) {
-		this.imeiMsisdnIdentity = imeiMsisdnIdentity;
-	}
-
-	public String getRequestedBy() {
-		return requestedBy;
-	}
-
-	public void setRequestedBy(String requestedBy) {
-		this.requestedBy = requestedBy;
-	}
-
-	public String getApprovedBy() {
-		return approvedBy;
-	}
-
-	public void setApprovedBy(String approvedBy) {
-		this.approvedBy = approvedBy;
-	}
-
+	String actualImei,
+			complaintType,
+			imei,
+			imsi,
+			modeType,
+			msisdn,
+			operatorId,
+			operatorName,
+			remarks,
+			requestType,
+			source,
+			tac,
+			txnId,
+			userId,
+			userType;
 }

@@ -9,7 +9,7 @@
  
  <property name="dialect">org.hibernate.dialect.MySQL5InnoDBDialect</property>
    <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
-        <property name="hibernate.connection.url">jdbc:mysql://159.223.159.153/ceirdb1234</property>
+        <property name="hibernate.connection.url">jdbc:mysql://64.227.137.112/ceirdb1234</property>
         <property name="connection.username">cdrp</property>
         <property name="connection.password">Cdrp@1234</property>   
  

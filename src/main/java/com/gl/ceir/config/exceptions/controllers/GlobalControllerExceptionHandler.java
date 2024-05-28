@@ -1,18 +1,19 @@
 /*
-  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.gl.ceir.config.exceptions;
+package com.gl.ceir.config.exceptions.controllers;
 
-import com.gl.ceir.config.controller.CheckImeiController;
 import com.gl.ceir.config.dto.ApiResponse;
 import com.gl.ceir.config.dto.ExceptionResponse;
 import com.gl.ceir.config.dto.Result;
+import com.gl.ceir.config.exceptions.*;
 import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
-import java.util.Enumeration;
+
 import java.util.Scanner;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,13 +137,13 @@ public class GlobalControllerExceptionHandler {
     }
 
     /* Custom Exceptions */
- /* Custom Exceptions */
- /* Custom Exceptions */
- /* Custom Exceptions */
- /* Custom Exceptions */
- /* Custom Exceptions */
+    /* Custom Exceptions */
+    /* Custom Exceptions */
+    /* Custom Exceptions */
+    /* Custom Exceptions */
+    /* Custom Exceptions */
 
- /* Custom Exceptions */
+    /* Custom Exceptions */
     @ExceptionHandler(value = UnAuthorizationException.class)
     public ResponseEntity<Object> exception(UnAuthorizationException exception) {
         return new ResponseEntity<>(
@@ -175,6 +176,15 @@ public class GlobalControllerExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(value = PayloadSizeExceeds.class)
+    public ResponseEntity<Object> exception(PayloadSizeExceeds exception) {
+        return new ResponseEntity<>(new ExceptionResponse(
+                HttpStatus.PAYLOAD_TOO_LARGE.value(),
+                HttpStatus.PAYLOAD_TOO_LARGE.getReasonPhrase(),
+                exception.getResourceName(), new Result(exception.getMessage())),
+                HttpStatus.PAYLOAD_TOO_LARGE);
+    }
+
     @ExceptionHandler(value = UnprocessableEntityException.class)
     public ResponseEntity<Object> exception(UnprocessableEntityException exception) {
         return new ResponseEntity<>(
@@ -183,6 +193,7 @@ public class GlobalControllerExceptionHandler {
                 HttpStatus.UNPROCESSABLE_ENTITY);
 
     }
+
 
     @ExceptionHandler(value = ResourceNotFoundException.class)
     public ResponseEntity<Object> exception(ResourceNotFoundException exception) {

@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 public interface UserInterface {
 
     public <T> T getUserDetailDao(String userName, String password, int parentId);
+
+    public <T> T getUserDetailDao(String userName, String password);
+
 }
 
 

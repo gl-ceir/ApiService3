@@ -14,6 +14,7 @@ import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 
 @Entity
@@ -21,8 +22,9 @@ import org.hibernate.annotations.DynamicInsert;
 @Setter
 @NoArgsConstructor
 @Table(name = "check_imei_req_detail")
-
 @DynamicInsert
+@ToString
+
 public class CheckImeiRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -53,14 +55,16 @@ public class CheckImeiRequest implements Serializable {
     private String device_id;
     private String fail_process_description;
     private int complianceValue;
+    private String requestId;
 
     @Transient
     private Date createdOn;
 
-
-    @Override
-    public String toString() {
-        return "CheckImeiRequest{" + "id=" + id + ", createdOn=" + createdOn + ", imei=" + imei + ", msisdn=" + msisdn + ", operator=" + operator + ", imsi=" + imsi + ", language=" + language + ", channel=" + channel + ", requestProcessStatus=" + requestProcessStatus + ", imeiProcessStatus=" + imeiProcessStatus + ", checkProcessTime=" + checkProcessTime + ", complianceStatus=" + complianceStatus + ", complianceValue=" + complianceValue + ", utm_source=" + utm_source + ", browser=" + browser + ", public_ip=" + public_ip + ", header_browser=" + header_browser + ", header_public_ip=" + header_public_ip + ", symbol_color=" + symbol_color + ", device_id=" + device_id + ", os_type=" + os_type + ", fail_process_description=" + fail_process_description + '}';
+    public CheckImeiRequest(String imei, String channel, String header_browser, String header_public_ip, String requestId) {
+        this.imei = imei;
+        this.channel = channel;
+        this.header_browser = header_browser;
+        this.header_public_ip = header_public_ip;
+        this.requestId = requestId;
     }
-
 }

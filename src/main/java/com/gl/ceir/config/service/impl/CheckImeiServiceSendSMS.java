@@ -35,12 +35,13 @@ public class CheckImeiServiceSendSMS {
     @Autowired
     CheckImeiResponseParamRepository checkImeiResponseParamRepository;
 
+    //CheckImeiResponse_1_MsgForSms
     public void sendSMSforUSSD_SMS(CheckImeiRequest checkImeiRequest, String status, CheckImeiRequest response) {
         if (checkImeiRequest.getChannel().equalsIgnoreCase("ussd")
                 && systemConfigurationDbRepositry.getByTag("send_sms_flag").getValue().equalsIgnoreCase("true")) {
-            logger.info("Going for ussd and send_sms_flag true  ");
+            logger.info("Going for ussd and send_sms_flag true; getting value of tag   : " + status + "_MsgForSms");
             var smsMessage = checkImeiResponseParamRepository.getByTagAndLanguage(
-                            status + "ForSms",
+                            status + "_MsgForSms",
                             checkImeiRequest.getLanguage())
                     .getValue()
                     .replace("<imei>", checkImeiRequest.getImei());

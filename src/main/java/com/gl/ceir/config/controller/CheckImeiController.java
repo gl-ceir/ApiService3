@@ -10,6 +10,7 @@ import com.gl.ceir.config.repository.app.*;
 import com.gl.ceir.config.service.impl.CheckImeiOtherApiImpl;
 import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
 import com.gl.ceir.config.service.impl.LanguageServiceImpl;
+import com.gl.ceir.config.service.impl.SystemParamServiceImpl;
 import com.gl.ceir.config.service.userlogic.UserFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,7 +59,6 @@ public class CheckImeiController {  //sachin
     private String sQLException;
     @Value("${someWentWrongException}")
     private String someWentWrongException;
-
     @Value("#{'${languageType}'.split(',')}")
     public List<String> languageType;
 
@@ -84,7 +84,7 @@ public class CheckImeiController {  //sachin
     UserRepository userRepository;
 
     @Autowired
-    SystemConfigurationDbRepository systemConfigurationDbRepositry;
+    SystemParamServiceImpl sysPrmSrvcImpl;
 
     @Autowired
     CheckImeiResponseParamRepository checkImeiResponseParamRepository;
@@ -136,21 +136,13 @@ public class CheckImeiController {  //sachin
 
 
     /*  *******************************  */
-
     //@ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
     @CrossOrigin(origins = "", allowedHeaders = "")
     @PostMapping("services/checkIMEI")
     public ResponseEntity checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
         var startTime = System.currentTimeMillis();  // this can be stored in setRequestProcessStatus
-        String userIp = request.getHeader("HTTP_CLIENT_IP") == null
-                ? (request.getHeader("X-FORWARDED-FOR") == null ? request.getRemoteAddr()
-                : request.getHeader("X-FORWARDED-FOR"))
-                : request.getHeader("HTTP_CLIENT_IP");
-        checkImeiRequest.setHeader_browser(request.getHeader("user-agent"));
-        checkImeiRequest.setHeader_public_ip(userIp);
-        var language = checkImeiRequest.getLanguage() == null ? "en" : checkImeiRequest.getLanguage().equalsIgnoreCase("kh") ? "kh" : "en";
-        checkImeiRequest.setLanguage(language);    // needs refactoring
-        logger.info(checkImeiRequest.toString());
+        var defaultLang = sysPrmSrvcImpl.getValueByTag("systemDefaultLanguage");
+        checkImeiRequest.setLanguage(checkImeiRequest.getLanguage() == null ? defaultLang : checkImeiRequest.getLanguage().equalsIgnoreCase("kh") ? "kh" : defaultLang);    // needs refactoring
         errorValidationChecker(checkImeiRequest, startTime);
         authorizationChecker(checkImeiRequest, startTime);
         var value = checkImeiServiceImpl.getImeiDetailsDevicesNew(checkImeiRequest, startTime);
@@ -159,8 +151,15 @@ public class CheckImeiController {  //sachin
     }
 
     void errorValidationChecker(CheckImeiRequest checkImeiRequest, long startTime) {
-        var sysConfigsServiceDownFlag = systemConfigurationDbRepositry.getByTag("service_down_flag");
-        if (sysConfigsServiceDownFlag != null && sysConfigsServiceDownFlag.getValue().toLowerCase().contains(checkImeiRequest.getChannel().toLowerCase())) {
+        String userIp = request.getHeader("HTTP_CLIENT_IP") == null
+                ? (request.getHeader("X-FORWARDED-FOR") == null ? request.getRemoteAddr()
+                : request.getHeader("X-FORWARDED-FOR"))
+                : request.getHeader("HTTP_CLIENT_IP");
+        checkImeiRequest.setHeader_browser(request.getHeader("user-agent"));
+        checkImeiRequest.setHeader_public_ip(userIp);
+        logger.info(checkImeiRequest.toString());
+        var sysConfigsServiceDownFlag = sysPrmSrvcImpl.getValueByTag("service_down_flag");
+        if (sysConfigsServiceDownFlag != null && sysConfigsServiceDownFlag.toLowerCase().contains(checkImeiRequest.getChannel().toLowerCase())) {
             logger.info(" Channel Not Allowed --" + checkImeiRequest.getChannel());
             checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, "Service Down for " + checkImeiRequest.getChannel());
             throw new ServiceUnavailableException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.checkImeiServiceDownMsg(checkImeiRequest.getLanguage()));
@@ -213,8 +212,8 @@ public class CheckImeiController {  //sachin
                     throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
                 }
 
-                if (systemConfigurationDbRepositry.getByTag("CHECK_IMEI_AUTH_WITH_IP").getValue().equalsIgnoreCase("true")) {
-                    var checkimeiFeatureType = systemConfigurationDbRepositry.getByTag("CHECK_IMEI_FEATURE_ID").getValue();
+                if (sysPrmSrvcImpl.getValueByTag("CHECK_IMEI_AUTH_WITH_IP").equalsIgnoreCase("true")) {
+                    var checkimeiFeatureType = sysPrmSrvcImpl.getValueByTag("CHECK_IMEI_FEATURE_ID");
                     FeatureIpAccessList featureIpAccessList = featureIpAccessListRepository.getByFeatureId(checkimeiFeatureType);
                     logger.info(" data in featureIpAccessList  " + featureIpAccessList);
                     if (featureIpAccessList == null) {

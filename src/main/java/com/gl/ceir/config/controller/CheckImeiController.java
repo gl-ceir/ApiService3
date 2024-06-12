@@ -7,11 +7,9 @@ import com.gl.ceir.config.exceptions.UnprocessableEntityException;
 import com.gl.ceir.config.model.app.*;
 import com.gl.ceir.config.model.constants.LanguageFeatureName;
 import com.gl.ceir.config.repository.app.*;
-import com.gl.ceir.config.service.impl.CheckImeiOtherApiImpl;
-import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
-import com.gl.ceir.config.service.impl.LanguageServiceImpl;
-import com.gl.ceir.config.service.impl.SystemParamServiceImpl;
+import com.gl.ceir.config.service.impl.*;
 import com.gl.ceir.config.service.userlogic.UserFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +96,9 @@ public class CheckImeiController {  //sachin
     @Autowired
     AppDeviceDetailsRepository appDeviceDetailsRepository;
 
+    @Autowired
+    FeatureMenuServiceImpl featureMenuServiceImpl;
+
     //@ApiOperation(value = "Pre Init Api to get  Server", response = DeviceidBaseUrlDb.class)
     @CrossOrigin(origins = "", allowedHeaders = "")
     @RequestMapping(path = "services/mobile_api/preInit", method = RequestMethod.GET)
@@ -105,8 +106,18 @@ public class CheckImeiController {  //sachin
         String host = request.getHeader("Host");
         System.out.println("Host Name " + host);
         logger.info("Host Name::: " + host);
+        logger.info("MENU LIST ::: " + featureMenuServiceImpl.getAll());
+        ;
         MappingJacksonValue mapping = new MappingJacksonValue(checkImeiOtherApiImpl.getPreinitApi(deviceId));
         logger.info("Response of View =" + mapping);
+        return mapping;
+    }
+
+
+    @CrossOrigin(origins = "", allowedHeaders = "")
+    @RequestMapping(path = "services/mobile_api/menu", method = RequestMethod.GET)
+    public MappingJacksonValue getPreMenu() {
+        MappingJacksonValue mapping = new MappingJacksonValue(featureMenuServiceImpl.getAll());
         return mapping;
     }
 
@@ -118,6 +129,9 @@ public class CheckImeiController {  //sachin
         logger.info("Request = " + appDeviceDetailsDb);
         checkImeiOtherApiImpl.saveDeviceDetails(appDeviceDetailsDb);
         logger.info("Going to fetch response according to  = " + appDeviceDetailsDb.getLanguageType());
+
+
+
         return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.getName(), appDeviceDetailsDb.getLanguageType()));
     }
 
@@ -159,7 +173,7 @@ public class CheckImeiController {  //sachin
         checkImeiRequest.setHeader_public_ip(userIp);
         logger.info(checkImeiRequest.toString());
         var sysConfigsServiceDownFlag = sysPrmSrvcImpl.getValueByTag("service_down_flag");
-        if (sysConfigsServiceDownFlag != null && sysConfigsServiceDownFlag.toLowerCase().contains(checkImeiRequest.getChannel().toLowerCase())) {
+        if (!StringUtils.isBlank(sysConfigsServiceDownFlag) && sysConfigsServiceDownFlag.toLowerCase().contains(checkImeiRequest.getChannel().toLowerCase())) {
             logger.info(" Channel Not Allowed --" + checkImeiRequest.getChannel());
             checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, "Service Down for " + checkImeiRequest.getChannel());
             throw new ServiceUnavailableException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.checkImeiServiceDownMsg(checkImeiRequest.getLanguage()));

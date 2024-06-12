@@ -22,7 +22,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -116,15 +115,19 @@ public class CheckImeiServiceImpl {
 
 
     private LinkedHashMap<String, Boolean> getResponseFromRuleEngine(CheckImeiRequest checkImeiRequest) {
-        Connection conn = dbRepository.getConnection();
+        try (Connection conn = dbRepository.getConnection()) {
         var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "edrapp",
                 "userType", "default",
                 "imei", checkImeiRequest.getImei(), "msisdn", checkImeiRequest.getMsisdn() == null ? "" : checkImeiRequest.getMsisdn(), "imsi", checkImeiRequest.getImsi() == null ? "" : checkImeiRequest.getImsi(), "feature", "CheckImei", "operator", checkImeiRequest.getOperator() == null ? "" : checkImeiRequest.getOperator());
         var startTime = System.currentTimeMillis();
         LinkedHashMap<String, Boolean> rules = RuleEngineAdaptor.startAdaptor(conn, deviceInfo);
         logger.info("Rule response  {}", rules);
-        logger.info("RuleEngine Time Taken is  :->" + (System.currentTimeMillis() - startTime));
-        return rules;
+        logger.info( ":RuleEngine Time Taken is  :->" + (System.currentTimeMillis() - startTime) +" *** connection :-"+ conn);
+            return rules;
+        } catch (Exception e) {
+            logger.error("Not able to get rules {}",e.getMessage());
+           return null;
+        }
     }
 
     private Result getResult(CheckImeiRequest checkImeiRequest, LinkedHashMap<String, Boolean> rules, String status) {

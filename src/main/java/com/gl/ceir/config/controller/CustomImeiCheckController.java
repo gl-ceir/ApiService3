@@ -8,25 +8,24 @@ import com.gl.ceir.config.model.app.*;
 import com.gl.ceir.config.model.constants.CustomCheckImeiRequest;
 import com.gl.ceir.config.repository.app.*;
 import com.gl.ceir.config.service.impl.CheckImeiServiceImpl;
-import com.gl.ceir.config.service.impl.CustomImeiCheckServiceImpl;
+import com.gl.ceir.config.service.impl.CustomImeiCheckImeiServiceImpl;
+import com.gl.ceir.config.service.impl.CustomImeiRegisterServiceImpl;
 import com.gl.ceir.config.service.impl.SystemParamServiceImpl;
 import com.gl.ceir.config.service.userlogic.UserFactory;
+import com.gl.custom.CustomCheck;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.commons.lang3.StringUtils;  // isBlank
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -90,9 +89,6 @@ public class CustomImeiCheckController {  //sachin
     UserRepository userRepository;
 
     @Autowired
-    SystemConfigurationDbRepository systemConfigurationDbRepositry;
-
-    @Autowired
     FeatureIpAccessListRepository featureIpAccessListRepository;
 
     @Autowired
@@ -102,7 +98,10 @@ public class CustomImeiCheckController {  //sachin
     GdceCheckImeiReqRepository gdceCheckImeiReqRepository;
 
     @Autowired
-    CustomImeiCheckServiceImpl customImeiCheckServiceImpl;
+    CustomImeiRegisterServiceImpl customImeiCheckServiceImpl;
+
+    @Autowired
+    CustomImeiCheckImeiServiceImpl customImeiCheckImeiServiceImpl;
 
     @Autowired
     GdceRegisterImeiReqRepo gdceRegisterImeiReqRepo;
@@ -113,17 +112,31 @@ public class CustomImeiCheckController {  //sachin
     @Autowired
     DbRepository dbRepository;
 
+    @Autowired
+    CustomCheck customCheck;
+
+    @ApiOperation(value = "Sample Imei Check Api", response = CustomImeiCheckResponse.class)
+    @CrossOrigin(origins = "", allowedHeaders = "")
+    @GetMapping("/gdce/Sample/checkIMEI")
+    public String sampleController(@RequestParam String imei, String source) {
+        try (Connection conn = dbRepository.getConnection()) {
+            return customImeiCheckServiceImpl.startSample(imei, source);
+        } catch (Exception e) {
+            logger.info("TESTING ERRROR {}", e);
+        }
+        return null;
+    }
 
     @ApiOperation(value = "Custom Imei Check Api", response = CustomImeiCheckResponse.class)
     @CrossOrigin(origins = "", allowedHeaders = "")
     @PostMapping("/gdce/services/checkIMEI")
     public ResponseEntity gdceCheckImeiDevice(@RequestBody List<CustomCheckImeiRequest> customCheckImeiRequest) {
-
         String reqId = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+        authorizationCheckerForCustom();
         String fileName = customImeiCheckServiceImpl.createFile(Arrays.toString(customCheckImeiRequest.toArray()), "checkIMEI", "req", reqId);
         var obj = gdceCheckImeiReqRepository.save(new GdceCheckImeiReq("INIT", " ", reqId, customCheckImeiRequest.size(), fileName));
-        errorValidationChecker(customCheckImeiRequest, obj);
-        List<CustomImeiCheckResponse>  value = customImeiCheckServiceImpl.startCustomCheckService(customCheckImeiRequest, obj);
+        errorValidationCheckerForCustomCheck(customCheckImeiRequest, obj);
+        List<CustomImeiCheckResponse> value = customImeiCheckImeiServiceImpl.startCustomCheckService(customCheckImeiRequest, obj);
         return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(new MappingJacksonValue(value));
     }
 
@@ -133,12 +146,12 @@ public class CustomImeiCheckController {  //sachin
     public ResponseEntity gdceRegisterDevice(@RequestBody List<GdceData> gdceData) {
         logger.info("Request :: {} ", gdceData);
         String reqId = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+        authorizationCheckerForCustom();
         String fileName = customImeiCheckServiceImpl.createFile(Arrays.toString(gdceData.toArray()), "registerIMEI", "req", reqId);
         var obj = gdceRegisterImeiReqRepo.save(new GdceRegisterImeiReq("INIT", "", reqId, gdceData.size(), fileName));
         errorValidationCheckerForRegister(gdceData, obj);
         var value = customImeiCheckServiceImpl.registerService(gdceData, obj);
         return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(new MappingJacksonValue(value));
-
     }
 
     private void errorValidationCheckerForRegister(List<GdceData> gdceRegister, GdceRegisterImeiReq obj) {
@@ -147,78 +160,78 @@ public class CustomImeiCheckController {  //sachin
             obj.setStatus("FAIL");
             obj.setRemark("400");
             gdceRegisterImeiReqRepo.save(obj);
+            customImeiCheckServiceImpl.createFile(mandatoryParameterMissing, "registerIMEI", "resp", obj.getRequestId());
             throw new MissingRequestParameterException("en", mandatoryParameterMissing);
         }
         if (gdceRegister.size() > Integer.parseInt(customImeiRegisterPayLoadMaxSize)) {    //2
             obj.setStatus("FAIL");
             obj.setRemark("413");
             gdceRegisterImeiReqRepo.save(obj);
+            customImeiCheckServiceImpl.createFile(customImeiRegisterPayLoadMaxSize, "registerIMEI", "resp", obj.getRequestId());
             throw new PayloadSizeExceeds("en", maxSizeDefinedException);
         }// authorizationChecker(re,);
     }
 
-
-    void errorValidationChecker(List<CustomCheckImeiRequest> customCheckImeiRequest, GdceCheckImeiReq re) {
+    void errorValidationCheckerForCustomCheck(List<CustomCheckImeiRequest> customCheckImeiRequest, GdceCheckImeiReq re) {
         if (customCheckImeiRequest == null || customCheckImeiRequest.size() == 0) {
             re.setStatus("FAIL");
             re.setRemark(mandatoryParameterMissing);
             gdceCheckImeiReqRepository.save(re);
+            customImeiCheckServiceImpl.createFile(mandatoryParameterMissing, "checkIMEI", "resp", re.getRequestId());
+
             throw new MissingRequestParameterException("en", mandatoryParameterMissing);
         }
         if (customCheckImeiRequest.size() > Integer.parseInt(customImeiPayLoadMaxSize)) {    //2
             re.setStatus("FAIL");
             re.setRemark(maxSizeDefinedException);
             gdceCheckImeiReqRepository.save(re);
+            customImeiCheckServiceImpl.createFile(maxSizeDefinedException, "checkIMEI", "resp", re.getRequestId());
             throw new PayloadSizeExceeds("en", maxSizeDefinedException);
-        }// authorizationChecker(re,);
+        }
     }
 
-    private void authorizationChecker(CheckImeiRequest checkImeiRequest) {
-        long startTime = System.currentTimeMillis();
+    private <T> void authorizationChecker(CheckImeiRequest checkImeiRequest) {
+        //long startTime = System.currentTimeMillis();
         if (!Optional.ofNullable(request.getHeader("Authorization")).isPresent() || !request.getHeader("Authorization").startsWith("Basic ")) {
             logger.info("Rejected Due to  Authorization  Not Present" + request.getHeader("Authorization"));
-            checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authNotPresent);
-            throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+            //    checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authNotPresent);
+            throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
         }
         logger.info("Basic Authorization present " + request.getHeader("Authorization").substring(6));
         try {
             var decodedString = new String(Base64.getDecoder().decode(request.getHeader("Authorization").substring(6)));
             logger.info("user:" + decodedString.split(":")[0] + "pass:" + decodedString.split(":")[1]);
             UserVars userValue = null;
-
             if (systemParamServiceImpl.getValueByTag("CustomApiAuthOperatorCheck").equalsIgnoreCase("true")) {
                 var systemConfig = systemConfigListRepository.findByTagAndInterp("OPERATORS", checkImeiRequest.getOperator().toUpperCase());
                 if (systemConfig == null) {
                     logger.info("Operator Not allowed ");
-                    checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authOperatorNotPresent);
-                    throw new UnprocessableEntityException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+                    //     checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authOperatorNotPresent);
+                    throw new UnprocessableEntityException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
                 }
                 logger.info("Found operator with  value " + systemConfig.getValue());
-                userValue = (UserVars) userFactory.createUser()
-                        .getUserDetailDao(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
+                userValue = (UserVars) userFactory.createUser().getUserDetailDao(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
             } else {
-                userValue = (UserVars) userFactory.createUser()
-                        .getUserDetailDao(decodedString.split(":")[0], decodedString.split(":")[1]);
+                userValue = (UserVars) userFactory.createUser().getUserDetailDao(decodedString.split(":")[0], decodedString.split(":")[1]);
             }
             if (userValue == null || !userValue.getUsername().equals(decodedString.split(":")[0]) || !userValue.getPassword().equals(decodedString.split(":")[1])) {
                 logger.info("username password not match");
-                checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authUserPassNotMatch);
-                throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+                //   checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authUserPassNotMatch);
+                throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
             }
-
-            if (systemConfigurationDbRepositry.getByTag("CustomApiAuthWithIpCheck").getValue().equalsIgnoreCase("true")) {
-                var checkimeiFeatureType = systemConfigurationDbRepositry.getByTag("CUSTOM_API_FEATURE_ID").getValue();
+            if (systemParamServiceImpl.getValueByTag("CustomApiAuthWithIpCheck").equalsIgnoreCase("true")) {
+                var checkimeiFeatureType = systemParamServiceImpl.getValueByTag("CUSTOM_API_FEATURE_ID");
                 FeatureIpAccessList featureIpAccessList = featureIpAccessListRepository.getByFeatureId(checkimeiFeatureType);
                 logger.info(" data in featureIpAccessList  " + featureIpAccessList);
                 if (featureIpAccessList == null) {
-                    checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authFeatureIpNotPresent);
-                    throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+                    //      checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authFeatureIpNotPresent);
+                    throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
                 }
                 if (featureIpAccessList.getTypeOfCheck() == 1) {
                     if (!featureIpAccessList.getIpAddress().contains(checkImeiRequest.getHeader_public_ip())) {
                         logger.info("Type Check 1 But Ip not allowed ");
-                        checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authFeatureIpNotMatch);
-                        throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+                        // checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authFeatureIpNotMatch);
+                        throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
                     }
                 } else {
                     logger.info("Type Check 2 with featureid  " + featureIpAccessList.getFeatureIpListId() + " And User id " + userValue.getId());
@@ -226,15 +239,77 @@ public class CustomImeiCheckController {  //sachin
                     logger.info("Response from  UserFeatureIpAccessList " + userFeatureIpAccessList);
                     if (userFeatureIpAccessList == null || !(userFeatureIpAccessList.getIpAddress().contains(checkImeiRequest.getHeader_public_ip()))) {
                         logger.info("Type Check 2 But Ip not allowed ");
-                        checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authUserIpNotMatch);
-                        throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+                        //        checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authUserIpNotMatch);
+                        throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
                     }
                 }
             }
             logger.debug("Authentication Pass ");
-        } catch (NullPointerException | UnsupportedOperationException e) {
+        } catch (Exception e) {
             logger.warn("Authentication fail" + e);
-            throw new UnAuthorizationException(checkImeiRequest.getLanguage(), checkImeiServiceImpl.globalErrorMsgs(checkImeiRequest.getLanguage()));
+            throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
+        }
+    }
+
+    private <T> void authorizationCheckerForCustom() {
+        //long startTime = System.currentTimeMillis();
+        if (!Optional.ofNullable(request.getHeader("Authorization")).isPresent() || !request.getHeader("Authorization").startsWith("Basic ")) {
+            logger.info("Rejected Due to  Authorization  Not Present" + request.getHeader("Authorization"));
+            //    checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authNotPresent);
+            throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
+        }
+        logger.info("Basic Authorization present " + request.getHeader("Authorization").substring(6));
+        try {
+            var decodedString = new String(Base64.getDecoder().decode(request.getHeader("Authorization").substring(6)));
+            logger.info("user:" + decodedString.split(":")[0] + "pass:" + decodedString.split(":")[1]);
+            UserVars userValue = null;
+            if (systemParamServiceImpl.getValueByTag("CustomApiAuthOperatorCheck").equalsIgnoreCase("true")) {
+                var systemConfig = systemConfigListRepository.findByTagAndInterp("OPERATORS", request.getHeader("Operator"));
+                if (systemConfig == null) {
+                    logger.info("Operator Not allowed ");
+                    //     checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authOperatorNotPresent);
+                    throw new UnprocessableEntityException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
+                }
+                logger.info("Found operator with  value " + systemConfig.getValue());
+                userValue = (UserVars) userFactory.createUser().getUserDetailDao(decodedString.split(":")[0], decodedString.split(":")[1], systemConfig.getValue());
+            } else {
+                userValue = (UserVars) userFactory.createUser().getUserDetailDao(decodedString.split(":")[0], decodedString.split(":")[1]);
+            }
+            if (userValue == null || !userValue.getUsername().equals(decodedString.split(":")[0]) || !userValue.getPassword().equals(decodedString.split(":")[1])) {
+                logger.info("username password not match");
+                //   checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authUserPassNotMatch);
+                throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
+            }
+
+            if (systemParamServiceImpl.getValueByTag("CustomApiAuthWithIpCheck").equalsIgnoreCase("true")) {
+                var checkimeiFeatureType = systemParamServiceImpl.getValueByTag("CUSTOM_API_FEATURE_ID");
+                FeatureIpAccessList featureIpAccessList = featureIpAccessListRepository.getByFeatureId(checkimeiFeatureType);
+                logger.info(" data in featureIpAccessList  " + featureIpAccessList);
+                if (featureIpAccessList == null) {
+                    //      checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authFeatureIpNotPresent);
+                    throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
+                }
+                if (featureIpAccessList.getTypeOfCheck() == 1) {
+                    if (!featureIpAccessList.getIpAddress().contains(request.getHeader("Header_ip"))) {//checkImeiRequest.getHeader_public_ip()
+                        logger.info("Type Check 1 But Ip not allowed ");
+                        // checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authFeatureIpNotMatch);
+                        throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
+                    }
+                } else {
+                    logger.info("Type Check 2 with featureid  " + featureIpAccessList.getFeatureIpListId() + " And User id " + userValue.getId());
+                    UserFeatureIpAccessList userFeatureIpAccessList = userFeatureIpAccessListRepository.getByFeatureIpListIdAndUserId(featureIpAccessList.getFeatureIpListId(), userValue.getId());
+                    logger.info("Response from  UserFeatureIpAccessList " + userFeatureIpAccessList);
+                    if (userFeatureIpAccessList == null || !(userFeatureIpAccessList.getIpAddress().contains(request.getHeader("Header_ip")))) { //checkImeiRequest.getHeader_public_ip()
+                        logger.info("Type Check 2 But Ip not allowed ");
+                        //        checkImeiServiceImpl.saveCheckImeiFailDetails(checkImeiRequest, startTime, authUserIpNotMatch);
+                        throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
+                    }
+                }
+            }
+            logger.debug("Authentication Pass ");
+        } catch (Exception e) {
+            logger.warn("Authentication fail" + e);
+            throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
         }
     }
 

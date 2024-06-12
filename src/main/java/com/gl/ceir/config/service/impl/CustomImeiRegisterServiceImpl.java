@@ -1,11 +1,9 @@
 package com.gl.ceir.config.service.impl;
 
 import com.gl.RuleEngineAdaptor;
-import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.model.app.*;
-import com.gl.ceir.config.model.constants.Alerts;
-import com.gl.ceir.config.model.constants.CustomCheckImeiRequest;
 import com.gl.ceir.config.repository.app.*;
+import com.gl.custom.CustomCheck;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,12 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,9 +32,10 @@ import java.util.stream.Collectors;
  * */
 
 @Service
-public class CustomImeiCheckServiceImpl {
+@Transactional
+public class CustomImeiRegisterServiceImpl {
 
-    private static final Logger logger = LogManager.getLogger(CustomImeiCheckServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(CustomImeiRegisterServiceImpl.class);
 
     @Value("${nullPointerException}")
     private String nullPointerException;
@@ -68,6 +68,14 @@ public class CustomImeiCheckServiceImpl {
     @Value("${passMessage}")
     private String passMessage;
 
+    @Value("${sourceServerName}")
+    private String sourceServerName;
+
+    @Value("${destServerName}")
+    private String destServerName;
+
+    @Value("${serverName}")
+    private String serverName;
 
     @Value("${imeiInvalid_Msg}")
     private String imeiInvalid_Msg;
@@ -97,9 +105,6 @@ public class CustomImeiCheckServiceImpl {
     NationalWhitelistRepository nationalWhitelistRepository;
 
     @Autowired
-    SystemConfigurationDbRepository systemConfigurationDbRepositry;
-
-    @Autowired
     DbRepository dbRepository;
 
     @Autowired
@@ -126,118 +131,24 @@ public class CustomImeiCheckServiceImpl {
     @Autowired
     GdceRegisterImeiReqRepo gdceRegisterImeiReqRepo;
 
+    @Autowired
+    CustomCheck customCheck;
 
-    public List<CustomImeiCheckResponse> startCustomCheckService(List<CustomCheckImeiRequest> custChckImeiReq, GdceCheckImeiReq obj) {
-        List<CustomImeiCheckResponse> imeiResponse = new LinkedList<>();
-        try {
-            int successCount = 0;
-            int failCount = 0;
-        var conn = dbRepository.getConnection();
-        String userIp = request.getHeader("HTTP_CLIENT_IP") == null ? (request.getHeader("X-FORWARDED-FOR") == null ? request.getRemoteAddr() : request.getHeader("X-FORWARDED-FOR")) : request.getHeader("HTTP_CLIENT_IP");
-        String userAgent = request.getHeader("user-agent");
-        var startTime = System.currentTimeMillis();
-            for (CustomCheckImeiRequest cusReq : custChckImeiReq) {
-                logger.info("********Starting Check imei for" + cusReq);
-                try {
-                    var checkImeiRequest = new CheckImeiRequest(cusReq.getImei(), "API", userAgent, userIp, obj.getRequestId());
-
-                    if (StringUtils.isBlank(cusReq.getImei()) || StringUtils.isBlank(cusReq.getSerialNumber())) {
-                        logger.info("imei/sno is not present for {} ", cusReq);
-                        imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", ""));
-                        checkImeiRequest.setImeiProcessStatus("Invalid");
-                        checkImeiRequest.setFail_process_description(mandatoryParameterMissing);
-                        checkImeiRequest.setComplianceValue(0);
-                        checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg); //"Device is not-compliant"
-                        failCount++;
-                    } else if (cusReq.getImei().length() < 14 || cusReq.getImei().length() > 20 || !cusReq.getImei().matches("^[ 0-9 ]+$")) {
-                        imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", ""));
-                        checkImeiRequest.setImeiProcessStatus("Invalid");
-                        checkImeiRequest.setFail_process_description(imeiInvalid_Msg);
-                        checkImeiRequest.setComplianceValue(0);
-                        checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg); //"Device is not-compliant"
-                        failCount++;
-                    } else {
-                        var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "edrapp", "userType", "default", "imei", cusReq.getImei(), "feature", "CustomCheckImei");
-                        LinkedHashMap<String, Boolean> rules = RuleEngineAdaptor.startAdaptor(conn, deviceInfo);
-                        logger.info("Rules Return " + rules);
-                        Map.Entry<String, Boolean> lastEntry = rules.entrySet().stream().skip(rules.size() - 1).findFirst().get();
-                        logger.info("Finale rule-> " + lastEntry.getKey() + " with value ->" + lastEntry.getValue());
-                        if (lastEntry.getValue()) {
-                            var tacDetail = gsmaTacDetailsRepository.getBydeviceId(cusReq.getImei().substring(0, 8));
-                            logger.info("tacDetail" + tacDetail);
-                            if (tacDetail == null) {
-                                imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", ""));
-                                checkImeiRequest.setImeiProcessStatus("Invalid");
-                                checkImeiRequest.setFail_process_description(applicationContext.getEnvironment().getProperty("MDR_Msg"));
-                                checkImeiRequest.setComplianceValue(0);
-                                failCount++;
-                                checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg); //"Device is not-compliant"
-                            } else {
-                                imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "200", deviceCompliantMsg, tacDetail.getDevice_type(), tacDetail.getBrand_name(), tacDetail.getModel_name()));
-                                checkImeiRequest.setImeiProcessStatus("Valid");
-                                checkImeiRequest.setComplianceValue(1);
-                                successCount++;
-                                checkImeiRequest.setComplianceStatus(deviceCompliantMsg); //"Device is Compliant"
-                            }
-                        } else {
-                            failCount++;
-                            imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", ""));
-                            checkImeiRequest.setImeiProcessStatus("Invalid");
-                            checkImeiRequest.setComplianceValue(1);
-                            String value = applicationContext.getEnvironment().getProperty(lastEntry.getKey() + "_Msg");
-                            logger.info("Env value for {} is {}  ", lastEntry.getKey(), value);
-                            checkImeiRequest.setFail_process_description(value);
-                            checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg);
-                        }
-                    }
-                    checkImeiRequest.setRequestProcessStatus("Success");
-                    saveCheckImeiRequest(checkImeiRequest, startTime);
-                } catch (Exception e) {
-                    logger.error(e + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiCheckServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
-                }
-            }
-            obj.setFailCount(failCount);
-            obj.setSuccessCount(successCount);
-            obj.setStatus("Success");
-            gdceCheckImeiReqRepository.save(obj);
-        } catch (Exception e) {
-            logger.error(e + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiCheckServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
-        }
-        createFile(Arrays.toString(imeiResponse.toArray()), "checkIMEI", "resp", obj.getRequestId());
-        return imeiResponse;
-    }
-
-    public CheckImeiRequest saveCheckImeiRequest(CheckImeiRequest checkImeiRequest, long startTime) {
-        try {
-            checkImeiRequest.setCheckProcessTime(String.valueOf(System.currentTimeMillis() - startTime));
-            return checkImeiRequestRepository.save(checkImeiRequest);
-        } catch (Exception e) {
-            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1110.getName(), 0);
-            throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
-        }
-    }
-
-    public String globalErrorMsgs(String language) {
-        return chkImeiRespPrmRepo.getByTagAndLanguage("CheckImeiErrorMessage", language).getValue();
-    }
+    @Autowired
+    SystemParamServiceImpl systemParamServiceImpl;
 
 
-    //********************************************************
-    //********************************************************
-    //********************************************************
 
     public List<ResponseArray> registerService(List<GdceData> gdceData, GdceRegisterImeiReq obj) {
-        var conn = dbRepository.getConnection();
         int failCount = 0;
         int passCount = 0;
-        var startTime = System.currentTimeMillis();
         List<ResponseArray> responseArray = new LinkedList<>();
         List<PrintReponse> a = new LinkedList<>();
         try {
             for (GdceData gdData : gdceData) {
+                gdData.setRequest_id(obj.getRequestId());
                 logger.info("********Starting Registering for" + gdceData);
                 if (StringUtils.isBlank(gdData.getImei()) ||
-                        StringUtils.isBlank(gdData.getSerial_number()) ||
                         StringUtils.isBlank(gdData.getGoods_description()) ||
                         StringUtils.isBlank(gdData.getCustoms_duty_tax())
                         || StringUtils.isBlank(gdData.getDevice_type()) ||
@@ -248,21 +159,43 @@ public class CustomImeiCheckServiceImpl {
                     responseArray.add(new ResponseArray(gdData.getImei(), gdData.getSerial_number(), 202, failMessage));
                     a.add(new PrintReponse(gdData.getImei(), gdData.getSerial_number(), 202, failMessage, mandatoryParameterMissing));
                     failCount++;
-                }
-                if (gdData.getImei().length() < 14 || gdData.getImei().length() > 20 ||
+                } else if (gdData.getImei().length() < 14 || gdData.getImei().length() > 20 ||
                         !gdData.getImei().matches("^[ 0-9 ]+$")) {
                     logger.info("imei not valid : " + gdData.getImei());
                     responseArray.add(new ResponseArray(gdData.getImei(), gdData.getSerial_number(), 202, failMessage));
                     a.add(new PrintReponse(gdData.getImei(), gdData.getSerial_number(), 202, failMessage, imeiInvalid_Msg));
                     failCount++;
+                } else if (systemParamServiceImpl.getValueByTag("strict_check_imei_validation").equalsIgnoreCase("OFF")) {
+                    logger.info("Strict Validation OFF, Going for Short Flow. ");
+                    if (checkImeiInGdceData(gdData)) { //  present in db
+                        failCount++;
+                        responseArray.add(new ResponseArray(gdData.getImei(), gdData.getSerial_number(), 201, gdFailMessage));
+                        a.add(new PrintReponse(gdData.getImei(), gdData.getSerial_number(), 201, gdFailMessage, applicationContext.getEnvironment().getProperty("CUSTOM_GDCE_Msg")));
+                    } else {
+                        addInImeiPairDetail(gdData);
+                        addInExceptionList(gdData);
+                        addInBlackList(gdData);
+                        if (insertInGdceData(gdData)) {
+                            passCount++;
+                            responseArray.add(new ResponseArray(gdData.getActual_imei(), gdData.getSerial_number(), 200, passMessage));
+                            a.add(new PrintReponse(gdData.getActual_imei(), gdData.getSerial_number(), 200, passMessage, "Pass"));
+                        } else {
+                            failCount++;
+                            responseArray.add(new ResponseArray(gdData.getImei(), gdData.getSerial_number(), 202, failMessage));
+                            a.add(new PrintReponse(gdData.getImei(), gdData.getSerial_number(), 202, failMessage, "Fail to insert in gdce_data"));
+                        }
+                    }
                 } else {
+                    LinkedHashMap<String, Boolean> rules = null;
                     var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "edrapp", "userType", "default", "imei", gdData.getImei(), "feature", "CustomRegisterImei", "source", customSource);
-                    LinkedHashMap<String, Boolean> rules = RuleEngineAdaptor.startAdaptor(conn, deviceInfo);
+                    try (var conn = dbRepository.getConnection()) {
+                        rules = RuleEngineAdaptor.startAdaptor(conn, deviceInfo);
+                    }
                     logger.info("Rules Return " + rules);
                     var lastRule = rules.entrySet().stream().map(Map.Entry::getKey).reduce((first, second) -> second).orElse(null);  // optimse
                     var response = rules.entrySet().stream().map(Map.Entry::getValue).reduce((first, second) -> second).orElse(null); // opt
                     logger.info("Finale " + lastRule + "  rule-> " + response);
-                    if (!response) {
+                    if (!response) {  // if (userType.equals("default") && !response) {
                         if (rules.containsKey("CUSTOM_GDCE")) {
                             responseArray.add(new ResponseArray(gdData.getImei(), gdData.getSerial_number(), 201, gdFailMessage));
                             a.add(new PrintReponse(gdData.getImei(), gdData.getSerial_number(), 201, gdFailMessage, applicationContext.getEnvironment().getProperty(lastRule+ "_Msg")));
@@ -270,16 +203,18 @@ public class CustomImeiCheckServiceImpl {
                             responseArray.add(new ResponseArray(gdData.getImei(), gdData.getSerial_number(), 202, failMessage));
                             a.add(new PrintReponse(gdData.getImei(), gdData.getSerial_number(), 202, failMessage,  applicationContext.getEnvironment().getProperty(lastRule+ "_Msg")));
                         }
-                    } else {
-                        gdData.setRequest_id(obj.getRequestId());
+                    } else {   //  --- Pass scenario.
+//                        var ruleFailStatus = rules.entrySet().stream() .map(Map.Entry::getValue).anyMatch(r -> !r);
+//                        gdData.setImei_status(!ruleFailStatus ? "Pass" : "Fail");
+//                        gdData.setStatus_remarks(new Gson().toJson(rules));
                         logger.info("Request Pass for  " + gdData.getImei());
                         addInImeiPairDetail(gdData);
                         addInExceptionList(gdData);
                         addInBlackList(gdData);
                         if (insertInGdceData(gdData)) {
                             passCount++;
-                            responseArray.add(new ResponseArray(gdData.getImei(), gdData.getSerial_number(), 200, passMessage));
-                            a.add(new PrintReponse(gdData.getImei(), gdData.getSerial_number(), 200, passMessage, "Pass"));
+                            responseArray.add(new ResponseArray(gdData.getActual_imei(), gdData.getSerial_number(), 200, passMessage));
+                            a.add(new PrintReponse(gdData.getActual_imei(), gdData.getSerial_number(), 200, passMessage, "Pass"));
                         } else {
                             failCount++;
                             responseArray.add(new ResponseArray(gdData.getImei(), gdData.getSerial_number(), 202, failMessage));
@@ -290,9 +225,9 @@ public class CustomImeiCheckServiceImpl {
             }
             updateGdceRegister(passCount, failCount, obj);
         } catch (Exception e) {
-            logger.error(e + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiCheckServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
+            logger.error(e + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiRegisterServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
         }
-        createFile(Arrays.toString(a.toArray()), "registerIMEI", "resp", obj.getRequestId());
+        createFile(Arrays.toString(a.toArray()), "registerIMEI", "response", obj.getRequestId());
         return responseArray;
     }
 
@@ -329,13 +264,14 @@ public class CustomImeiCheckServiceImpl {
         }
     }
 
+
     @Transactional
     private void addInBlackList(GdceData gdData) {
         try {
             for (BlackList b : blackListRepository.getByImei(gdData.getImei())) {
                 blackListHisRepo.save(new BlackListHis(b.getActualImei(), b.getComplaintType(), b.getImei(), b.getImsi(), b.getModeType(), b.getMsisdn(), b.getOperatorId(), b.getOperatorName(), b.getRemarks(), b.getRequestType(), b.getSource(), b.getTac(), b.getTxnId(), b.getUserId(), b.getUserType(), "GDCE_TAX_PAID"));
             }
-            logger.info("Going to Exit   ");
+            logger.info(" . ");
             blackListRepository.deleteByImei(gdData.getImei());
         } catch (Exception e) {
             logger.warn("Not able to insert/update in blacklist/his, Exception :{}", e.getLocalizedMessage());
@@ -354,57 +290,62 @@ public class CustomImeiCheckServiceImpl {
             logger.warn("Not able to insert in gdce_data, Exception :{}", e.getLocalizedMessage());
             return false;
         }
-
     }
+
+
+    private boolean checkImeiInGdceData(GdceData gdData) {
+        var a = gdceDataRepository.getByImei(gdData.getImei().substring(0, 14));
+        if (a == null) return false;
+        else return true;
+    }
+
 
     public String createFile(String prm, String feature, String type, String reqId) {
         try {
-            var filepath = systemConfigurationDbRepositry.getByTag("CustomApiFilePath").getValue() + "/" + feature + "/" + reqId + "/";
+            var filepath = systemParamServiceImpl.getValueByTag("CustomApiFilePath") + "/" + feature + "/" + reqId + "/";
             Files.createDirectories(Paths.get(filepath));
             logger.info("FullFilePath--" + filepath);
             FileWriter writer = new FileWriter(filepath + reqId + "_" + type + ".txt");
             writer.write(prm);
             writer.close();
-            return reqId + "_" + type + ".txt";
+            var fileName = reqId + "_" + type + ".txt";
+            callFileCopierApi(filepath, fileName ,reqId);
+            return fileName;
         } catch (Exception e) {
             logger.error("Not able to create custom file {}", e.getLocalizedMessage());
         }
         return null;
     }
 
+    private void callFileCopierApi(String filepath, String fileName,String req) {
+        String url = systemParamServiceImpl.getValueByTag("platFormComponentApiUrl") + "/fileCopyApi";
+        String body ="{\n" +
+                "  \"appName\": \"CustomImei\",\n" +
+                "  \"remarks\": \"CustomImei File to be copied\",\n" +
+                "  \"destination\": [\n" +
+                "    {\n" +
+                "      \"destFilePath\": \""+filepath+"\",\n" +
+                "      \"destServerName\": \" "+destServerName+" \"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"serverName\": \" "+serverName+" \",\n" +
+                "  \"sourceFileName\": \" "+fileName+" \",\n" +
+                "  \"sourceFilePath\": \" "+filepath+"  \",\n" +
+                "  \"sourceServerName\": \"   "+sourceServerName+" \",\n" +
+                "  \"txnId\": \" "+req+" \"\n" +
+                "}" ;
+        checkImeiServiceSendSMS.sendPostRequestToUrl(url, body);
+    }
 
-    public String createFileForCustomCheck(List<CustomCheckImeiRequest> list, String reqId) {
-        try {
-            var filepath = systemConfigurationDbRepositry.getByTag("CustomApiFilePath").getValue() + "/checkIMEI/" + reqId + "/";
-            Files.createDirectories(Paths.get(filepath));
-            logger.info("FullFilePath--" + filepath);
-
-            FileWriter writer = new FileWriter(filepath + reqId + ".txt");
-            writer.write(Arrays.toString(list.toArray()));
-            writer.close();
-            return reqId + ".txt";
+    public String startSample(String imei, String source) {
+        try (Connection conn = dbRepository.getConnection()) {
+            logger.info("Connection " + conn);
+            return CustomCheck.identifyCustomComplianceStatus(imei, source);
         } catch (Exception e) {
-            logger.error("Not able to create custom file {}", e.getLocalizedMessage());
+            logger.error(" Not able to get response  {}", e.toString());
         }
         return null;
     }
-
-    public String createFileForRegisterCustom(List<GdceData> list, String reqId) {
-        try {
-            var filepath = systemConfigurationDbRepositry.getByTag("CustomApiFilePath").getValue() + "/registerIMEI/" + reqId + "/";
-            Files.createDirectories(Paths.get(filepath));
-            logger.info("FullFilePath--" + filepath);
-            FileWriter writer = new FileWriter(filepath + reqId + ".txt");
-            writer.write(Arrays.toString(list.toArray()));
-            writer.close();
-            return reqId + ".txt";
-        } catch (Exception e) {
-            logger.error(" Not able to create register file {}", e.toString());
-        }
-        return null;
-    }
-
-
 }
 
 
@@ -553,3 +494,19 @@ class ResponseArray {
 //            throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
 //        }
 //    }
+
+
+//public String createFileForRegisterCustom(List<GdceData> list, String reqId) {
+//    try {
+//        var filepath = systemConfigurationDbRepositry.getByTag("CustomApiFilePath").getValue() + "/registerIMEI/" + reqId + "/";
+//        Files.createDirectories(Paths.get(filepath));
+//        logger.info("FullFilePath--" + filepath);
+//        FileWriter writer = new FileWriter(filepath + reqId + ".txt");
+//        writer.write(Arrays.toString(list.toArray()));
+//        writer.close();
+//        return reqId + ".txt";
+//    } catch (Exception e) {
+//        logger.error(" Not able to create register file {}", e.toString());
+//    }
+//    return null;
+//}

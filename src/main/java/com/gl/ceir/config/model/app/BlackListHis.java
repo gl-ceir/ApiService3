@@ -45,9 +45,9 @@ public class BlackListHis implements Serializable {
 			tac,
 			txnId,
 			userId,
-			userType,actionRemarks;
+			userType,actionRemark;
 
-	public BlackListHis( String actualImei, String complaintType, String imei, String imsi, String modeType, String msisdn, String operatorId, String operatorName, String remarks, String requestType, String source, String tac, String txnId, String userId, String userType,String actionRemarks) {
+	public BlackListHis( String actualImei, String complaintType, String imei, String imsi, String modeType, String msisdn, String operatorId, String operatorName, String remarks, String requestType, String source, String tac, String txnId, String userId, String userType,String actionRemark) {
 		this.actualImei = actualImei;
 		this.complaintType = complaintType;
 		this.imei = imei;
@@ -63,6 +63,6 @@ public class BlackListHis implements Serializable {
 		this.txnId = txnId;
 		this.userId = userId;
 		this.userType = userType;
-		this.actionRemarks =actionRemarks;
+		this.actionRemark =actionRemark;
 	}
 }

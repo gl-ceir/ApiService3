@@ -5,15 +5,18 @@
 package com.gl.ceir.config.service.impl;
 
 import com.gl.ceir.config.exceptions.InternalServicesException;
+import com.gl.ceir.config.model.app.FeatureMenu;
+import com.gl.ceir.config.model.app.LanguageResponse;
+import com.gl.ceir.config.model.constants.Alerts;
 import com.gl.ceir.config.repository.app.LanguageLabelDbRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.gl.ceir.config.model.app.LanguageResponse;
-import com.gl.ceir.config.model.constants.Alerts;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  *
@@ -30,6 +33,9 @@ public class LanguageServiceImpl {
     @Autowired
     AlertServiceImpl alertServiceImpl;
 
+    @Autowired
+    FeatureMenuServiceImpl featureMenuServiceImpl;
+
     public LanguageResponse getLanguageLabels(String featureName, String language) {
         String responseValue;
         logger.info("Feature Name " + featureName);
@@ -39,7 +45,9 @@ public class LanguageServiceImpl {
             } else {
                 responseValue = languageLabelDbRepository.getEnglishNameAndLabelFromFeatureName(featureName);
             }
-            return new LanguageResponse(language, (JSONObject) new JSONParser().parse(responseValue));
+            List<FeatureMenu> s = featureMenuServiceImpl.getAll();
+
+            return new LanguageResponse(language, (JSONObject) new JSONParser().parse(responseValue), s);
         } catch (Exception e) {
             logger.error(e + " : " + e.getLocalizedMessage());
             alertServiceImpl.raiseAnAlert(Alerts.ALERT_1105.getName(), 0);

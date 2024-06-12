@@ -30,7 +30,6 @@ public class GdceRegisterImeiReq {
 
     private String status;
     private String remark;
-    private int httpStatusCode;
     private String requestId;
     private int imeiCount;
     private int successCount;
@@ -45,11 +44,5 @@ public class GdceRegisterImeiReq {
         this.fileName = fileName;
     }
 
-    public GdceRegisterImeiReq(Long id, int successCount, int failCount,  String remark, String status) {
-        this.id = id;
-        this.successCount = successCount;
-        this.failCount = failCount;
-        this.remark = remark;
-        this.status = status;
-    }
+
 }

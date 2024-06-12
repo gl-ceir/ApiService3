@@ -2,7 +2,10 @@ package com.gl.ceir.config.model.app;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -23,11 +26,11 @@ public class GdceData {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
+    @JsonIgnore// not seen in swagger
     private Long id;
 
     @NotNull
-    @Size(min = 15, max = 15)
+
     //  @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@#$%^&+=!]).*$", message = "Password must contain at least one digit, one letter, and one special character")
     private String imei;
 
@@ -64,11 +67,14 @@ public class GdceData {
 
     private int is_used;
 
-    // not seen in swagger
     private String importer_id;
 
     private String importer_name;
 
+//    @JsonIgnore// not seen in swagger
+//    private String imei_status;
+//    @JsonIgnore// not seen in swagger
+//    private String status_remarks;
     @JsonIgnore
     private String actual_imei;
     @JsonIgnore

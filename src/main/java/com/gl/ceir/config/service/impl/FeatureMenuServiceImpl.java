@@ -19,7 +19,6 @@ public class FeatureMenuServiceImpl {
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     public List<FeatureMenu> getAll() {
-
         try {
             var v = featureMenuRepository.findAll();
             logger.info("Response {}", v.toString());

@@ -9,7 +9,6 @@ import java.util.List;
 @Repository
 public interface FeatureMenuRepository extends JpaRepository<FeatureMenu, Long> {
     //JpaSpecificationExecutor<FeatureMenu>     , CrudRepository<FeatureMenu, Long>
-
     @Override
     public List<FeatureMenu> findAll();
 

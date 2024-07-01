@@ -1,15 +1,11 @@
 package com.gl.ceir.config.model.app;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.Date;
 
 
 //@NotNull
@@ -35,14 +31,15 @@ public class GdceRegisterImeiReq {
     private int successCount;
     private int failCount;
     private String fileName;
+    private int httpStatusCode;
 
-    public GdceRegisterImeiReq(String status, String remark, String requestId, int imeiCount, String fileName) {
+    public GdceRegisterImeiReq(String status, String remark, String requestId, int imeiCount, String fileName  ) {
         this.status = status;
         this.remark = remark;
         this.requestId = requestId;
         this.imeiCount = imeiCount;
         this.fileName = fileName;
-    }
+     }
 
 
 }

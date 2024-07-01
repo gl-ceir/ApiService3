@@ -86,16 +86,15 @@ public class GlobalControllerExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionResponse handleBadRequestException(Exception e, WebRequest request) {
         logger.error("Error msg :" + e.getLocalizedMessage() + " # request " + request.toString());
         try {
             logger.error("Error ############ : " + req.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
         } catch (Exception exp) {
             logger.error("Error msgs :" + exp.toString());
-
         }
-        return new ExceptionResponse(HttpStatus.BAD_REQUEST.value(), "bad request", "en ", new Result(checkImeiServiceImpl.globalErrorMsgs("en")));
+        return new ExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "internal server error", "en ", new Result(checkImeiServiceImpl.globalErrorMsgs("en")));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)  // spec chars

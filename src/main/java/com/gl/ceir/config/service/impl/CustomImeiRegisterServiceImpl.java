@@ -1,6 +1,7 @@
 package com.gl.ceir.config.service.impl;
 
 import com.gl.RuleEngineAdaptor;
+import com.gl.ceir.config.exceptions.InternalServicesException;
 import com.gl.ceir.config.model.app.*;
 import com.gl.ceir.config.repository.app.*;
 import com.gl.custom.CustomCheck;
@@ -13,7 +14,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -32,28 +32,10 @@ import java.util.stream.Collectors;
  * */
 
 @Service
-@Transactional
+// @Transactional to run with deleteByid -uncomment
 public class CustomImeiRegisterServiceImpl {
 
     private static final Logger logger = LogManager.getLogger(CustomImeiRegisterServiceImpl.class);
-
-    @Value("${nullPointerException}")
-    private String nullPointerException;
-
-    @Value("${sqlException}")
-    private String sQLException;
-
-    @Value("${deviceNotCompliantMsg}")
-    private String deviceNotCompliantMsg;
-
-    @Value("${deviceCompliantMsg}")
-    private String deviceCompliantMsg;
-
-    @Value("${ruleResponseError}")
-    private String ruleResponseError;
-
-    @Value("${someWentWrongException}")
-    private String someWentWrongException;
 
 
     @Value("${customSource}")
@@ -84,31 +66,11 @@ public class CustomImeiRegisterServiceImpl {
     private String mandatoryParameterMissing;
 
     @Autowired
-    AlertServiceImpl alertServiceImpl;
-
-    @Autowired
-    CheckImeiResponseParamRepository chkImeiRespPrmRepo;
-
-    @Autowired
-    GsmaTacDetailsRepository gsmaTacDetailsRepository;
-
-    @Autowired
-    CheckImeiRequestRepository checkImeiRequestRepository;
-
-    @Autowired
-    GdceCheckImeiReqRepository gdceCheckImeiReqRepository;
-
-    @Autowired
     CheckImeiServiceSendSMS checkImeiServiceSendSMS;
 
-    @Autowired
-    NationalWhitelistRepository nationalWhitelistRepository;
 
     @Autowired
     DbRepository dbRepository;
-
-    @Autowired
-    private HttpServletRequest request;
 
     @Autowired
     BlackListHisRepo blackListHisRepo;
@@ -132,12 +94,10 @@ public class CustomImeiRegisterServiceImpl {
     GdceRegisterImeiReqRepo gdceRegisterImeiReqRepo;
 
     @Autowired
-    CustomCheck customCheck;
-
-    @Autowired
     SystemParamServiceImpl systemParamServiceImpl;
 
-
+    @Autowired
+    CustomImeiCheckImeiServiceImpl customImeiCheckImeiServiceImpl;
 
     public List<ResponseArray> registerService(List<GdceData> gdceData, GdceRegisterImeiReq obj) {
         int failCount = 0;
@@ -147,7 +107,7 @@ public class CustomImeiRegisterServiceImpl {
         try {
             for (GdceData gdData : gdceData) {
                 gdData.setRequest_id(obj.getRequestId());
-                logger.info("********Starting Registering for" + gdceData);
+                logger.info("Starting Registering for" + gdceData);
                 if (StringUtils.isBlank(gdData.getImei()) ||
                         StringUtils.isBlank(gdData.getGoods_description()) ||
                         StringUtils.isBlank(gdData.getCustoms_duty_tax())
@@ -166,15 +126,12 @@ public class CustomImeiRegisterServiceImpl {
                     a.add(new PrintReponse(gdData.getImei(), gdData.getSerial_number(), 202, failMessage, imeiInvalid_Msg));
                     failCount++;
                 } else if (systemParamServiceImpl.getValueByTag("strict_check_imei_validation").equalsIgnoreCase("OFF")) {
-                    logger.info("Strict Validation OFF, Going for Short Flow. ");
+                    logger.info("Strict Validation is OFF ");
                     if (checkImeiInGdceData(gdData)) { //  present in db
                         failCount++;
                         responseArray.add(new ResponseArray(gdData.getImei(), gdData.getSerial_number(), 201, gdFailMessage));
                         a.add(new PrintReponse(gdData.getImei(), gdData.getSerial_number(), 201, gdFailMessage, applicationContext.getEnvironment().getProperty("CUSTOM_GDCE_Msg")));
                     } else {
-                        addInImeiPairDetail(gdData);
-                        addInExceptionList(gdData);
-                        addInBlackList(gdData);
                         if (insertInGdceData(gdData)) {
                             passCount++;
                             responseArray.add(new ResponseArray(gdData.getActual_imei(), gdData.getSerial_number(), 200, passMessage));
@@ -187,7 +144,7 @@ public class CustomImeiRegisterServiceImpl {
                     }
                 } else {
                     LinkedHashMap<String, Boolean> rules = null;
-                    var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "edrapp", "userType", "default", "imei", gdData.getImei(), "feature", "CustomRegisterImei", "source", customSource);
+                    var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "app_edr", "userType", "default", "imei", gdData.getImei(), "feature", "CustomRegisterImei", "source", customSource);
                     try (var conn = dbRepository.getConnection()) {
                         rules = RuleEngineAdaptor.startAdaptor(conn, deviceInfo);
                     }
@@ -203,10 +160,7 @@ public class CustomImeiRegisterServiceImpl {
                             responseArray.add(new ResponseArray(gdData.getImei(), gdData.getSerial_number(), 202, failMessage));
                             a.add(new PrintReponse(gdData.getImei(), gdData.getSerial_number(), 202, failMessage,  applicationContext.getEnvironment().getProperty(lastRule+ "_Msg")));
                         }
-                    } else {   //  --- Pass scenario.
-//                        var ruleFailStatus = rules.entrySet().stream() .map(Map.Entry::getValue).anyMatch(r -> !r);
-//                        gdData.setImei_status(!ruleFailStatus ? "Pass" : "Fail");
-//                        gdData.setStatus_remarks(new Gson().toJson(rules));
+                    } else {
                         logger.info("Request Pass for  " + gdData.getImei());
                         addInImeiPairDetail(gdData);
                         addInExceptionList(gdData);
@@ -225,7 +179,9 @@ public class CustomImeiRegisterServiceImpl {
             }
             updateGdceRegister(passCount, failCount, obj);
         } catch (Exception e) {
+            createFile(customImeiCheckImeiServiceImpl.globalErrorMsgs("en"), "registerIMEI", "response", obj.getRequestId());
             logger.error(e + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiRegisterServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
+            throw new InternalServicesException("en", customImeiCheckImeiServiceImpl.globalErrorMsgs("en"));
         }
         createFile(Arrays.toString(a.toArray()), "registerIMEI", "response", obj.getRequestId());
         return responseArray;
@@ -233,7 +189,8 @@ public class CustomImeiRegisterServiceImpl {
 
     private void updateGdceRegister(int passCount, int failCount, GdceRegisterImeiReq obj) {
         obj.setRemark("200");
-        obj.setStatus("Success");
+        obj.setHttpStatusCode(200);
+        obj.setStatus("DONE");
         obj.setFailCount(failCount);
         obj.setSuccessCount(passCount);
         gdceRegisterImeiReqRepo.save(obj);
@@ -293,26 +250,27 @@ public class CustomImeiRegisterServiceImpl {
     }
 
 
+
     private boolean checkImeiInGdceData(GdceData gdData) {
         var a = gdceDataRepository.getByImei(gdData.getImei().substring(0, 14));
         if (a == null) return false;
         else return true;
     }
 
-
     public String createFile(String prm, String feature, String type, String reqId) {
         try {
             var filepath = systemParamServiceImpl.getValueByTag("CustomApiFilePath") + "/" + feature + "/" + reqId + "/";
             Files.createDirectories(Paths.get(filepath));
-            logger.info("FullFilePath--" + filepath);
+            if (StringUtils.isBlank(prm.trim())) prm = customImeiCheckImeiServiceImpl.globalErrorMsgs("en");
+            logger.info("FullFilePath--" + filepath + reqId + "_" + type + ".txt");
+            logger.info("Content-> " + prm);
             FileWriter writer = new FileWriter(filepath + reqId + "_" + type + ".txt");
             writer.write(prm);
             writer.close();
-            var fileName = reqId + "_" + type + ".txt";
-            callFileCopierApi(filepath, fileName ,reqId);
+            var fileName = reqId + "_" + type + ".txt";//   callFileCopierApi(filepath, fileName ,reqId);
             return fileName;
         } catch (Exception e) {
-            logger.error("Not able to create custom file {}", e.getLocalizedMessage());
+            logger.error("Not able to create custom reg file {}", e.getLocalizedMessage());
         }
         return null;
     }
@@ -468,45 +426,3 @@ class ResponseArray {
     }
 }
 
-// public CheckImeiResponse getImeiDetailsDevicesNew(CheckImeiRequest checkImeiRequest, long startTime) {
-//        try {
-//
-//            var rules = getResponseStatusViaRuleEngine(checkImeiRequest);
-//            var responseTag = "CheckImeiResponse_" + checkImeiRequest.getComplianceValue();  // optimise
-//            logger.info("Response Tag :: " + responseTag);
-//            var result = getResult(checkImeiRequest, rules, responseTag);
-//            var response = saveCheckImeiRequest(checkImeiRequest, startTime);
-//            checkImeiServiceSendSMS.sendSMSforUSSD_SMS(checkImeiRequest, responseTag, response);
-//            return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()), StatusMessage.FOUND.getName(), checkImeiRequest.getLanguage(), result);
-//        } catch (Exception e) {
-//            logger.error(e + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiCheckServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
-//            logger.error("Failed at " + e.getLocalizedMessage() + " ----- " + e.toString() + " ::::: " + e.getMessage() + " $$$$$$$$$$$ " + e);
-//            if (e instanceof NullPointerException) {
-//                saveCheckImeiFailDetails(checkImeiRequest, startTime, nullPointerException);
-//            } else if (e instanceof SQLException) {
-//                saveCheckImeiFailDetails(checkImeiRequest, startTime, sQLException);
-//            } else {
-//                saveCheckImeiFailDetails(checkImeiRequest, startTime, e.getLocalizedMessage());
-//            }  //  else if (e instanceof SQLGrammarException) { saveCheckImeiFailDetails(checkImeiRequest, startTime, e.getLocalizedMessage());            }
-//            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1103.getName(), 0);
-//            logger.error("Failed at " + e.getLocalizedMessage());
-//            saveCheckImeiRequest(checkImeiRequest, startTime);
-//            throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
-//        }
-//    }
-
-
-//public String createFileForRegisterCustom(List<GdceData> list, String reqId) {
-//    try {
-//        var filepath = systemConfigurationDbRepositry.getByTag("CustomApiFilePath").getValue() + "/registerIMEI/" + reqId + "/";
-//        Files.createDirectories(Paths.get(filepath));
-//        logger.info("FullFilePath--" + filepath);
-//        FileWriter writer = new FileWriter(filepath + reqId + ".txt");
-//        writer.write(Arrays.toString(list.toArray()));
-//        writer.close();
-//        return reqId + ".txt";
-//    } catch (Exception e) {
-//        logger.error(" Not able to create register file {}", e.toString());
-//    }
-//    return null;
-//}

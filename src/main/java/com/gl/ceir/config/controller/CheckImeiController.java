@@ -21,10 +21,8 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class CheckImeiController {  //sachin
@@ -104,10 +102,8 @@ public class CheckImeiController {  //sachin
     @RequestMapping(path = "services/mobile_api/preInit", method = RequestMethod.GET)
     public MappingJacksonValue getPreInit(@RequestParam("deviceId") String deviceId) {
         String host = request.getHeader("Host");
-        System.out.println("Host Name " + host);
         logger.info("Host Name::: " + host);
         logger.info("MENU LIST ::: " + featureMenuServiceImpl.getAll());
-        ;
         MappingJacksonValue mapping = new MappingJacksonValue(checkImeiOtherApiImpl.getPreinitApi(deviceId));
         logger.info("Response of View =" + mapping);
         return mapping;
@@ -129,9 +125,6 @@ public class CheckImeiController {  //sachin
         logger.info("Request = " + appDeviceDetailsDb);
         checkImeiOtherApiImpl.saveDeviceDetails(appDeviceDetailsDb);
         logger.info("Going to fetch response according to  = " + appDeviceDetailsDb.getLanguageType());
-
-
-
         return new MappingJacksonValue(languageServiceImpl.getLanguageLabels(LanguageFeatureName.CHECKIMEI.getName(), appDeviceDetailsDb.getLanguageType()));
     }
 
@@ -156,6 +149,11 @@ public class CheckImeiController {  //sachin
     public ResponseEntity checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
         var startTime = System.currentTimeMillis();  // this can be stored in setRequestProcessStatus
         var defaultLang = sysPrmSrvcImpl.getValueByTag("systemDefaultLanguage");
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        Map<String, String> headers = Collections.list(httpRequest.getHeaderNames())
+                .stream()
+                .collect(Collectors.toMap(h -> h, httpRequest::getHeader));
+        logger.info("Headers->  {}", headers);
         checkImeiRequest.setLanguage(checkImeiRequest.getLanguage() == null ? defaultLang : checkImeiRequest.getLanguage().equalsIgnoreCase("kh") ? "kh" : defaultLang);    // needs refactoring
         errorValidationChecker(checkImeiRequest, startTime);
         authorizationChecker(checkImeiRequest, startTime);

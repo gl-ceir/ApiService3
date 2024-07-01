@@ -8,7 +8,6 @@ import com.gl.ceir.config.model.app.GdceCheckImeiReq;
 import com.gl.ceir.config.model.constants.Alerts;
 import com.gl.ceir.config.model.constants.CustomCheckImeiRequest;
 import com.gl.ceir.config.repository.app.*;
-import com.gl.custom.CustomCheck;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,40 +38,17 @@ public class CustomImeiCheckImeiServiceImpl {
 
     private static final Logger logger = LogManager.getLogger(CustomImeiRegisterServiceImpl.class);
 
-    @Value("${nullPointerException}")
-    private String nullPointerException;
-
-    @Value("${sqlException}")
-    private String sQLException;
-
     @Value("${deviceNotCompliantMsg}")
     private String deviceNotCompliantMsg;
 
     @Value("${deviceCompliantMsg}")
     private String deviceCompliantMsg;
 
-    @Value("${ruleResponseError}")
-    private String ruleResponseError;
-
-    @Value("${someWentWrongException}")
-    private String someWentWrongException;
-
-
-    @Value("${customSource}")
-    private String customSource;
-
-    @Value("${gdFailMessage}")
-    private String gdFailMessage;
-
-    @Value("${failMessage}")
-    private String failMessage;
-
-    @Value("${passMessage}")
-    private String passMessage;
-
-
     @Value("${imeiInvalid_Msg}")
     private String imeiInvalid_Msg;
+
+    @Value("${imeiInvalid_Code}")
+    private String imeiInvalid_Code;
 
     @Value("${mandatoryParameterMissing}")
     private String mandatoryParameterMissing;
@@ -99,27 +75,11 @@ public class CustomImeiCheckImeiServiceImpl {
     private HttpServletRequest request;
 
     @Autowired
-    BlackListHisRepo blackListHisRepo;
-    @Autowired
-    BlackListRepository blackListRepository;
-    @Autowired
-    ExceptionListRepo exceptionListRepo;
-    @Autowired
-    ExceptionListHisRepo exceptionListHisRepo;
-    @Autowired
-    ImeiPairDetailRepo imeiPairDetailRepo;
-    @Autowired
-    ImeiPairDetailHisRepo imeiPairDetailHisRepo;
-    @Autowired
-    GdceDataRepository gdceDataRepository;
-
-    @Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
-    CustomCheck customCheck;
-    @Autowired
     SystemParamServiceImpl systemParamServiceImpl;
+
 
 
     public List<CustomImeiCheckResponse> startCustomCheckService(List<CustomCheckImeiRequest> custChckImeiReq, GdceCheckImeiReq obj) {
@@ -131,27 +91,26 @@ public class CustomImeiCheckImeiServiceImpl {
             String userAgent = request.getHeader("user-agent");
             var startTime = System.currentTimeMillis();
             for (CustomCheckImeiRequest cusReq : custChckImeiReq) {
-                logger.info("********Starting Check imei for" + cusReq);
+                logger.info("Starting Check imei for " + cusReq);
                 try {
                     var checkImeiRequest = new CheckImeiRequest(cusReq.getImei(), "API", userAgent, userIp, obj.getRequestId());
-
                     if (StringUtils.isBlank(cusReq.getImei()) ) {
                         logger.info("imei/sno is not present for {} ", cusReq);
                         imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "","",""));
                         checkImeiRequest.setImeiProcessStatus("Invalid");
                         checkImeiRequest.setFail_process_description(mandatoryParameterMissing);
-                        checkImeiRequest.setComplianceValue(0);
-                        checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg); //"Device is not-compliant"
+                        checkImeiRequest.setComplianceValue(413);
+                        checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg);
                         failCount++;
                     } else if (cusReq.getImei().length() < 14 || cusReq.getImei().length() > 20 || !cusReq.getImei().matches("^[ 0-9 ]+$")) {
                         imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "" ,"",""));
                         checkImeiRequest.setImeiProcessStatus("Invalid");
                         checkImeiRequest.setFail_process_description(imeiInvalid_Msg);
-                        checkImeiRequest.setComplianceValue(0);
+                        checkImeiRequest.setComplianceValue(Integer.parseInt(imeiInvalid_Code));
                         checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg); //"Device is not-compliant"
                         failCount++;
                     } else {
-                        var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "edrapp",
+                        var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "app_edr",
                                 "userType", "default", "imei", cusReq.getImei(), "feature", "CustomCheckImei");
                         LinkedHashMap<String, Boolean> rules = null;
                         try (var conn = dbRepository.getConnection()) {
@@ -159,30 +118,33 @@ public class CustomImeiCheckImeiServiceImpl {
                         }
                         logger.info("Rules Return " + rules);
                         Map.Entry<String, Boolean> lastEntry = rules.entrySet().stream().skip(rules.size() - 1).findFirst().get();
-                        logger.info("Finale rule-> " + lastEntry.getKey() + " with value ->" + lastEntry.getValue());
-
+                        logger.info("Final rule-> " + lastEntry.getKey() + " with value ->" + lastEntry.getValue());
                         if (lastEntry.getValue()) {
                             var tacDetail = gsmaTacDetailsRepository.getBydeviceId(cusReq.getImei().substring(0, 8));
-                            logger.info("tacDetail" + tacDetail);
                             if (tacDetail == null) {
                                 imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "" ,"",""));
                                 checkImeiRequest.setImeiProcessStatus("Invalid");
                                 checkImeiRequest.setFail_process_description(applicationContext.getEnvironment().getProperty("MDR_Msg"));
-                                checkImeiRequest.setComplianceValue(0);
+                                checkImeiRequest.setComplianceValue(Integer.parseInt(applicationContext.getEnvironment().getProperty("MDR_Code")));
                                 failCount++;
                                 checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg); //"Device is not-compliant"
                             } else {
+                                successCount++;
                                 imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "200", deviceCompliantMsg, tacDetail.getDevice_type(), tacDetail.getBrand_name(), tacDetail.getModel_name() , tacDetail.getMarketing_name() ,tacDetail.getManufacturer()  ));
                                 checkImeiRequest.setImeiProcessStatus("Valid");
-                                checkImeiRequest.setComplianceValue(1);
-                                successCount++;
+                                checkImeiRequest.setComplianceValue(200);
+                                checkImeiRequest.setBrandName(tacDetail.getBrand_name());
+                                checkImeiRequest.setModelName(tacDetail.getModel_name());
+                                checkImeiRequest.setMarketingName(tacDetail.getMarketing_name());
+                                checkImeiRequest.setManufacturer(tacDetail.getManufacturer());
+                                checkImeiRequest.setDeviceType(tacDetail.getDevice_type());
                                 checkImeiRequest.setComplianceStatus(deviceCompliantMsg); //"Device is Compliant"
                             }
                         } else {
                             failCount++;
                             imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "","",""));
                             checkImeiRequest.setImeiProcessStatus("Invalid");
-                            checkImeiRequest.setComplianceValue(1);
+                            checkImeiRequest.setComplianceValue(Integer.parseInt(applicationContext.getEnvironment().getProperty(lastEntry.getKey() + "_Code")));
                             String value = applicationContext.getEnvironment().getProperty(lastEntry.getKey() + "_Msg");
                             logger.info("Env value for {} is {}  ", lastEntry.getKey(), value);
                             checkImeiRequest.setFail_process_description(value);
@@ -197,7 +159,7 @@ public class CustomImeiCheckImeiServiceImpl {
             }
             obj.setFailCount(failCount);
             obj.setSuccessCount(successCount);
-            obj.setStatus("Success");
+            obj.setStatus("DONE");
             gdceCheckImeiReqRepository.save(obj);
         } catch (Exception e) {
             logger.error(e + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiRegisterServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
@@ -224,7 +186,9 @@ public class CustomImeiCheckImeiServiceImpl {
         try {
             var filepath = systemParamServiceImpl.getValueByTag("CustomApiFilePath") + "/" + feature + "/" + reqId + "/";
             Files.createDirectories(Paths.get(filepath));
-            logger.info("FullFilePath--" + filepath);
+            if (StringUtils.isBlank(prm)) prm = globalErrorMsgs("en");
+            logger.info("FullFilePath " + filepath + reqId + "_" + type + ".txt");
+            logger.info("Content-> " + prm);
             FileWriter writer = new FileWriter(filepath + reqId + "_" + type + ".txt");
             writer.write(prm);
             writer.close();
@@ -236,30 +200,3 @@ public class CustomImeiCheckImeiServiceImpl {
     }
 }
 
-
-// public CheckImeiResponse getImeiDetailsDevicesNew(CheckImeiRequest checkImeiRequest, long startTime) {
-//        try {
-//
-//            var rules = getResponseStatusViaRuleEngine(checkImeiRequest);
-//            var responseTag = "CheckImeiResponse_" + checkImeiRequest.getComplianceValue();  // optimise
-//            logger.info("Response Tag :: " + responseTag);
-//            var result = getResult(checkImeiRequest, rules, responseTag);
-//            var response = saveCheckImeiRequest(checkImeiRequest, startTime);
-//            checkImeiServiceSendSMS.sendSMSforUSSD_SMS(checkImeiRequest, responseTag, response);
-//            return new CheckImeiResponse(String.valueOf(HttpStatus.OK.value()), StatusMessage.FOUND.getName(), checkImeiRequest.getLanguage(), result);
-//        } catch (Exception e) {
-//            logger.error(e + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiCheckServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
-//            logger.error("Failed at " + e.getLocalizedMessage() + " ----- " + e.toString() + " ::::: " + e.getMessage() + " $$$$$$$$$$$ " + e);
-//            if (e instanceof NullPointerException) {
-//                saveCheckImeiFailDetails(checkImeiRequest, startTime, nullPointerException);
-//            } else if (e instanceof SQLException) {
-//                saveCheckImeiFailDetails(checkImeiRequest, startTime, sQLException);
-//            } else {
-//                saveCheckImeiFailDetails(checkImeiRequest, startTime, e.getLocalizedMessage());
-//            }  //  else if (e instanceof SQLGrammarException) { saveCheckImeiFailDetails(checkImeiRequest, startTime, e.getLocalizedMessage());            }
-//            alertServiceImpl.raiseAnAlert(Alerts.ALERT_1103.getName(), 0);
-//            logger.error("Failed at " + e.getLocalizedMessage());
-//            saveCheckImeiRequest(checkImeiRequest, startTime);
-//            throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
-//        }
-//    }

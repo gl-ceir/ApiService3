@@ -1,18 +1,17 @@
 package com.gl.ceir.config.repository.app;
 
-import com.gl.ceir.config.model.app.FeatureList;
-import com.gl.ceir.config.model.app.FeatureMenu;
+import com.gl.ceir.config.model.app.FeatureSubmenu;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface FeatureListRepository extends JpaRepository<FeatureList, Long> {
+public interface FeatureListRepository extends JpaRepository<FeatureSubmenu, Long> {
     //JpaSpecificationExecutor<FeatureMenu>     , CrudRepository<FeatureMenu, Long>
 
     @Override
-    List<FeatureList> findAll();
+    List<FeatureSubmenu> findAll();
 
-    List<FeatureList> findByFeatureMenuId(Long l);
+    List<FeatureSubmenu> findByFeatureMenuId(Long l);
 }

@@ -51,6 +51,12 @@ public class CheckImeiServiceImpl {
     @Value("${someWentWrongException}")
     private String someWentWrongException;
 
+    @Value("${stolenRule}")
+    private String stolenRule;
+
+    @Value("${customRule}")
+    private String customRule;
+
     @Autowired
     AlertServiceImpl alertServiceImpl;
 
@@ -116,7 +122,7 @@ public class CheckImeiServiceImpl {
 
     private LinkedHashMap<String, Boolean> getResponseFromRuleEngine(CheckImeiRequest checkImeiRequest) {
         try (Connection conn = dbRepository.getConnection()) {
-        var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "edrapp",
+        var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "app_edr",
                 "userType", "default",
                 "imei", checkImeiRequest.getImei(), "msisdn", checkImeiRequest.getMsisdn() == null ? "" : checkImeiRequest.getMsisdn(), "imsi", checkImeiRequest.getImsi() == null ? "" : checkImeiRequest.getImsi(), "feature", "CheckImei", "operator", checkImeiRequest.getOperator() == null ? "" : checkImeiRequest.getOperator());
         var startTime = System.currentTimeMillis();
@@ -173,7 +179,7 @@ public class CheckImeiServiceImpl {
         String remarksValue = "Remarks:";
         int val = 0;
         boolean IMEI_PAIRING = r.getOrDefault("IMEI_PAIRING", false);
-        boolean STOLEN = r.getOrDefault("STOLEN", false);
+        boolean STOLEN = r.getOrDefault(stolenRule.trim(), false);
         boolean DUPLICATE_DEVICE = r.getOrDefault("DUPLICATE_DEVICE", false);
         boolean BLACKLIST = r.getOrDefault("EXIST_IN_BLACKLIST_DB", false);
 

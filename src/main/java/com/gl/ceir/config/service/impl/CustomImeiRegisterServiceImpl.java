@@ -37,6 +37,17 @@ public class CustomImeiRegisterServiceImpl {
 
     private static final Logger logger = LogManager.getLogger(CustomImeiRegisterServiceImpl.class);
 
+    @Value("${appdbName}")
+    private String appdbName;
+
+    @Value("${auddbName}")
+    private String auddbName;
+
+    @Value("${repdbName}")
+    private String repdbName;
+
+    @Value("${edrappdbName}")
+    private String edrappdbName;
 
     @Value("${customSource}")
     private String customSource;
@@ -67,7 +78,6 @@ public class CustomImeiRegisterServiceImpl {
 
     @Autowired
     CheckImeiServiceSendSMS checkImeiServiceSendSMS;
-
 
     @Autowired
     DbRepository dbRepository;
@@ -144,12 +154,12 @@ public class CustomImeiRegisterServiceImpl {
                     }
                 } else {
                     LinkedHashMap<String, Boolean> rules = null;
-                    var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "app_edr", "userType", "default", "imei", gdData.getImei(), "feature", "CustomRegisterImei", "source", customSource);
+                    var deviceInfo = getDeviceInfoMap(gdData);
                     try (var conn = dbRepository.getConnection()) {
                         rules = RuleEngineAdaptor.startAdaptor(conn, deviceInfo);
                     }
                     logger.info("Rules Return " + rules);
-                    var lastRule = rules.entrySet().stream().map(Map.Entry::getKey).reduce((first, second) -> second).orElse(null);  // optimse
+                    var lastRule = rules.entrySet().stream().map(Map.Entry::getKey).reduce((first, second) -> second).orElse(null);  // opt
                     var response = rules.entrySet().stream().map(Map.Entry::getValue).reduce((first, second) -> second).orElse(null); // opt
                     logger.info("Finale " + lastRule + "  rule-> " + response);
                     if (!response) {  // if (userType.equals("default") && !response) {
@@ -185,6 +195,11 @@ public class CustomImeiRegisterServiceImpl {
         }
         createFile(Arrays.toString(a.toArray()), "registerIMEI", "response", obj.getRequestId());
         return responseArray;
+    }
+
+    private Map<String, String> getDeviceInfoMap(GdceData gdData) {
+        var deviceInfo = Map.of("appdbName", appdbName, "auddbName", auddbName, "repdbName", repdbName, "edrappdbName", edrappdbName, "userType", "default", "imei", gdData.getImei(), "feature", "CustomRegisterImei", "source", customSource);
+        return deviceInfo;
     }
 
     private void updateGdceRegister(int passCount, int failCount, GdceRegisterImeiReq obj) {

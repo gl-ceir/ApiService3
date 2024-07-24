@@ -97,6 +97,12 @@ public class CheckImeiController {  //sachin
     @Autowired
     FeatureMenuServiceImpl featureMenuServiceImpl;
 
+    @Autowired
+    FeatureSubMenuRepository fea;
+
+    @Autowired
+    FeatureMenuRepository feat;
+
     //@ApiOperation(value = "Pre Init Api to get  Server", response = DeviceidBaseUrlDb.class)
     @CrossOrigin(origins = "", allowedHeaders = "")
     @RequestMapping(path = "services/mobile_api/preInit", method = RequestMethod.GET)
@@ -106,14 +112,6 @@ public class CheckImeiController {  //sachin
         logger.info("MENU LIST ::: " + featureMenuServiceImpl.getAll());
         MappingJacksonValue mapping = new MappingJacksonValue(checkImeiOtherApiImpl.getPreinitApi(deviceId));
         logger.info("Response of View =" + mapping);
-        return mapping;
-    }
-
-
-    @CrossOrigin(origins = "", allowedHeaders = "")
-    @RequestMapping(path = "services/mobile_api/menu", method = RequestMethod.GET)
-    public MappingJacksonValue getPreMenu() {
-        MappingJacksonValue mapping = new MappingJacksonValue(featureMenuServiceImpl.getAll());
         return mapping;
     }
 
@@ -140,7 +138,6 @@ public class CheckImeiController {  //sachin
             throw new UnprocessableEntityException("en", "provide specified field value");
         }
     }
-
 
     /*  *******************************  */
     //@ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
@@ -256,7 +253,6 @@ public class CheckImeiController {  //sachin
             }
         }
     }
-
 }
 
 //                logger.info("Authentication FAIL++++++++++++++++++ ");
@@ -343,5 +339,22 @@ public class CheckImeiController {  //sachin
 //        return mapping;
 //    }
 
+    @CrossOrigin(origins = "", allowedHeaders = "")
+    @RequestMapping(path = "services/mobile_api/menu", method = RequestMethod.GET)
+    public MappingJacksonValue getPreMenu() {
+        List<FeatureMenu> fm = feat.getByLanguage("en");
+        fm.forEach(a -> a.getFeatureSubmenus().size());
+        List<FeatureMenu> newF = new ArrayList<>();
+        for (FeatureMenu f : fm) {
+            List<FeatureSubmenu> newFs = new ArrayList<>();
+            for (FeatureSubmenu fs : f.getFeatureSubmenus()) {
+                if (fs.getStatus() == 1) {
+                    newFs.add(fs);
+                }
+            }
+            newF.add(new FeatureMenu(newFs, f.getLogo(), f.getName()));
+        }
+        return new MappingJacksonValue(newF);
+    }
 
  */

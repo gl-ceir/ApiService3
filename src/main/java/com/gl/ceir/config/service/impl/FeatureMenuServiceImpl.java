@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -28,4 +29,33 @@ public class FeatureMenuServiceImpl {
             return null;
         }
     }
+
+    public List<FeatureMenu> getByStatusAndLanguageAndFeatureSubmenusStatus(String language) {
+        List<FeatureMenu> fm = featureMenuRepository.getByLanguage(language);
+
+
+        List<FeatureMenu> newFm = fm.stream()
+                .map(f -> new FeatureMenu(
+                        f.getFeatureSubmenus().stream()
+                                .filter(fs -> fs.getStatus() == 1)
+                                .collect(Collectors.toList()),
+                        f.getLogo(),
+                        f.getName()))
+                .collect(Collectors.toList());
+        return newFm;
+    }
+
 }
+
+
+//        fm.forEach(a -> a.getFeatureSubmenus().size());
+//        List<FeatureMenu> newF = new ArrayList<>();
+//        for (FeatureMenu f : fm) {
+//            List<FeatureSubmenu> newFs = new ArrayList<>();
+//            for (FeatureSubmenu fs : f.getFeatureSubmenus()) {
+//                if (fs.getStatus() == 1) {
+//                    newFs.add(fs);
+//                }
+//            }
+//            newF.add(new FeatureMenu(newFs, f.getLogo(), f.getName()));
+//        }

@@ -45,8 +45,7 @@ public class LanguageServiceImpl {
             } else {
                 responseValue = languageLabelDbRepository.getEnglishNameAndLabelFromFeatureName(featureName);
             }
-            List<FeatureMenu> s = featureMenuServiceImpl.getAll();
-
+            List<FeatureMenu> s = featureMenuServiceImpl.getByStatusAndLanguageAndFeatureSubmenusStatus(language);
             return new LanguageResponse(language, (JSONObject) new JSONParser().parse(responseValue), s);
         } catch (Exception e) {
             logger.error(e + " : " + e.getLocalizedMessage());

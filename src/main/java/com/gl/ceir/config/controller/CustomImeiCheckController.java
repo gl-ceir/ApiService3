@@ -123,7 +123,7 @@ public class CustomImeiCheckController {  //sachin
         try (Connection conn = dbRepository.getConnection()) {
             return customImeiCheckServiceImpl.startSample(imei, source);
         } catch (Exception e) {
-            logger.info("TESTING ERRROR {}", e);
+            logger.info(" {}", e);
         }
         return null;
     }
@@ -195,8 +195,7 @@ public class CustomImeiCheckController {  //sachin
     }
 
     private <T> void authorizationCheckerForCustom() {
-        //long startTime = System.currentTimeMillis();
-        if (!Optional.ofNullable(request.getHeader("Authorization")).isPresent() || !request.getHeader("Authorization").startsWith("Basic ")) {
+         if (!Optional.ofNullable(request.getHeader("Authorization")).isPresent() || !request.getHeader("Authorization").startsWith("Basic ")) {
             logger.info("Rejected Due to  Authorization  Not Present" + request.getHeader("Authorization"));
             throw new UnAuthorizationException("en", checkImeiServiceImpl.globalErrorMsgs("en"));
         }

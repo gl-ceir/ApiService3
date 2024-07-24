@@ -53,6 +53,18 @@ public class CustomImeiCheckImeiServiceImpl {
     @Value("${mandatoryParameterMissing}")
     private String mandatoryParameterMissing;
 
+    @Value("${appdbName}")
+    private static String appdbName;
+
+    @Value("${auddbName}")
+    private static String auddbName;
+
+    @Value("${repdbName}")
+    private static String repdbName;
+
+    @Value("${edrappdbName}")
+    private static String edrappdbName;
+
     @Autowired
     AlertServiceImpl alertServiceImpl;
 
@@ -79,7 +91,6 @@ public class CustomImeiCheckImeiServiceImpl {
 
     @Autowired
     SystemParamServiceImpl systemParamServiceImpl;
-
 
 
     public List<CustomImeiCheckResponse> startCustomCheckService(List<CustomCheckImeiRequest> custChckImeiReq, GdceCheckImeiReq obj) {
@@ -110,8 +121,7 @@ public class CustomImeiCheckImeiServiceImpl {
                         checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg); //"Device is not-compliant"
                         failCount++;
                     } else {
-                        var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "app_edr",
-                                "userType", "default", "imei", cusReq.getImei(), "feature", "CustomCheckImei");
+                        var deviceInfo = getDeviceInfoMap(cusReq);
                         LinkedHashMap<String, Boolean> rules = null;
                         try (var conn = dbRepository.getConnection()) {
                             rules = RuleEngineAdaptor.startAdaptor(conn, deviceInfo);
@@ -138,7 +148,7 @@ public class CustomImeiCheckImeiServiceImpl {
                                 checkImeiRequest.setMarketingName(tacDetail.getMarketing_name());
                                 checkImeiRequest.setManufacturer(tacDetail.getManufacturer());
                                 checkImeiRequest.setDeviceType(tacDetail.getDevice_type());
-                                checkImeiRequest.setComplianceStatus(deviceCompliantMsg); //"Device is Compliant"
+                                checkImeiRequest.setComplianceStatus(deviceCompliantMsg);   //"Device is Compliant"
                             }
                         } else {
                             failCount++;
@@ -146,7 +156,7 @@ public class CustomImeiCheckImeiServiceImpl {
                             checkImeiRequest.setImeiProcessStatus("Invalid");
                             checkImeiRequest.setComplianceValue(Integer.parseInt(applicationContext.getEnvironment().getProperty(lastEntry.getKey() + "_Code")));
                             String value = applicationContext.getEnvironment().getProperty(lastEntry.getKey() + "_Msg");
-                            logger.info("Env value for {} is {}  ", lastEntry.getKey(), value);
+                            logger.info(" value for {} is {}  ", lastEntry.getKey(), value);
                             checkImeiRequest.setFail_process_description(value);
                             checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg);
                         }
@@ -166,6 +176,12 @@ public class CustomImeiCheckImeiServiceImpl {
         }
         createFile(Arrays.toString(imeiResponse.toArray()), "checkIMEI", "response", obj.getRequestId());
         return imeiResponse;
+    }
+
+    private static Map<String, String> getDeviceInfoMap(CustomCheckImeiRequest cusReq) {
+        var deviceInfo = Map.of("appdbName", appdbName, "auddbName", auddbName, "repdbName", repdbName, "edrappdbName", edrappdbName,
+                "userType", "default", "imei", cusReq.getImei(), "feature", "CustomCheckImei");
+        return deviceInfo;
     }
 
     public CheckImeiRequest saveCheckImeiRequest(CheckImeiRequest checkImeiRequest, long startTime) {

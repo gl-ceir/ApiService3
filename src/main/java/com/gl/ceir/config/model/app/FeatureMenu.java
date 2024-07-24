@@ -21,9 +21,33 @@ public class FeatureMenu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String logo, name,englishName,khmerName;
+    private String logo, name;
+    @JsonIgnore
+    private String language; //,link, tag ,
 
     @OneToMany(mappedBy = "featureMenuId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    List<FeatureSubmenu> featureList;
+    List<FeatureSubmenu> featureSubmenus;
 
+    public FeatureMenu(List<FeatureSubmenu> featureSubmenus, String logo, String name) {
+        this.featureSubmenus = featureSubmenus;
+        this.logo = logo;
+        this.name = name;
+    }
 }
+
+//    @JsonManagedReference
+//    @OneToMany(mappedBy = "featureId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    List<FeatureSubmenu> featureSubmenus;
+//
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//        FeatureMenu that = (FeatureMenu) o;
+//        return status == that.status && Objects.equals(id, that.id) && Objects.equals(logo, that.logo) && Objects.equals(name, that.name) && Objects.equals(language, that.language) && Objects.equals(featureSubmenus, that.featureSubmenus);
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(id, logo, name, status, language, featureSubmenus);
+//    }

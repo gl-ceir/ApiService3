@@ -22,7 +22,6 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -120,10 +119,10 @@ public class CustomImeiCheckController {  //sachin
     @CrossOrigin(origins = "", allowedHeaders = "")
     @GetMapping("/gdce/Sample/checkIMEI")
     public String sampleController(@RequestParam String imei, String source) {
-        try (Connection conn = dbRepository.getConnection()) {
+        try {
             return customImeiCheckServiceImpl.startSample(imei, source);
         } catch (Exception e) {
-            logger.info(" {}", e);
+            logger.error(" {}", e);
         }
         return null;
     }

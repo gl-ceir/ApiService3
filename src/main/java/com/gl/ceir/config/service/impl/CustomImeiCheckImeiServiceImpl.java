@@ -65,6 +65,9 @@ public class CustomImeiCheckImeiServiceImpl {
     @Value("${edrappdbName}")
     private static String edrappdbName;
 
+    @Value("${customSource}")
+    static String customSource;
+
     @Autowired
     AlertServiceImpl alertServiceImpl;
 
@@ -180,7 +183,7 @@ public class CustomImeiCheckImeiServiceImpl {
 
     private static Map<String, String> getDeviceInfoMap(CustomCheckImeiRequest cusReq) {
         var deviceInfo = Map.of("appdbName", appdbName, "auddbName", auddbName, "repdbName", repdbName, "edrappdbName", edrappdbName,
-                "userType", "default", "imei", cusReq.getImei(), "feature", "CustomCheckImei");
+                "userType", "default", "imei", cusReq.getImei(), "feature", "CustomCheckImei", "source", customSource);
         return deviceInfo;
     }
 

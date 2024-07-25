@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -311,13 +310,13 @@ public class CustomImeiRegisterServiceImpl {
     }
 
     public String startSample(String imei, String source) {
-        try (Connection conn = dbRepository.getConnection()) {
-            logger.info("Connection " + conn);
-            return CustomCheck.identifyCustomComplianceStatus(imei, source);
+        String value = null;
+        try (var conn = dbRepository.getConnection()) {
+            value = CustomCheck.identifyCustomComplianceStatus(imei, source);
         } catch (Exception e) {
             logger.error(" Not able to get response  {}", e.toString());
         }
-        return null;
+        return value;
     }
 }
 

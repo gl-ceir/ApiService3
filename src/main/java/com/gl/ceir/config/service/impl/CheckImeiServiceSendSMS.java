@@ -55,16 +55,15 @@ public class CheckImeiServiceSendSMS {
                 checkImeiRequest.getOperator(), checkImeiRequest.getLanguage(), id);
         Gson gson = new Gson();
         String body = gson.toJson(notification, Notification.class);
-        sendPostForSmsNotification(body);
-    }
-
-    private String sendPostForSmsNotification(String body) {
         logger.info("Going to send notification::  :" + body);
         String url = systemConfigurationDbRepositry.getByTag("notificationTableUrl")
                 .getValue()
                 .replace("{localIp}", localIp);
-        StringBuffer response = new StringBuffer();
+        sendPostRequestToUrl(url ,body);
+    }
+    public String sendPostRequestToUrl(String url ,String body) {
         logger.info("POST  Start Url-> " + url + " ;Body->" + body);
+        StringBuffer response = new StringBuffer();
         try {
             URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();

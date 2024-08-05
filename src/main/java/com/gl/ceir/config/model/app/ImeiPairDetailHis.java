@@ -36,14 +36,14 @@ public class ImeiPairDetailHis implements Serializable {
             gsmaStatus,
             pairMode,
             operator,
-            action,actionRemarks;
+            action,actionRemark;
 
     @CreationTimestamp
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime pairingDate, recordTime, expiryDate;
 
 
-    public ImeiPairDetailHis(int allowedDays, String imei, String imsi, String msisdn, String fileName, String gsmaStatus, String pairMode, String operator, String action, LocalDateTime pairingDate, LocalDateTime recordTime, LocalDateTime expiryDate,String actionRemarks) {
+    public ImeiPairDetailHis(int allowedDays, String imei, String imsi, String msisdn, String fileName, String gsmaStatus, String pairMode, String operator, String action, LocalDateTime pairingDate, LocalDateTime recordTime, LocalDateTime expiryDate,String actionRemark) {
         this.allowedDays = allowedDays;
         this.imei = imei;
         this.imsi = imsi;
@@ -56,6 +56,6 @@ public class ImeiPairDetailHis implements Serializable {
         this.pairingDate = pairingDate;
         this.recordTime = recordTime;
         this.expiryDate = expiryDate;
-        this.actionRemarks =actionRemarks;
+        this.actionRemark =actionRemark;
     }
 }

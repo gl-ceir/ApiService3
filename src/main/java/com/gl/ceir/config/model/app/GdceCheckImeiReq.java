@@ -28,8 +28,6 @@ public class GdceCheckImeiReq implements Serializable {
 
     private String fileName;
 
-
-
     public GdceCheckImeiReq() {
     }
 
@@ -49,11 +47,15 @@ public class GdceCheckImeiReq implements Serializable {
         this.fileName = fileName;
     }
 
+
+
+
+
+
     public GdceCheckImeiReq(String status, String remark) {
         this.status = status;
         this.remark = remark;
     }
-
 
 
     public Long getId() {
@@ -63,8 +65,6 @@ public class GdceCheckImeiReq implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
-
-
 
     public String getStatus() {
         return status;

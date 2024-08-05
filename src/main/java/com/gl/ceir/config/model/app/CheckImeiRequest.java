@@ -57,6 +57,8 @@ public class CheckImeiRequest implements Serializable {
     private int complianceValue;
     private String requestId;
 
+    private String brandName,modelName,manufacturer,marketingName,deviceType;
+
     @Transient
     private Date createdOn;
 

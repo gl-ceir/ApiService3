@@ -15,9 +15,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing
 
 // @EnableCaching
-@EntityScan({"com.gl.ceir.config.model"})
+@EntityScan({"com.gl.ceir.config.model" , "com.gl"})
 
-@ComponentScan({"com.gl.ceir.config"})
+@ComponentScan({"com.gl.ceir.config" , "com.gl" ,"com.gl.custom"})
 
 @EnableEncryptableProperties
 

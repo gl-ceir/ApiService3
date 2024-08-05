@@ -22,7 +22,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -51,6 +50,24 @@ public class CheckImeiServiceImpl {
 
     @Value("${someWentWrongException}")
     private String someWentWrongException;
+
+    @Value("${stolenRule}")
+    private String stolenRule;
+
+    @Value("${customRule}")
+    private String customRule;
+
+    @Value("${appdbName}")
+    private static String appdbName;
+
+    @Value("${auddbName}")
+    private static String auddbName;
+
+    @Value("${repdbName}")
+    private static String repdbName;
+
+    @Value("${edrappdbName}")
+    private static String edrappdbName;
 
     @Autowired
     AlertServiceImpl alertServiceImpl;
@@ -98,8 +115,6 @@ public class CheckImeiServiceImpl {
             throw new InternalServicesException(checkImeiRequest.getLanguage(), globalErrorMsgs(checkImeiRequest.getLanguage()));
         }
     }
-
-    //MDR //NATIONAL_WHITELISTS  // NWL_VALIDITYFLAG //   // CUSTOM_LOCAL_MANUFACTURER // TRC // if not present make pass
     private void setComplianceValueByRule(CheckImeiRequest checkImeiRequest, LinkedHashMap<String, Boolean> r) {
         int complianceValue = 0;
         boolean isWhitelisted = r.containsKey("NATIONAL_WHITELISTS") ? r.get("NATIONAL_WHITELISTS") : true;
@@ -116,15 +131,23 @@ public class CheckImeiServiceImpl {
 
 
     private LinkedHashMap<String, Boolean> getResponseFromRuleEngine(CheckImeiRequest checkImeiRequest) {
-        Connection conn = dbRepository.getConnection();
-        var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "edrapp",
-                "userType", "default",
-                "imei", checkImeiRequest.getImei(), "msisdn", checkImeiRequest.getMsisdn() == null ? "" : checkImeiRequest.getMsisdn(), "imsi", checkImeiRequest.getImsi() == null ? "" : checkImeiRequest.getImsi(), "feature", "CheckImei", "operator", checkImeiRequest.getOperator() == null ? "" : checkImeiRequest.getOperator());
-        var startTime = System.currentTimeMillis();
+        try (Connection conn = dbRepository.getConnection()) {
+            var deviceInfo = getDeviceInfoMap(checkImeiRequest);
+            var startTime = System.currentTimeMillis();
         LinkedHashMap<String, Boolean> rules = RuleEngineAdaptor.startAdaptor(conn, deviceInfo);
         logger.info("Rule response  {}", rules);
-        logger.info("RuleEngine Time Taken is  :->" + (System.currentTimeMillis() - startTime));
-        return rules;
+        logger.info( ":RuleEngine Time Taken is  :->" + (System.currentTimeMillis() - startTime) +" *** connection :-"+ conn);
+            return rules;
+        } catch (Exception e) {
+            logger.error("Not able to get rules {}",e.getMessage());
+           return null;
+        }
+    }
+
+    private static Map<String, String> getDeviceInfoMap(CheckImeiRequest checkImeiRequest) {
+        var deviceInfo = Map.of("appdbName", appdbName, "auddbName", auddbName, "repdbName", repdbName, "edrappdbName", edrappdbName,
+                "userType", "default", "imei", checkImeiRequest.getImei(), "msisdn", checkImeiRequest.getMsisdn() == null ? "" : checkImeiRequest.getMsisdn(), "imsi", checkImeiRequest.getImsi() == null ? "" : checkImeiRequest.getImsi(), "feature", "CheckImei", "operator", checkImeiRequest.getOperator() == null ? "" : checkImeiRequest.getOperator());
+        return deviceInfo;
     }
 
     private Result getResult(CheckImeiRequest checkImeiRequest, LinkedHashMap<String, Boolean> rules, String status) {
@@ -170,7 +193,7 @@ public class CheckImeiServiceImpl {
         String remarksValue = "Remarks:";
         int val = 0;
         boolean IMEI_PAIRING = r.getOrDefault("IMEI_PAIRING", false);
-        boolean STOLEN = r.getOrDefault("STOLEN", false);
+        boolean STOLEN = r.getOrDefault(stolenRule.trim(), false);
         boolean DUPLICATE_DEVICE = r.getOrDefault("DUPLICATE_DEVICE", false);
         boolean BLACKLIST = r.getOrDefault("EXIST_IN_BLACKLIST_DB", false);
 

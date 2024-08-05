@@ -17,8 +17,12 @@ public class CustomImeiCheckResponse {
     private String deviceType;
     private String deviceBrand;
     private String modelName;
+    private String marketingName;
+    private String manufacturer;
 
-    public CustomImeiCheckResponse(String imei, String serialNumber, String statusCode, String statusMessage, String deviceType, String deviceBrand, String modelName) {
+
+    public CustomImeiCheckResponse(String imei, String serialNumber, String statusCode, String statusMessage,
+                                   String deviceType, String deviceBrand, String modelName,String marketingName ,String manufacturer) {
         this.imei = imei;
         this.serialNumber = serialNumber;
         this.statusCode = statusCode;
@@ -26,8 +30,10 @@ public class CustomImeiCheckResponse {
         this.deviceType = deviceType;
         this.deviceBrand = deviceBrand;
         this.modelName = modelName;
-    }
+        this. marketingName=marketingName;
+        this.manufacturer = manufacturer;
 
+    }
     @Override
     public String toString() {
         return "{" +
@@ -38,6 +44,8 @@ public class CustomImeiCheckResponse {
                 ", deviceType='" + deviceType + '\'' +
                 ", deviceBrand='" + deviceBrand + '\'' +
                 ", modelName='" + modelName + '\'' +
+                ", marketingName='" + marketingName + '\'' +
+                ", manufacturer='" + manufacturer + '\'' +
                 '}';
     }
 }

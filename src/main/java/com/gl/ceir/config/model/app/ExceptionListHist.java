@@ -40,13 +40,13 @@ public class ExceptionListHist implements Serializable {
             remarks,
             imsi,
             msisdn,
-            source,actionRemarks;
+            source,actionRemark;
 
     @CreationTimestamp
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime expiryDate;
 
-    public ExceptionListHist(String complaintType, String imei, String modeType, String requestType, String txnId, String userId, String userType, String operatorId, String operatorName, String actualImei, String tac, String remarks, String imsi, String msisdn, String source, LocalDateTime expiryDate,String actionRemarks) {
+    public ExceptionListHist(String complaintType, String imei, String modeType, String requestType, String txnId, String userId, String userType, String operatorId, String operatorName, String actualImei, String tac, String remarks, String imsi, String msisdn, String source, LocalDateTime expiryDate,String actionRemark) {
         this.complaintType = complaintType;
         this.imei = imei;
         this.modeType = modeType;
@@ -63,6 +63,6 @@ public class ExceptionListHist implements Serializable {
         this.msisdn = msisdn;
         this.source = source;
         this.expiryDate = expiryDate;
-        this.actionRemarks =actionRemarks;
+        this.actionRemark =actionRemark;
     }
 }

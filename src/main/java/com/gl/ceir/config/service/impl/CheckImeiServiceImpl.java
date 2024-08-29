@@ -58,16 +58,16 @@ public class CheckImeiServiceImpl {
     private String customRule;
 
     @Value("${appdbName}")
-    private static String appdbName;
+    private   String appdbName;
 
     @Value("${auddbName}")
-    private static String auddbName;
+    private   String auddbName;
 
     @Value("${repdbName}")
-    private static String repdbName;
+    private   String repdbName;
 
     @Value("${edrappdbName}")
-    private static String edrappdbName;
+    private   String edrappdbName;
 
     @Autowired
     AlertServiceImpl alertServiceImpl;
@@ -145,7 +145,7 @@ public class CheckImeiServiceImpl {
     }
 
     private static Map<String, String> getDeviceInfoMap(CheckImeiRequest checkImeiRequest) {
-        var deviceInfo = Map.of("appdbName", appdbName, "auddbName", auddbName, "repdbName", repdbName, "edrappdbName", edrappdbName,
+        var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep", "edrappdbName", "app_edr",
                 "userType", "default", "imei", checkImeiRequest.getImei(), "msisdn", checkImeiRequest.getMsisdn() == null ? "" : checkImeiRequest.getMsisdn(), "imsi", checkImeiRequest.getImsi() == null ? "" : checkImeiRequest.getImsi(), "feature", "CheckImei", "operator", checkImeiRequest.getOperator() == null ? "" : checkImeiRequest.getOperator());
         return deviceInfo;
     }

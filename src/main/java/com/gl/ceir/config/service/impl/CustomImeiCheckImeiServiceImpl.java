@@ -57,16 +57,16 @@ public class CustomImeiCheckImeiServiceImpl {
     private static String appdbName;
 
     @Value("${auddbName}")
-    private static String auddbName;
+    private String auddbName;
 
     @Value("${repdbName}")
-    private static String repdbName;
+    private String repdbName;
 
     @Value("${edrappdbName}")
-    private static String edrappdbName;
+    private String edrappdbName;
 
     @Value("${customSource}")
-    static String customSource;
+    String customSource;
 
     @Autowired
     AlertServiceImpl alertServiceImpl;
@@ -101,41 +101,40 @@ public class CustomImeiCheckImeiServiceImpl {
         try {
             int successCount = 0;
             int failCount = 0;
-            String userIp = request.getHeader("HTTP_CLIENT_IP") == null ? (request.getHeader("X-FORWARDED-FOR") == null ? request.getRemoteAddr() : request.getHeader("X-FORWARDED-FOR")) : request.getHeader("HTTP_CLIENT_IP");
             String userAgent = request.getHeader("user-agent");
+            String userIp = request.getHeader("HTTP_CLIENT_IP") == null ? (request.getHeader("X-FORWARDED-FOR") == null ? request.getRemoteAddr() : request.getHeader("X-FORWARDED-FOR")) : request.getHeader("HTTP_CLIENT_IP");
             var startTime = System.currentTimeMillis();
             for (CustomCheckImeiRequest cusReq : custChckImeiReq) {
                 logger.info("Starting Check imei for " + cusReq);
                 try {
                     var checkImeiRequest = new CheckImeiRequest(cusReq.getImei(), "API", userAgent, userIp, obj.getRequestId());
-                    if (StringUtils.isBlank(cusReq.getImei()) ) {
+
+                    if (StringUtils.isBlank(cusReq.getImei())) {
                         logger.info("imei/sno is not present for {} ", cusReq);
-                        imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "","",""));
+                        imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "", "", ""));
                         checkImeiRequest.setImeiProcessStatus("Invalid");
                         checkImeiRequest.setFail_process_description(mandatoryParameterMissing);
                         checkImeiRequest.setComplianceValue(413);
                         checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg);
                         failCount++;
                     } else if (cusReq.getImei().length() < 14 || cusReq.getImei().length() > 20 || !cusReq.getImei().matches("^[ 0-9 ]+$")) {
-                        imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "" ,"",""));
+                        logger.info("imei length/alphanum check fail {} ", cusReq);
+                        imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "", "", ""));
                         checkImeiRequest.setImeiProcessStatus("Invalid");
                         checkImeiRequest.setFail_process_description(imeiInvalid_Msg);
                         checkImeiRequest.setComplianceValue(Integer.parseInt(imeiInvalid_Code));
                         checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg); //"Device is not-compliant"
                         failCount++;
                     } else {
-                        var deviceInfo = getDeviceInfoMap(cusReq);
-                        LinkedHashMap<String, Boolean> rules = null;
-                        try (var conn = dbRepository.getConnection()) {
-                            rules = RuleEngineAdaptor.startAdaptor(conn, deviceInfo);
-                        }
-                        logger.info("Rules Return " + rules);
+                        logger.info("Rule  deviceInfo {} :-", getDeviceInfoMap(cusReq));
+                        LinkedHashMap<String, Boolean> rules = RuleEngineAdaptor.startAdaptor(getDeviceInfoMap(cusReq));
+                        logger.info("Rule  Time Taken is  :->{} . [] response  {}", System.currentTimeMillis() - startTime, rules);
                         Map.Entry<String, Boolean> lastEntry = rules.entrySet().stream().skip(rules.size() - 1).findFirst().get();
                         logger.info("Final rule-> " + lastEntry.getKey() + " with value ->" + lastEntry.getValue());
                         if (lastEntry.getValue()) {
                             var tacDetail = gsmaTacDetailsRepository.getBydeviceId(cusReq.getImei().substring(0, 8));
                             if (tacDetail == null) {
-                                imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "" ,"",""));
+                                imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "", "", ""));
                                 checkImeiRequest.setImeiProcessStatus("Invalid");
                                 checkImeiRequest.setFail_process_description(applicationContext.getEnvironment().getProperty("MDR_Msg"));
                                 checkImeiRequest.setComplianceValue(Integer.parseInt(applicationContext.getEnvironment().getProperty("MDR_Code")));
@@ -143,7 +142,7 @@ public class CustomImeiCheckImeiServiceImpl {
                                 checkImeiRequest.setComplianceStatus(deviceNotCompliantMsg); //"Device is not-compliant"
                             } else {
                                 successCount++;
-                                imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "200", deviceCompliantMsg, tacDetail.getDevice_type(), tacDetail.getBrand_name(), tacDetail.getModel_name() , tacDetail.getMarketing_name() ,tacDetail.getManufacturer()  ));
+                                imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "200", deviceCompliantMsg, tacDetail.getDevice_type(), tacDetail.getBrand_name(), tacDetail.getModel_name(), tacDetail.getMarketing_name(), tacDetail.getManufacturer()));
                                 checkImeiRequest.setImeiProcessStatus("Valid");
                                 checkImeiRequest.setComplianceValue(200);
                                 checkImeiRequest.setBrandName(tacDetail.getBrand_name());
@@ -155,7 +154,7 @@ public class CustomImeiCheckImeiServiceImpl {
                             }
                         } else {
                             failCount++;
-                            imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "","",""));
+                            imeiResponse.add(new CustomImeiCheckResponse(cusReq.getImei(), cusReq.getSerialNumber(), "201", deviceNotCompliantMsg, "", "", "", "", ""));
                             checkImeiRequest.setImeiProcessStatus("Invalid");
                             checkImeiRequest.setComplianceValue(Integer.parseInt(applicationContext.getEnvironment().getProperty(lastEntry.getKey() + "_Code")));
                             String value = applicationContext.getEnvironment().getProperty(lastEntry.getKey() + "_Msg");
@@ -167,7 +166,7 @@ public class CustomImeiCheckImeiServiceImpl {
                     checkImeiRequest.setRequestProcessStatus("Success");
                     saveCheckImeiRequest(checkImeiRequest, startTime);
                 } catch (Exception e) {
-                    logger.error(e + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiRegisterServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
+                    logger.error(e.getLocalizedMessage() + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiRegisterServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
                 }
             }
             obj.setFailCount(failCount);
@@ -175,14 +174,14 @@ public class CustomImeiCheckImeiServiceImpl {
             obj.setStatus("DONE");
             gdceCheckImeiReqRepository.save(obj);
         } catch (Exception e) {
-            logger.error(e + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiRegisterServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
+            logger.error(e + "in [" + Arrays.stream(e.getStackTrace()).filter(ste -> ste.getClassName().equals(CustomImeiCheckImeiServiceImpl.class.getName())).collect(Collectors.toList()).get(0) + "]");
         }
         createFile(Arrays.toString(imeiResponse.toArray()), "checkIMEI", "response", obj.getRequestId());
         return imeiResponse;
     }
 
-    private static Map<String, String> getDeviceInfoMap(CustomCheckImeiRequest cusReq) {
-        var deviceInfo = Map.of("appdbName", appdbName, "auddbName", auddbName, "repdbName", repdbName, "edrappdbName", edrappdbName,
+    private Map<String, String> getDeviceInfoMap(CustomCheckImeiRequest cusReq) {
+        var deviceInfo = Map.of("appdbName", "app", "auddbName", "aud", "repdbName", "rep",
                 "userType", "default", "imei", cusReq.getImei(), "feature", "CustomCheckImei", "source", customSource);
         return deviceInfo;
     }

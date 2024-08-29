@@ -157,7 +157,8 @@ public class CustomImeiCheckController {  //sachin
     }
 
     private void errorValidationCheckerForRegister(List<GdceData> gdceRegister, GdceRegisterImeiReq obj) {
-        if (gdceRegister == null || gdceRegister.size() == 0) {
+        if (gdceRegister == null || gdceRegister.isEmpty()) {
+            logger.info("Rejected Due to data is empty");
             obj.setStatus("FAIL");
             obj.setRemark(eirsResponseParamServiceImpl.getValueByTag("customImeiRegisterReqLength0"));
             obj.setHttpStatusCode(400);
@@ -167,6 +168,7 @@ public class CustomImeiCheckController {  //sachin
         }
 
         if (gdceRegister.size() > Integer.parseInt(customImeiRegisterPayLoadMaxSize)) {
+            logger.info("Rejected Due to request size is more than payload defined ");
             obj.setStatus("FAIL");
             obj.setRemark(eirsResponseParamServiceImpl.getValueByTag("customImeiRegisterPayLoadMaxSize"));
             obj.setHttpStatusCode(413);
@@ -177,7 +179,8 @@ public class CustomImeiCheckController {  //sachin
     }
 
     void errorValidationCheckerForCustomCheck(List<CustomCheckImeiRequest> customCheckImeiRequest, GdceCheckImeiReq re) {
-        if (customCheckImeiRequest == null || customCheckImeiRequest.size() == 0) {
+        if (customCheckImeiRequest == null || customCheckImeiRequest.isEmpty()) {
+            logger.info("Rejected Due to data is empty");
             re.setStatus("FAIL");
             re.setRemark(mandatoryParameterMissing);
             gdceCheckImeiReqRepository.save(re);
@@ -185,6 +188,7 @@ public class CustomImeiCheckController {  //sachin
             throw new MissingRequestParameterException("en", mandatoryParameterMissing);
         }
         if (customCheckImeiRequest.size() > Integer.parseInt(customImeiPayLoadMaxSize)) {
+            logger.info("Rejected Due request size is more than payload defined ");
             re.setStatus("FAIL");
             re.setRemark(maxSizeDefinedException);
             gdceCheckImeiReqRepository.save(re);

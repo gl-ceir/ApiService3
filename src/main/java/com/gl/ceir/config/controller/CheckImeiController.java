@@ -1,16 +1,10 @@
 package com.gl.ceir.config.controller;
 
-import com.gl.ceir.config.exceptions.MissingRequestParameterException;
-import com.gl.ceir.config.exceptions.ServiceUnavailableException;
-import com.gl.ceir.config.exceptions.UnAuthorizationException;
-import com.gl.ceir.config.exceptions.UnprocessableEntityException;
-import com.gl.ceir.config.model.app.*;
+import com.gl.ceir.config.model.app.AppDeviceDetailsDb;
+import com.gl.ceir.config.model.app.CheckImeiRequest;
 import com.gl.ceir.config.model.constants.LanguageFeatureName;
-import com.gl.ceir.config.repository.app.*;
 import com.gl.ceir.config.service.impl.*;
-import com.gl.ceir.config.service.userlogic.UserFactory;
 import com.gl.ceir.config.validate.CheckImeiValidator;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +16,9 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -71,7 +67,7 @@ public class CheckImeiController {  //sachin
     CheckImeiServiceImpl checkImeiServiceImpl;
 
     @Autowired
-    CheckImeiServiceImpl_V2 checkImeiServiceImplV2;
+    CheckImeiServiceImpl_V3 checkImeiServiceImplV3;
 
     @Autowired
     LanguageServiceImpl languageServiceImpl;
@@ -88,7 +84,6 @@ public class CheckImeiController {  //sachin
     FeatureMenuServiceImpl featureMenuServiceImpl;
 
 
-    //@ApiOperation(value = "Pre Init Api to get  Server", response = DeviceidBaseUrlDb.class)
     @CrossOrigin(origins = "", allowedHeaders = "")
     @RequestMapping(path = "services/mobile_api/preInit", method = RequestMethod.GET)
     public MappingJacksonValue getPreInit(@RequestParam("deviceId") String deviceId) {
@@ -100,7 +95,6 @@ public class CheckImeiController {  //sachin
         return mapping;
     }
 
-    //@ApiOperation(value = "Mobile Details", response = String.class)
     @CrossOrigin(origins = "", allowedHeaders = "")
     @PostMapping("services/mobile_api/mobileDeviceDetails/save")
     public MappingJacksonValue getMobileDeviceDetails(@RequestBody AppDeviceDetailsDb appDeviceDetailsDb) {
@@ -113,21 +107,15 @@ public class CheckImeiController {  //sachin
 
 
     /*  *******************************  */
-    //@ApiOperation(value = "check Imei Api", response = CheckImeiResponse.class)
-    @CrossOrigin(origins = "", allowedHeaders = "")
-    @PostMapping("services/checkIMEI/v1")
-    public ResponseEntity checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
-        return startCheckImei(checkImeiRequest, "v1");
-   }
+
 
     @CrossOrigin(origins = "", allowedHeaders = "")
     @PostMapping("services/checkIMEI")
-    public ResponseEntity checkImeiDeviceV2(@RequestBody CheckImeiRequest checkImeiRequest) {
-        return startCheckImei(checkImeiRequest, "v2");
+    public ResponseEntity checkImeiDevice(@RequestBody CheckImeiRequest checkImeiRequest) {
+        return startCheckImei(checkImeiRequest);
     }
 
-
-    public ResponseEntity startCheckImei(CheckImeiRequest checkImeiRequest, String version) {
+    public ResponseEntity startCheckImei(CheckImeiRequest checkImeiRequest) {
         var startTime = System.currentTimeMillis();
         var defaultLang = sysPrmSrvcImpl.getValueByTag("systemDefaultLanguage");
         HttpServletRequest httpRequest = (HttpServletRequest) request;
@@ -139,9 +127,7 @@ public class CheckImeiController {  //sachin
         checkImeiValidator.errorValidationChecker(checkImeiRequest, startTime);
         checkImeiValidator.authorizationChecker(checkImeiRequest, startTime);
 
-        var value = version.equals("v2") ?
-                checkImeiServiceImplV2.getImeiDetailsDevicesNew(checkImeiRequest, startTime) :
-                checkImeiServiceImpl.getImeiDetailsDevicesNew(checkImeiRequest, startTime);
+        var value = checkImeiServiceImplV3.getImeiDetailsDevicesNew(checkImeiRequest, startTime);
         logger.info("   Start Time = " + startTime + "; End Time  = " + System.currentTimeMillis() + "  !!! Request = " + checkImeiRequest.toString() + " ########## Response =" + value.toString());
         return ResponseEntity.status(HttpStatus.OK).headers(HttpHeaders.EMPTY).body(new MappingJacksonValue(value));
     }

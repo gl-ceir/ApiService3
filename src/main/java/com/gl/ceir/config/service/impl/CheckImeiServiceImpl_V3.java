@@ -156,10 +156,10 @@ public class CheckImeiServiceImpl_V3 {
     }
 
     private Result getResult(CheckImeiRequest checkImeiRequest, LinkedHashMap<String, Boolean> rules, Map<String, String> responseMap) {
+        getComplinaceStatus(checkImeiRequest, responseMap.get("compliantTag"));
         var message = getMessage(checkImeiRequest, responseMap.get("messageTag"));
         var symbolColor = getSymbolColor(checkImeiRequest, responseMap.get("messageTag"));
         var devDetails = getDeviceDetails(responseMap.get("messageTag"), checkImeiRequest);
-        getComplinaceStatus(checkImeiRequest, responseMap.get("compliantTag"));
         checkImeiRequest.setRequestProcessStatus("Success");
         return new Result(checkImeiRequest.getImeiProcessStatus().equalsIgnoreCase("valid"),
                 symbolColor, checkImeiRequest.getComplianceStatus(),
@@ -170,7 +170,8 @@ public class CheckImeiServiceImpl_V3 {
         var value = chkImeiRespPrmValue(checkImeiRequest.getChannel().equalsIgnoreCase("ussd") ? responseTag + "_MsgForUssd"
                 : checkImeiRequest.getChannel().equalsIgnoreCase("sms") ? responseTag + "_MsgForSms"
                 : responseTag + "_Msg", checkImeiRequest.getLanguage())
-                .replace("<imei>", checkImeiRequest.getImei());
+                .replace("<imei>", checkImeiRequest.getImei())
+                .replace("<compliance_status>", checkImeiRequest.getComplianceStatus());
         logger.info("Message :::->" + value);
         return value;
     }
@@ -178,7 +179,7 @@ public class CheckImeiServiceImpl_V3 {
     private String getSymbolColor(CheckImeiRequest checkImeiRequest, String responseTag) {
         var symbolTag = responseTag + "_SymbolColor";
         var symbolColor = chkImeiRespPrmValue(symbolTag, "en");
-        logger.info("SymbolColor Response :::->" + symbolColor);
+        logger.info("SymbolColor Response :->" + symbolColor);
         checkImeiRequest.setSymbol_color(symbolColor);
         return symbolColor;
     }
@@ -200,12 +201,19 @@ public class CheckImeiServiceImpl_V3 {
             if (Arrays.stream(list.split(",")).collect(Collectors.toList()).contains(tag)) {
                 checkImeiRequest.setImeiProcessStatus("Valid");
                 var gsmaTacDetails = gsmaTacDetailsRepository.getBydeviceId(checkImeiRequest.getImei().substring(0, 8));
-                if (gsmaTacDetails == null)
+                if (gsmaTacDetails == null) {
                     logger.info("No MDR detail Found ");
-                else
+                } else {
                     deviceDetailMap = deviceDetailsNew(gsmaTacDetails.getBrand_name(), gsmaTacDetails.getModel_name(), gsmaTacDetails.getDevice_type(), gsmaTacDetails.getManufacturer(), gsmaTacDetails.getMarketing_name(), checkImeiRequest.getLanguage());
+                    checkImeiRequest.setBrandName(gsmaTacDetails.getBrand_name());
+                    checkImeiRequest.setModelName(gsmaTacDetails.getModel_name());
+                    checkImeiRequest.setDeviceType(gsmaTacDetails.getDevice_type());
+                    checkImeiRequest.setManufacturer(gsmaTacDetails.getManufacturer());
+                    checkImeiRequest.setMarketingName(gsmaTacDetails.getMarketing_name());
+                }
             }
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             logger.warn("Not able to get MDR details:" + e.getLocalizedMessage());
         }
         logger.info(" MDR detail Response {}", deviceDetailMap);
@@ -237,9 +245,9 @@ public class CheckImeiServiceImpl_V3 {
     private LinkedHashMap<String, String> deviceDetailsNew(String brand_name, String model_name, String device_type, String manufacturer, String marketing_name, String lang) {
         LinkedHashMap<String, String> item = new LinkedHashMap();
         item.put(chkImeiRespPrmValue("brandName", lang), brand_name);
-        item.put(chkImeiRespPrmValue("modelName", lang), model_name);
-        item.put(chkImeiRespPrmValue("manufacturer", lang), manufacturer);
         item.put(chkImeiRespPrmValue("marketingName", lang), marketing_name);
+        item.put(chkImeiRespPrmValue("manufacturer", lang), manufacturer);
+        item.put(chkImeiRespPrmValue("modelName", lang), model_name);
         item.put(chkImeiRespPrmValue("deviceType", lang), device_type);
         return item;
     }

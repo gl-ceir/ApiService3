@@ -19,6 +19,10 @@ public class BrandServiceImpl {
     @Value("${spring.jpa.properties.hibernate.dialect}")
     public String dialect;
 
+    @Value("#{'${Top5Brands}'.split(',')}")
+    public List<String> topBrands;
+
+
     @Autowired
     private BrandRepository brandRepository;
 
@@ -31,7 +35,7 @@ public class BrandServiceImpl {
             List<DevBrandName> list1 = null;
 
             logger.info("Going for top 5 brands");
-            List<String> topBrands = propertiesReader.getTop5Brands();
+         //   List<String> topBrands = propertiesReader.getTop5Brands();
             if (topBrands.size() < 5) {
                 logger.error("Brands size is less than 5, Please provide  Top 5 Brand Name in properties via  Top5Brands  :: size " + topBrands.size() + "[]");
             }
@@ -47,7 +51,8 @@ public class BrandServiceImpl {
             return list1;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new ResourceServicesException("en", e.getMessage());
+return null;
+         //   throw new ResourceServicesException("en", e.getMessage());
         }
 
     }
